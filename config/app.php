@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Reftec Industrial Supply and Services Inc.'),
 
     /*
     |--------------------------------------------------------------------------

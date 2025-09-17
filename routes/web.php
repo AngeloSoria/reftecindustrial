@@ -9,3 +9,8 @@ Route::get('/', function () {
 Route::get('/sample', function () {
     return view('sample');
 });
+
+// Temporary route for home view
+Route::get('/home', function () {
+    return view('home');
+});

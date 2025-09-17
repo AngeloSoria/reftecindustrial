@@ -6,15 +6,15 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class head extends Component
+class navbar_public extends Component
 {
     /**
      * Create a new component instance.
      */
-    public $title;
-    public function __construct($title)
+    public string $currentRouteName;
+    public function __construct($currentRouteName)
     {
-        $this->title = $title;
+        $this->currentRouteName = $currentRouteName;
     }
 
     /**
@@ -22,6 +22,6 @@ class head extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.head');
+        return view('components.navbar_public');
     }
 }
