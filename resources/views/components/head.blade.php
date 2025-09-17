@@ -2,16 +2,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ $title }}</title>
+    {{-- FavIcon --}}
+    <link rel="shortcut icon" href="{{ asset('images/logo_favicon_64x64_3.png') }}" type="image/x-icon">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <title>{{ $title ?? config('app.name', 'Laravel Project') }}</title>
 
     <!-- Styles / Scripts -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @else
-        
     @endif
 </head>
