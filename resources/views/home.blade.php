@@ -41,9 +41,20 @@ $defaultHeroImage = 'images/bulan.jpg';
             </div>
 
             {{-- TODO: Server rendered product lines. --}}
-            <div class="bg-accent-black_2">
-                
-            </div>
+            <div class="mt-4 bg-accent-black_2 flex">
+                {{-- TODO: Use ForEach here --}}
+                {{-- FIXME: Undesired layout for product lines. --}}
+                @for ($i = 0; $i < 3; $i++)
+                    <div class="flex-1 flex-col border border-white relative">
+                        <div class=""></div>
+                            <img src="{{ asset('images/kingspan.jpg') }}" alt="Airconditioning"
+                                class="w-full h-24 object-fit" />
+                        </div>
+                        <div class="p-4 text-white text-center bg-red-300">
+                            <h2 class="text-xl font-bold mb-2">Airconditioning Systems</h2>
+                        </div>
+                    </div>
+                @endfor
         </section>
     </x-public-content-container>
 
