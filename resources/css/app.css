@@ -5,6 +5,10 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+html {
+  scroll-behavior: smooth;
+}
+
 @theme {
   --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
       'Segoe UI Symbol', 'Noto Color Emoji';
@@ -23,7 +27,7 @@
   --color-accent-blue: #3b82f6;
   --color-accent-black_2: #2C2C2C;
   --color-accent-black_2_ligher: #4d4d4d;
-  
+
   --color-brand-primary: #07092F;
 }
 
