@@ -6,25 +6,27 @@ $defaultHeroImage = 'images/bulan.jpg';
 <!DOCTYPE html>
 <html lang="en">
 <x-head />
+
 <body class="bg-gray-200">
     <x-navbar_public currentRouteName="home" />
 
     {{-- Hero section --}}
     {{-- TODO: Server rendered background-image of hero section. --}}
-    <section class="w-full h-100 bg-cover bg-center flex items-center justify-start relative" style="background-image: url('{{ asset($defaultHeroImage) }}');">
+    <section class="w-full h-100 bg-cover bg-center flex items-center justify-start relative"
+        style="background-image: url('{{ asset($defaultHeroImage) }}');">
         <div class="block absolute top-0 left-0 w-full h-full bg-black/85 z-0"></div>
         <section class="max-w-6xl z-1 mx-auto flex items-center justify-center sm:justify-start w-full px-2 md:px-6">
-            <div class="font-inter p-2 flex flex-col items-center sm:items-start justify-center sm:justify-start space-y-2 w-full">
+            <div
+                class="font-inter p-2 flex flex-col items-center sm:items-start justify-center sm:justify-start space-y-2 w-full">
                 {{-- get the current year and minus it from 2005 --}}
-                <h1 class="text-2xl md:text-2xl text-white italic font-regular">Celebrating {{ date('Y') - 2005 }} years of</h1>
-                <h1 class="text-3xl md:text-4xl text-white uppercase font-black text-wrap max-w-2xl text-center sm:text-start">Reliable Refrigeration & Water System Engineering</h1>
+                <h1 class="text-2xl md:text-2xl text-white italic font-regular">Celebrating {{ date('Y') - 2005 }} years
+                    of</h1>
+                <h1
+                    class="text-3xl md:text-4xl text-white uppercase font-black text-wrap max-w-2xl text-center sm:text-start">
+                    Reliable Refrigeration & Water System Engineering</h1>
                 <div class="mt-4 flex space-x-4">
-                    <x-button button_type="primary">
-                        Contact Us
-                    </x-button>
-                    <x-button button_type="secondary">
-                        Learn More
-                    </x-button>
+                    <x-button button_type="primary" href="#footer_">Contact Us</x-button>
+                    <x-button button_type="secondary">Learn More</x-button>
                 </div>
             </div>
         </section>
@@ -32,18 +34,23 @@ $defaultHeroImage = 'images/bulan.jpg';
 
     <x-public-content-container>
         {{-- Product Lines --}}
-        <section class="bg-red-500 px-4 my-6">
-            <div class="bg-green-500/25 flex flex-col items-center">
-                <p class="text-2xl font-inter font-black text-accent-yellow">PRODUCT LINES</p>
-                <p class="text-md">HERE TO PROVIDE YOU TOP NOTCH SERVICES AND PRODUCTS</p>
+        <section class="px-4 my-6">
+            <div class="flex flex-col items-center">
+                <p class="text-3xl font-inter font-black text-accent-yellow">PRODUCT LINES</p>
+                <p class="text-sm font-medium">HERE TO PROVIDE YOU TOP NOTCH SERVICES AND PRODUCTS</p>
             </div>
 
             {{-- TODO: Server rendered product lines. --}}
+            <div class="bg-accent-black_2">
+                test
+            </div>
         </section>
     </x-public-content-container>
 
-    <x-btn_backtotop>
-        test
-    </x-btn_backtotop>
+
+    <x-footer_public />
+
+    <x-btn_backtotop />
 </body>
+
 </html>
