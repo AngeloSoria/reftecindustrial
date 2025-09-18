@@ -13,6 +13,19 @@
             break;
     }
 @endphp
-<button class="py-2 px-5 rounded shadow-sm {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
-    {{ $slot }}
-</button>
+
+@props([
+    'href' => null,
+    'type' => 'button'
+])
+
+@if ($href)
+    <a href="{{ $href }}" class="py-2 px-5 rounded shadow-sm {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
+        {{ $slot }}
+    </a>
+@else
+    <button class="py-2 px-5 rounded shadow-sm {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
+        {{ $slot }}
+    </button>
+@endif
+

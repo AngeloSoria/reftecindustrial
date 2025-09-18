@@ -42,7 +42,7 @@ $defaultHeroImage = 'images/bulan.jpg';
 
             {{-- TODO: Server rendered product lines. --}}
             <div class="bg-accent-black_2">
-                test
+                
             </div>
         </section>
     </x-public-content-container>
