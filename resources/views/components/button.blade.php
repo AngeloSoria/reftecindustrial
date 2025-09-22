@@ -20,7 +20,7 @@
 ])
 
 @if ($href)
-    <a href="{{ $href }}" class="py-2 px-5 rounded shadow-sm {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
+    <a role="button" href="{{ $href }}" class="py-2 px-5 rounded shadow-sm {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
         {{ $slot }}
     </a>
 @else

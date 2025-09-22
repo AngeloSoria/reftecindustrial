@@ -1,6 +1,5 @@
-{{-- Generate a js script that will detect the y-location of scroll to show the back to top button. add animation on show. when click go to start of the DOM --}}
-<div class="fixed bottom-0 right-0 p-4 z-10">
-    <button id="backToTopBtn" class="cursor-pointer bg-accent-yellow text-black px-3 py-3 rounded-full shadow-lg hover:bg-yellow-400 transition duration-300 opacity-0 pointer-events-none transform translate-y-4">
+<div class="fixed bottom-0 right-0 p-4 z-10 w-full flex justify-end">
+    <button title="button back-to-top" id="backToTopBtn" class="cursor-pointer bg-accent-yellow text-black px-3 py-3 rounded-full shadow-lg hover:bg-yellow-400 transition duration-300 opacity-0 pointer-events-none transform translate-y-4">
         <i data-lucide="arrow-up" class="w-5 h-5"></i>
     </button>
 </div>

@@ -1,11 +1,11 @@
-<footer id="footer_" class="bg-cover bg-center relative border-t-4 border-accent-yellow"
+<footer id="footer_" class="bg-cover bg-center relative border-t-4 border-accent-yellow mt-[100px]"
     style="background-image: url('{{ asset('images/footerbg.jpg') }}');">
     <div class="block absolute top-0 left-0 w-full h-full bg-accent-black_2/75 z-0"></div>
-    <img class="absolute bottom-3 right-0 opacity-50" src="{{ asset('images/reftec_logo_transparent.png') }}" />
+    <img class="absolute bottom-3 right-0 opacity-50" src="{{ asset('images/reftec_logo_transparent.png') }}" alt="Reftec Logo" />
 
     <section class="z-1 relative">
         <section class="px-4 py-10 flex gap-6 items-center justify-center flex-col md:flex-row">
-            <x-googlemap class=""/>
+            <x-googlemap/>
 
             <div class="flex gap-4 flex-col align-center lg:flex-row">
 
@@ -26,7 +26,7 @@
                                 <div class="p-1 m-0 w-8 h-8 flex items-center justify-center">
                                     <x-heroicon-s-phone class="w-5 h-5 p-0 m-0 text-white" />
                                 </div>
-                                <p class="text-sm">+63 2 8961 4549</p>
+                                <a href="tel:+63289614549" class="text-sm hover:underline">+63 2 8961 4549</a>
                             </div>
                         </div>
                     </div>
@@ -46,7 +46,7 @@
                                 <div class="p-1 m-0 w-8 h-8 flex items-center justify-center">
                                     <x-heroicon-s-phone class="w-5 h-5 p-0 m-0 text-white" />
                                 </div>
-                                <p class="text-sm">+63 2 7903 0836</p>
+                                <a href="tel:+63279030836" class="text-sm hover:underline">+63 2 7903 0836</a>
                             </div>
                         </div>
                         <div class="mt-2 flex flex-col justify-start">
@@ -60,7 +60,7 @@
                                 <div class="p-1 m-0 w-8 h-8 flex items-center justify-center">
                                     <x-heroicon-s-phone class="w-5 h-5 p-0 m-0 text-white" />
                                 </div>
-                                <p class="text-sm">+63 33 533 7625</p>
+                                <a href="tel:+63335337625" class="text-sm hover:underline">+63 33 533 7625</a>
                             </div>
                         </div>
                     </div>
