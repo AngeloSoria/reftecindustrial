@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <x-head />
-<body class="bg-gray-200">
+<body class="bg-white">
     <x-navbar_public currentRouteName="projects" />
 
     <x-public-content-container>

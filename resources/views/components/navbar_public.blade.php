@@ -1,3 +1,4 @@
+<x-topbarcompanycontacts />
 <nav class="shadow-md bg-white px-5 py-2 top-0 z-50 transition-all duration-300 ease-out transform scale-y-100 origin-top"
     id="main-navbar">
     <section class="max-w-6xl mx-auto">

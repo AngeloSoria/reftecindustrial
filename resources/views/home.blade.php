@@ -80,7 +80,7 @@ $defaultHeroImage = 'images/bulan.jpg';
         </section>
 
         {{-- Our History --}}
-        <section id="OurHistory_" class="scroll-mt-16 px-4 my-6 mt-[100px] relative">
+        <section id="OurHistory_" class="scroll-mt-16 px-4 my-6 mt-[100px] relative overflow-hidden">
             <div data-aos="fade-right" data-aos-duration="1500"
                 class="flex flex-col mb-10 items-center md:items-start md:ms-[80px]">
                 <p class="text-2xl md:text-3xl font-inter font-black">
