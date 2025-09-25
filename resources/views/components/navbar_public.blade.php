@@ -1,5 +1,5 @@
 <x-topbarcompanycontacts />
-<nav class="shadow-md bg-white px-5 py-2 top-0 z-50 transition-all duration-300 ease-out transform scale-y-100 origin-top"
+<nav class="sticky shadow-md bg-white px-5 py-2 top-0 z-50 transition-all duration-300 ease-out transform scale-y-100 origin-top"
     id="main-navbar">
     <section class="max-w-6xl mx-auto">
         {{-- main nav --}}
@@ -14,7 +14,7 @@
             {{-- Mobile Menu button --}}
             <section class="md:hidden">
                 <button id="mobile-menu-toggle" class="p-2 rounded hover:bg-gray-200 cursor-pointer" title="menu">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
+                    <i data-lucide="menu" class="w-6 h-6 text-black"></i>
                 </button>
             </section>
 
