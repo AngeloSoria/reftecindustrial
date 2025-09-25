@@ -9,5 +9,5 @@ AOS.init({
 
 // Wait until DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    createIcons({ icons });
+  createIcons({ icons });
 });
