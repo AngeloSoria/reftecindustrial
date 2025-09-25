@@ -10,6 +10,10 @@ html {
 }
 
 @theme {
+  --breakpoint-xs: 475px;
+
+  --text-xxs: 0.625rem; /* 10px */
+
   --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
       'Segoe UI Symbol', 'Noto Color Emoji';
   
