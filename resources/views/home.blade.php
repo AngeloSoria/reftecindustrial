@@ -7,7 +7,7 @@ $defaultHeroImage = 'images/bulan.jpg';
 <html lang="en">
 <x-head />
 
-<body>
+<body class="bg-white">
     <x-navbar_public />
 
     {{-- Hero section --}}
@@ -37,7 +37,7 @@ $defaultHeroImage = 'images/bulan.jpg';
         <section class="px-4 my-6 relative">
             <div class="flex flex-col items-center justify-center">
                 <p class="text-2xl md:text-3xl font-inter font-black text-accent-yellow">PRODUCT LINES</p>
-                <p class="text-sm font-medium text-center">HERE TO PROVIDE YOU TOP NOTCH SERVICES AND PRODUCTS</p>
+                <p class="text-black text-sm font-medium text-center">HERE TO PROVIDE YOU TOP NOTCH SERVICES AND PRODUCTS</p>
             </div>
 
             {{-- TODO: Server rendered product lines. --}}
@@ -93,7 +93,7 @@ $defaultHeroImage = 'images/bulan.jpg';
 
                 {{-- Text --}}
                 <div data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-duration="1200"
-                    class="order-2 md:order-1 bg-[#ecf0f1] shadow-md flex flex-col justify-center item-end -border-4 -border-accent-yellow p-6 rounded">
+                    class="text-black order-2 md:order-1 bg-[#ecf0f1] shadow-md flex flex-col justify-center item-end -border-4 -border-accent-yellow p-6 rounded">
                     <p class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
                         Founded in 2005 as Single Proprietorship,<span class="font-black text-accent-red"> REFTEC
                             Industrial Supply and Services Inc.</span> is 100%
@@ -141,21 +141,21 @@ $defaultHeroImage = 'images/bulan.jpg';
                         [
                             'title' => 'Project Title 1',
                             'description' => 'Brief description of Project 1. This is a placeholder text.',
-                            'image' => asset('images/res_16x9.png'),
+                            'image' => asset('images/layout_light_16x9.png'),
                             'status' => 'COMPLETED',
                             'status_color' => 'bg-accent-green',
                         ],
                         [
                             'title' => 'Project Title 2',
                             'description' => 'Brief description of Project 2. This is a placeholder text.',
-                            'image' => asset('images/res_16x9.png'),
+                            'image' => asset('images/layout_light_16x9.png'),
                             'status' => 'COMPLETED',
                             'status_color' => 'bg-accent-green',
                         ],
                         [
                             'title' => 'Project Title 3',
                             'description' => 'Brief description of Project 3. This is a placeholder text.',
-                            'image' => asset('images/res_16x9.png'),
+                            'image' => asset('images/layout_light_16x9.png'),
                             'status' => 'ON GOING',
                             'status_color' => 'bg-accent-yellow',
                         ],
