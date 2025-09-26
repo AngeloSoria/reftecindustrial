@@ -60,7 +60,7 @@
                     [
                         'status' => 'ongoing',
                         'thumbnail' => asset('images/reftec_logo_transparent_16x9.png'),
-                        'title' => 'Project 1',
+                        'title' => 'Bacolor, Pampanga',
                         'description' => 'Hello World Thessssssss.',
                         'date' => '2023-10-01',
                     ],
@@ -103,7 +103,14 @@
             @endphp
             <section class="mt-4 p-4 flex flex-wrap gap-2 justify-start items-start">
                 @foreach ($fake_data as $project)
-                    <div class="w-88 h-60 grow relative border cursor-pointer">
+                    <div class="w-88 h-60 grow relative border cursor-pointer"
+                        x-data
+                        @click="
+                            $dispatch('preview_project_info', {
+                                modalId: 'modal_previewProject',
+                                projectInfo: @js($project)
+                            })
+                        ">
                         {{-- Image --}}
                         <img src="{{ $project['thumbnail'] }}" alt="Project Thumbnail"
                             class="w-full h-full absolute top-0 left-0 object-cover bg-gray-200">
@@ -129,9 +136,10 @@
 
                                     <section
                                         class="w-[95%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                        <h2 class="text-lg font-bold text-wrap text-center w-full">
+                                        <h2 class="text-lg font-black text-wrap text-center w-full">
                                             {{ $project['title'] }}</h2>
-                                        <h3 class="text-md text-center w-full">{{ $project['description'] }}</h3>
+                                        <h3 class="text-accent-yellow text-md text-center w-full">
+                                            {{ $project['description'] }}</h3>
                                     </section>
                                     <p class="text-xxs font-medium absolute bottom-2 left-2">{{ $project['date'] }}</p>
                                 </div>
@@ -145,22 +153,7 @@
 
     </x-public-content-container>
 
-    {{-- TODO: Create proper modal component that is modular / reusable. --}}
-    {{-- Modal component --}}
-    <x-popup_info_project_public id="confirm-delete" title="Delete item" show="false">
-        <x-slot name="body">
-            Are you sure you want to delete this item?
-        </x-slot>
-
-        <x-slot name="footer">
-            <button onclick="closeModal('confirm-delete')" class="px-4 py-2 bg-gray-300 rounded-lg">
-                Cancel
-            </button>
-            <button class="px-4 py-2 bg-red-600 text-white rounded-lg">
-                Delete
-            </button>
-        </x-slot>
-    </x-popup_info_project_public>
+    <x-modal_preview_project id="modal_previewProject" size="4xl" keyEscapeClose  />
 
     <x-footer_public />
     <x-btn_backtotop />
