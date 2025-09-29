@@ -1,13 +1,14 @@
 @props([
     'images' => [
-        ['url' => asset('images/vilter_logo.png'), 'alt' => 'Nope', 'caption' => 'Caption here'],
-        ['url' => asset('images/res_16x9.png'), 'alt' => 'Nope', 'caption' => 'Caption here'],
-        ['url' => asset('images/bulan.jpg'), 'alt' => 'eqeq', 'caption' => 'Caption here'],
+        // Placeholders if there's no image passed.
+        ['url' => asset('images/reftec_logo_filled.jpg'), 'alt' => 'Reftec Logo', 'caption' => 'Reftec Industrial Supply and Services Inc. Logo'],
+        ['url' => asset('images/reftec_logo_filled.jpg'), 'alt' => 'Reftec Logo', 'caption' => 'Reftec Industrial Supply and Services Inc. Logo'],
+        ['url' => asset('images/reftec_logo_filled.jpg'), 'alt' => 'Reftec Logo', 'caption' => 'Reftec Industrial Supply and Services Inc. Logo'],
     ],
     'aspectRatio' => '16/9',
     'autoPlay' => false,
     'interval' => 4000,
-    'size' => 'max-w-3xl', // ✅ new prop (default large width)
+    'size' => 'max-w-3xl',
 ])
 
 @php
@@ -26,13 +27,17 @@
         slides: @js($normalized),
         idx: 0,
         playing: @js($autoPlay ? true : false),
-        start() { if (this.playing) this._timer = setInterval(() => this.next(), @js($interval)); },
+        start() {
+            if (this.playing && this.slides.length > 1) {
+                this._timer = setInterval(() => this.next(), @js($interval));
+            }
+        },
         stop() { clearInterval(this._timer); this._timer = null; },
         go(i){ this.idx = (i + this.slides.length) % this.slides.length; },
         next(){ this.idx = (this.idx + 1) % this.slides.length; },
         prev(){ this.idx = (this.idx - 1 + this.slides.length) % this.slides.length; }
     }"
-    x-init="if (playing) start(); $watch('playing', value => value ? start() : stop())"
+    x-init="if (playing && slides.length > 1) start(); $watch('playing', value => value && slides.length > 1 ? start() : stop())"
     class="relative w-full {{ $size }} border bg-white"
 >
     <!-- Slideshow container -->
@@ -48,30 +53,48 @@
                 x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="opacity-100 transform scale-100"
                 x-transition:leave-end="opacity-0 transform scale-95"
-                class="absolute inset-0 flex items-center justify-center"
+                class="absolute inset-0 flex items-center justify-center group"
             >
                 <img :src="slide.url" :alt="slide.alt" class="object-cover w-full h-full" />
-                <div x-show="slide.caption" class="absolute bottom-4 left-4 right-4 bg-black/40 text-white text-sm p-2 rounded">
+
+                <!-- Caption -->
+                <div
+                    x-show="slide.caption"
+                    class="absolute bottom-4 left-4 right-4 bg-black/50 backdrop-blur-xs text-white text-sm p-2 rounded
+                        opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                >
                     <span x-text="slide.caption"></span>
                 </div>
             </div>
         </template>
 
-        <!-- Prev / Next -->
-        <button @click="prev()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <!-- Prev / Next (only show if more than 1 slide) -->
+        <button
+            x-show="slides.length > 1"
+            @click="prev()"
+            class="cursor-pointer absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
         </button>
-        <button @click="next()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <button
+            x-show="slides.length > 1"
+            @click="next()"
+            class="cursor-pointer absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
         </button>
     </div>
 
-    <!-- Indicators -->
-    <div class="mt-3 flex items-center justify-center gap-2">
+    <!-- Indicators (only show if more than 1 slide) -->
+    <div class="mt-3 flex items-center justify-center gap-2" x-show="slides.length > 1">
         <template x-for="(slide, i) in slides" :key="i">
             <button
                 @click="go(i)"
-                :class="{'w-8 bg-blue-600': i === idx, 'w-4 bg-gray-300': i !== idx}"
+                :class="{'w-8 bg-accent-yellow': i === idx, 'w-4 bg-gray-300': i !== idx}"
                 class="h-2 rounded-full transition-all duration-150"
                 :aria-current="i === idx"
                 :aria-label="`Go to slide ${i+1}`"
@@ -79,3 +102,4 @@
         </template>
     </div>
 </div>
+
