@@ -39,7 +39,7 @@
     {{-- Backdrop --}}
     <div
         id="modal-backdrop"
-        class="w-full h-full inset-0 bg-black/50 z-40"
+        class="w-full h-full inset-0 bg-black/40 z-40 backdrop-blur-xss"
         @if($clickOutsideToClose ?? false)
             @click="open = false"
         @endif
