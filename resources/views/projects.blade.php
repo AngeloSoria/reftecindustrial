@@ -38,8 +38,8 @@
                     </x-dropdown>
 
                     {{-- TODO: Fill the option with detected years from projects. --}}
-                    <x-dropdown name="filter_date" size="6" id="dropdown_filter_year" class="rounded-sm"
-                        label="Year" title="Select Year Completed">
+                    <x-dropdown name="filter_date" size="6" id="dropdown_filter_year" class="rounded-sm" label="Year"
+                        title="Select Year Completed">
                         <option value="all">All</option>
                         @for ($year = date('Y'); $year >= 2005; $year--)
                             <option value="{{ $year }}">
@@ -56,6 +56,7 @@
 
             {{-- Data --}}
             @php
+                // TODO: Make these server sided data retrieval.
                 $fake_data = [
                     [
                         'status' => 'ongoing',
@@ -100,60 +101,66 @@
                         'date' => '2019-07-04',
                     ],
                 ];
+                $fake_data2 = [];
             @endphp
             <section class="mt-4 p-4 flex flex-wrap gap-2 justify-start items-start">
-                @foreach ($fake_data as $project)
-                    <div class="w-88 h-60 grow relative border cursor-pointer"
-                        x-data
-                        @click="
-                            $dispatch('preview_project_info', {
-                                modalId: 'modal_previewProject',
-                                projectInfo: @js($project)
-                            })
-                        ">
-                        {{-- Image --}}
-                        <img src="{{ $project['thumbnail'] }}" alt="Project Thumbnail"
-                            class="w-full h-full absolute top-0 left-0 object-cover bg-gray-200">
+                @if (count($fake_data) > 1)
+                    @foreach ($fake_data as $project)
+                        <div class="w-88 h-60 grow relative border cursor-pointer" x-data @click="
+                                    $dispatch('preview_project_info', {
+                                        modalId: 'modal_previewProject',
+                                        projectInfo: @js($project)
+                                    })
+                                ">
+                            {{-- Image --}}
+                            <img src="{{ $project['thumbnail'] }}" alt="Project Thumbnail"
+                                class="w-full h-full absolute top-0 left-0 object-cover bg-gray-200">
 
-                        {{-- animated info --}}
-                        <section
-                            class="absolute top-0 left-0 w-full h-full opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in-out z-10">
+                            {{-- animated info --}}
+                            <section
+                                class="absolute top-0 left-0 w-full h-full opacity-0 hover:opacity-100 transition-opacity duration-300 ease-in-out z-10">
 
-                            <div class="w-full h-full relative bg-red-300/50">
-                                <div
-                                    class="relative w-full h-full bg-brand-primary/75 text-white p-4 pb-6 flex flex-col items-center justify-end">
-                                    @if ($project['status'] === 'ongoing')
-                                        <p
-                                            class="bg-accent-yellow absolute top-2 right-2 font-medium uppercase text-black px-2 py-1 rounded-full text-xs mb-2">
-                                            Ongoing
-                                        </p>
-                                    @else
-                                        <p
-                                            class="bg-accent-green absolute top-2 right-2 font-medium uppercase text-white px-2 py-1 rounded-full text-xs mb-2">
-                                            Completed
-                                        </p>
-                                    @endif
+                                <div class="w-full h-full relative bg-red-300/50">
+                                    <div
+                                        class="relative w-full h-full bg-brand-primary/75 text-white p-4 pb-6 flex flex-col items-center justify-end">
+                                        @if ($project['status'] === 'ongoing')
+                                            <p
+                                                class="bg-accent-yellow absolute top-2 right-2 font-medium uppercase text-black px-2 py-1 rounded-full text-xs mb-2">
+                                                Ongoing
+                                            </p>
+                                        @else
+                                            <p
+                                                class="bg-accent-green absolute top-2 right-2 font-medium uppercase text-white px-2 py-1 rounded-full text-xs mb-2">
+                                                Completed
+                                            </p>
+                                        @endif
 
-                                    <section
-                                        class="w-[95%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                        <h2 class="text-lg font-black text-wrap text-center w-full">
-                                            {{ $project['title'] }}</h2>
-                                        <h3 class="text-accent-yellow text-md text-center w-full">
-                                            {{ $project['description'] }}</h3>
-                                    </section>
-                                    <p class="text-xxs font-medium absolute bottom-2 left-2">{{ $project['date'] }}</p>
+                                        <section class="w-[95%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                            <h2 class="text-lg font-black text-wrap text-center w-full">
+                                                {{ $project['title'] }}
+                                            </h2>
+                                            <h3 class="text-accent-yellow text-md text-center w-full">
+                                                {{ $project['description'] }}
+                                            </h3>
+                                        </section>
+                                        <p class="text-xxs font-medium absolute bottom-2 left-2">{{ $project['date'] }}</p>
+                                    </div>
                                 </div>
-                            </div>
 
-                        </section>
-                    </div>
-                @endforeach
+                            </section>
+                        </div>
+                    @endforeach
+                @else
+                    <section class="bg-gray-300 w-full p-6 flex justify-center items-center">
+                        <h1 class="text-gray-600">No Projects Found</h1>
+                    </section>
+                @endif
             </section>
         </section>
 
     </x-public-content-container>
 
-    <x-modal_preview_project id="modal_previewProject" size="4xl" keyEscapeClose  />
+    <x-modal_preview_project id="modal_previewProject" size="3xl" keyEscapeClose clickOutsideToClose />
 
     <x-footer_public />
     <x-btn_backtotop />
