@@ -1,4 +1,4 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://temp.reftecindustrial.com/images/reftec_logo_notext.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"><a href="https://reftecindustrial.com" target="_blank"><img src="https://temp.reftecindustrial.com/images/reftec_logo_notext.svg" width="400" alt="Reftec Logo"></a></p>
 
 # Reftec Industrial Supply and Services Inc.  
 
@@ -52,8 +52,8 @@ Make sure you have the following installed:
 
 1. Clone the repository:  
 
-        git clone https://github.com/your-username/reftec-laravel.git
-        cd reftec-laravel
+        git clone https://github.com/reftec-it/reftecindustrial_website.git
+        cd reftecindustrial_website
 
 2. Install PHP dependencies:  
 
