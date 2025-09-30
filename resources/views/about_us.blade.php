@@ -2,54 +2,88 @@
 <html lang="en">
 <x-head />
 
-<body class="bg-gray-200">
+<body>
     <x-navbar_public currentRouteName="about_us" />
 
-    <x-public-content-container>
-        <h1 class="font-castle font-bold text-4xl">about us page</h1>
+    <div class="flex flex-col items-center justify-center my-12">
+        <p class="text-2xl md:text-3xl font-inter font-black">
+            <span class="text-accent-black_2">GET TO </span>
+            <span class="text-accent-yellow">KNOW US</span>
+        </p>
+        <p class="text-gray-800 text-sm font-medium text-center">PASSION FOR INNOVATION, COMMITMENT TO EXCELLENCE - THIS
+            IS WHO WE ARE!</p>
+    </div>
 
-        <x-modal id="previewProject" />
-        <x-modal id="modalTest" maxWidth="max-w-3xl"/>
+    {{-- Collage --}}
+    {{-- TODO: Make this server-sided. --}}
+    <section class="relative h-[200px]">
+        <div class="grid grid-cols-3 h-full">
+            @php
+                $fake_data = [
+                    asset('images/layout_light_16x9.png'),
+                    asset('images/layout_light_16x9.png'),
+                    asset('images/layout_light_16x9.png'),
+                ];
+            @endphp
+            @for($index = 0; $index < 3; $index++)
+                <div class="bg-cover bg-no-repeat bg-center" style="background-image: url({{ $fake_data[$index] }});"></div>
+            @endfor
+        </div>
 
-        @php
-            $items = [
-                ['title' => 'Title 1', 'description' => 'Desc 1'],
-                ['title' => 'Title 2', 'description' => 'Desc 2'],
-                ['title' => 'Title 3', 'description' => 'Desc 3'],
-                ['title' => 'Title 4', 'description' => 'Desc 4'],
-                ['title' => 'Title 5', 'description' => 'Desc 5'],
-            ];
-        @endphp
-        <div class="grid grid-cols-3 gap-4">
-            @foreach ($items as $item)
-                <div class="p-4 border rounded shadow">
-                    <h3 class="font-semibold">{{ $item['title'] }}</h3>
-                    <p>{{ Str::limit($item['description'], 50) }}</p>
+        {{-- gradient fade --}}
+        <div class="bg-linear-to-b from-black/5 to-black/75 absolute bottom-0 left-0 w-full h-[40%]"></div>
+    </section>
 
-                    <button class="mt-2 px-3 py-1 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700" x-data
-                        @click="
-                            $dispatch('open-modal', {
-                                modalID: 'previewProject',
-                                title: '{{ addslashes($item['title']) }}',
-                                content: '{{ addslashes($item['description']) }}'
-                            });
-                        ">
-                        View Details
-                    </button>
+    {{-- Detailed Info --}}
+    <x-public-content-container minHeight="min-h-[10vh]">
+
+        <section class="mx-auto w-[90%] md:w-[75%] lg:w-[55%]">
+            {{-- small box --}}
+            <div data-aos="fade-right" data-aos-anchor-placement="center-center">
+                <div
+                    class="bg-transparent border-3 border-accent-yellow w-[200px] h-[70px] transform -translate-x-15 translate-y-7">
                 </div>
-            @endforeach
-        </div>
-
-        <div x-data="{ sayHi() { console.log('Hi there!') } }">
-            <button @click="$dispatch('open-modal', {
-                modalID: 'modalTest'
-            })" class="px-4 py-2 bg-purple-600 text-white rounded">
-                Say Hi
-            </button>
-        </div>
+            </div>
+            {{-- bigger box --}}
+            <div data-aos="fade-left" data-aos-anchor-placement="top-center">
+                <div class="bg-transparent border-3 border-accent-yellow px-8 py-14 ">
+                    {{-- TODO: Make the text here server-sided. --}}
+                    <p class="font-inter text-xl font-medium">
+                        Founded in 2005 as a sole proprietorship, <span class="font-black text-accent-red">REFTEC
+                            Industrial
+                            Supply and Services Inc.</span> is a 100%
+                        Filipino-owned company. In 2011, it was officially registered as a corporation with the
+                        Securities
+                        and Exchange Commission.
+                        <br />
+                        <br />
+                        REFTEC specializes in the installation of ice plants and cold storage
+                        facilities, as well as the fabrication of ice plant components. The company also supplies and
+                        installs commercial water tanks, engages in the water systems business, and offers a range of
+                        services related to the water and refrigeration industries.
+                    </p>
+                </div>
+            </div>
+        </section>
 
     </x-public-content-container>
 
+    {{-- Mission and Vision --}}
+    <secti55 class="mt-10 grid grid-cols-1 gap-1 md:gap-0 md:grid-cols-2 overflow-hidden">
+        <div data-aos="fade-right" data-aos-anchor-placement="top-center" style="background-image: url({{ asset('images/bulan.jpg') }});"
+            class="relative bg-center bg-cover p-16 py-16 flex flex-col items-center justify-center text-center">
+            <h2 class="font-black text-2xl text-accent-yellow z-2">MISSION</h2>
+            <p class="text-white z-2">To provide the finest quality in all our products and services for the benefit of
+                customers, shareholders, employees and community.</p>
+            <div class="absolute inset-0 w-full h-full bg-accent-black_2_ligher/75"></div>
+        </div>
+        <div data-aos="fade-left" data-aos-anchor-placement="top-center" style="background-image: url({{ asset('images/footerbg.jpg') }});"
+            class="relative bg-center bg-cover p-16 py-16 flex flex-col items-center justify-center text-center">
+            <h2 class="font-black text-2xl text-accent-yellow z-2">VISION</h2>
+            <p class="text-white z-2">To be the company that best understands customers' needs.</p>
+            <div class="absolute inset-0 w-full h-full bg-accent-black_2_ligher/75"></div>
+        </div>
+    </secti55>
 
     <x-footer_public />
     <x-btn_backtotop />
