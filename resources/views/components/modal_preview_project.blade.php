@@ -39,7 +39,7 @@
     {{-- Backdrop --}}
     <div
         id="modal-backdrop"
-        class="w-full h-full inset-0 bg-black/40 z-40 backdrop-blur-xss"
+        class="w-full h-full inset-0 bg-black/40 z-40"
         @if($clickOutsideToClose ?? false)
             @click="open = false"
         @endif
@@ -63,18 +63,33 @@
         </div>
 
         {{-- Modal Body --}}
-        <div class="p-4 flex bg-red-300/50">
+        <div class="p-4 flex gap-2 flex-col-reverse md:flex-row">
             {{-- Slideshow --}}
-            <x-slideshow size="max-w-md"/>
-            <p x-text="projectInfo.description"></p>
+            <x-slideshow size="max-w-md" class="grow" />
+            <section class="bg-brand-primary text-white font-inter p-4 grow flex flex-col gap-4 md:max-w-[280px]">
+                <p x-text="projectInfo.title" class="font-medium text-2xl text-wrap"></p>
+                <p x-text="projectInfo.description" class="font-regular text-sm"></p>
+                <span class="flex gap-2 items-center text-sm">
+                    Status:
+                    <p
+                    x-text="projectInfo.status"
+                    :class="{
+                        'bg-accent-yellow': projectInfo.status === 'ongoing',
+                        'bg-accent-green': projectInfo.status === 'completed'
+                    }"
+                        class="px-2 py-1 rounded-lg text-white font-medium capitalize text-xs"
+                        ></p>
+                </span>
+                <p x-text="'Date Completed: ' + projectInfo.date" class=" text-sm font-regular"></p>
+            </section>
         </div>
 
         {{-- Modal Footer --}}
         <div class="flex justify-end p-2">
-            <button @click="open = false"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
+            {{-- <button @click="open = false"
+                class="px-4 py-2 bg-accent-yellow hover:bg-accent-yellow-darker text-white rounded cursor-pointer">
                 Close
-            </button>
+            </button> --}}
         </div>
     </div>
 </section>
