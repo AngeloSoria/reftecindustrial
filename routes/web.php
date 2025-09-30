@@ -17,12 +17,3 @@ Route::get('/products', function () {
 Route::get('/about_us', function () {
     return view('about_us');
 })->name('about_us');
-
-Route::get('/sample', function () {
-    return view('sample');
-});
-
-// Temporary route for home view
-Route::get('/welcome', function () {
-    return view('welcome');
-});
