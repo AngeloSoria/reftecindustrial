@@ -1,9 +1,7 @@
 @props([
     'images' => [
         // Placeholders if there's no image passed.
-        ['url' => asset('images/reftec_logo_filled.jpg'), 'alt' => 'Reftec Logo', 'caption' => 'Reftec Industrial Supply and Services Inc. Logo'],
-        ['url' => asset('images/reftec_logo_filled.jpg'), 'alt' => 'Reftec Logo', 'caption' => 'Reftec Industrial Supply and Services Inc. Logo'],
-        ['url' => asset('images/reftec_logo_filled.jpg'), 'alt' => 'Reftec Logo', 'caption' => 'Reftec Industrial Supply and Services Inc. Logo'],
+        ['url' => asset('images/reftec_logo_transparent_16x9.png'), 'alt' => 'Reftec Logo', 'caption' => 'Reftec Industrial Supply and Services Inc. Logo'],
     ],
     'aspectRatio' => '16/9',
     'autoPlay' => false,
@@ -38,7 +36,7 @@
         prev(){ this.idx = (this.idx - 1 + this.slides.length) % this.slides.length; }
     }"
     x-init="if (playing && slides.length > 1) start(); $watch('playing', value => value && slides.length > 1 ? start() : stop())"
-    class="relative w-full {{ $size }} border bg-white"
+    class="relative w-full {{ $size }} rounded bg-white border-2 border-black/25 {{ $attributes->get('class') }}"
 >
     <!-- Slideshow container -->
     <div class="relative w-full overflow-hidden rounded"
@@ -61,8 +59,7 @@
                 <div
                     x-show="slide.caption"
                     class="absolute bottom-4 left-4 right-4 bg-black/50 backdrop-blur-xs text-white text-sm p-2 rounded
-                        opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                >
+                        opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                     <span x-text="slide.caption"></span>
                 </div>
             </div>
