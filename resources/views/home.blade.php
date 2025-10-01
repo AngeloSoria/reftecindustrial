@@ -41,7 +41,7 @@ $defaultHeroImage = 'images/bulan.jpg';
             </div>
 
             {{-- TODO: Server rendered product lines. --}}
-            <div data-aos="fade-up" data-aos-anchor-placement="bottom-center"
+            <div data-aos="fade-up" data-aos-anchor-placement="center-center"
                 class="mt-4 bg-accent-black_2 grid gap-1 md:gap-0 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 relative">
                 @php
                     // TODO: This will be replaced by server rendered product lines.
