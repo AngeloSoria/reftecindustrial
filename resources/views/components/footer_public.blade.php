@@ -97,6 +97,7 @@
                     </div>
                 </div>
 
+                {{-- Quick Links --}}
                 <div class="flex flex-col align-center justify-start md:align-start flex-1 text-white">
                     <p class="font-inter font-black text-lg">QUICK LINKS</p>
                     <div class="mt-2">
@@ -114,7 +115,7 @@
                                 <a href="{{ route('about_us') }}" class="hover:underline text-sm">About Us</a>
                             </li>
                             <li>
-                                <a href="#" class="hover:underline text-sm">Admin Panel</a>
+                                <a href="{{ route('admin.login') }}" class="hover:underline text-sm">Admin Panel</a>
                             </li>
                         </ul>
                     </div>
@@ -131,3 +132,5 @@
         </section>
     </section>
 </footer>
+
+<x-google_tag/>
