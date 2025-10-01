@@ -5,7 +5,7 @@
 <body>
     <x-navbar_public currentRouteName="products" />
 
-    <x-public-content-container>
+    <x-public-content-container minHeight="min-h-[10vh]">
         <div class="flex flex-col items-center justify-center my-12">
             <p class="text-2xl md:text-3xl font-inter font-black">
                 <span class="text-accent-black_2">OUR </span>
@@ -18,20 +18,12 @@
             // TODO: Populate this with server-sided data.
             $fake_items = [
                 [
-                    "title" => "Item Name 1",
-                    "image" => asset('images/kingspan.jpg')
+                    "title" => "Synthetic Lubricants",
+                    "image" => asset('images/lubricants.png')
                 ],
                 [
-                    "title" => "Item Name 2",
-                    "image" => asset('images/reftec_logo_filled.jpg')
-                ],
-                [
-                    "title" => "Item Name 3",
-                    "image" => asset('images/reftec_logo_filled.jpg')
-                ],
-                [
-                    "title" => "Item Name 3",
-                    "image" => asset('images/footerbg.jpg')
+                    "title" => "Galvanized Ice Cans",
+                    "image" => asset('images/galvanized-ice-can.png')
                 ],
             ];
         @endphp
