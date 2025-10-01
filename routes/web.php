@@ -17,3 +17,10 @@ Route::get('/products', function () {
 Route::get('/about_us', function () {
     return view('about_us');
 })->name('about_us');
+
+// Admin
+Route::prefix('admin')->group(function () {
+    Route::get('/login', function() {
+        return view('admin.login');
+    })->name('admin.login');
+});
