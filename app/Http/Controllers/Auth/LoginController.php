@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class LoginController extends Controller
+{
+    public function showForm()
+    {
+        // points to resources/views/admin/login.blade.php
+        if(Auth::check()){
+            return view('admin.dashboard');
+        }
+        return view('admin.login');
+    }
+
+    public function submit(Request $request)
+    {
+        $credentials = $request->validate([
+            'username' => ['required', 'string'],  // validate as string
+            'password' => ['required'],
+        ]);
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->intended(route('admin.dashboard'));
+        }
+
+        // Return one error message only
+        return back()->withErrors([
+            'login_request' => 'Invalid username or password.',
+        ])->onlyInput('username');
+    }
+}
