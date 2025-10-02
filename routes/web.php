@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
 
 Route::get('/', function () {
     return view('home');
@@ -20,7 +22,20 @@ Route::get('/about_us', function () {
 
 // Admin
 Route::prefix('admin')->group(function () {
-    Route::get('/login', function() {
-        return view('admin.login');
-    })->name('admin.login');
+    // Show login form (GET)
+    Route::get('/login', [LoginController::class, 'showForm'])
+        ->middleware('guest')
+        ->name('admin.login.form');
+
+    // Handle login submission (POST)
+    Route::post('/login', [LoginController::class, 'submit'])
+        ->name('admin.login.submit');
+
+    // Dashboard (GET)
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
 });
+
+// Handle logout submission (POST)
+Route::post('/logout', [LogoutController::class, 'logout'])->name('user.logout');

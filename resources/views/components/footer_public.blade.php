@@ -115,7 +115,7 @@
                                 <a href="{{ route('about_us') }}" class="hover:underline text-sm">About Us</a>
                             </li>
                             <li>
-                                <a href="{{ route('admin.login') }}" class="hover:underline text-sm">Admin Panel</a>
+                                <a href="{{ route('admin.login.form') }}" class="hover:underline text-sm">Admin Panel</a>
                             </li>
                         </ul>
                     </div>
