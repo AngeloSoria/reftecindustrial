@@ -24,7 +24,7 @@
         {{ $slot }}
     </a>
 @else
-    <button class="py-2 px-5 rounded shadow-sm {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
+    <button class="py-2 px-4 rounded {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
         {{ $slot }}
     </button>
 @endif
