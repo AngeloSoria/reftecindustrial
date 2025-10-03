@@ -10,7 +10,6 @@ class LoginController extends Controller
 {
     public function showForm()
     {
-        // points to resources/views/admin/login.blade.php
         if(Auth::check()){
             return view('admin.dashboard');
         }
