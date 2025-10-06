@@ -93,7 +93,7 @@ $defaultHeroImage = 'images/bulan.jpg';
 
                 {{-- Text --}}
                 <div data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-duration="1200"
-                    class="text-black order-2 md:order-1 bg-[#ecf0f1] shadow-md flex flex-col justify-center item-end -border-4 -border-accent-yellow p-6 rounded">
+                    class="text-black order-2 md:order-1 bg-[#ecf0f1] shadow-md flex flex-col justify-center item-end -border-4 -border-accent-orange-300 p-6 rounded">
                     <p class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
                         Founded in 2005 as Single Proprietorship,<span class="font-black text-brand-secondary-300"> REFTEC
                             Industrial Supply and Services Inc.</span> is 100%
@@ -143,14 +143,14 @@ $defaultHeroImage = 'images/bulan.jpg';
                             'description' => 'Brief description of Project 1. This is a placeholder text.',
                             'image' => asset('images/layout_light_16x9.png'),
                             'status' => 'COMPLETED',
-                            'status_color' => 'bg-accent-lightscreen-50',
+                            'status_color' => 'bg-accent-lightseagreen-50',
                         ],
                         [
                             'title' => 'Project Title 2',
                             'description' => 'Brief description of Project 2. This is a placeholder text.',
                             'image' => asset('images/layout_light_16x9.png'),
                             'status' => 'COMPLETED',
-                            'status_color' => 'bg-accent-lightscreen-50',
+                            'status_color' => 'bg-accent-lightseagreen-50',
                         ],
                         [
                             'title' => 'Project Title 3',

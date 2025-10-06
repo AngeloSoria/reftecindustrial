@@ -75,7 +75,7 @@
                     x-text="projectInfo.status"
                     :class="{
                         'bg-accent-orange-300': projectInfo.status === 'ongoing',
-                        'bg-accent-lightscreen-50': projectInfo.status === 'completed'
+                        'bg-accent-lightseagreen-50': projectInfo.status === 'completed'
                     }"
                         class="px-2 py-1 rounded-lg text-white font-medium capitalize text-xs"
                         ></p>

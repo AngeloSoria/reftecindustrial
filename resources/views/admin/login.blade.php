@@ -34,7 +34,7 @@
                         <label for="input_Password" class="text-sm font-medium">Password</label>
                         <input
                             class="px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none"
-                            id="input_Password" name="password" type="password" placeholder="Enter your Password"
+                            id="input_Password" name="password" type="password" placeholder="Enter your Password" autocomplete="current-password"
                             required aria-required="true" />
                     </div>
                     <div>

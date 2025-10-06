@@ -41,12 +41,12 @@
             {{-- small box --}}
             <div data-aos="fade-right" data-aos-anchor-placement="center-center">
                 <div
-                    class="bg-transparent border-3 border-accent-yellow w-[200px] h-[70px] transform -translate-x-15 translate-y-7">
+                    class="bg-transparent border-3 border-accent-orange-300 w-[200px] h-[70px] transform -translate-x-15 translate-y-7">
                 </div>
             </div>
             {{-- bigger box --}}
             <div data-aos="fade-left" data-aos-anchor-placement="top-center">
-                <div class="bg-transparent border-3 border-accent-yellow px-8 py-14 ">
+                <div class="bg-transparent border-3 border-accent-orange-300 px-8 py-14 ">
                     {{-- TODO: Make the text here server-sided. --}}
                     <p class="font-inter text-xl font-medium">
                         Founded in 2005 as a sole proprietorship, <span class="font-black text-brand-secondary-300">REFTEC

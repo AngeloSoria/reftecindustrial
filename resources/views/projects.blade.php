@@ -39,7 +39,7 @@
                         label="Project Status" title="Select Project Status">
                         <option>All</option>
                         <option value="ongoing" class="text-accent-orange-300 p-1">Ongoing</option>
-                        <option value="completed" class="text-accent-lightscreen-50 p-1">Completed</option>
+                        <option value="completed" class="text-accent-lightseagreen-50 p-1">Completed</option>
                     </x-dropdown>
 
                     {{-- TODO: Fill the option with detected years from projects. --}}
@@ -133,7 +133,7 @@
                                             </p>
                                         @else
                                             <p
-                                                class="bg-accent-lightscreen-50 absolute top-2 right-2 font-medium uppercase text-white px-2 py-1 rounded-full text-xs mb-2">
+                                                class="bg-accent-lightseagreen-50 absolute top-2 right-2 font-medium uppercase text-white px-2 py-1 rounded-full text-xs mb-2">
                                                 Completed
                                             </p>
                                         @endif

@@ -1,4 +1,4 @@
-<footer id="footer_" class="bg-cover bg-center relative border-t-4 border-accent-yellow mt-[100px]"
+<footer id="footer_" class="bg-cover bg-center relative border-t-4 border-accent-orange-300 mt-[100px]"
     style="background-image: url('{{ asset('images/footerbg.jpg') }}');">
     <div class="block absolute top-0 left-0 w-full h-full bg-accent-darkslategray-900/75 z-0"></div>
     <img class="absolute bottom-3 right-0 opacity-50" src="{{ asset('images/reftec_logo_transparent.png') }}" alt="Reftec Logo" />

@@ -11,7 +11,7 @@ class LoginController extends Controller
     public function showForm()
     {
         if(Auth::check()){
-            return view('admin.dashboard');
+            return view('dashboard');
         }
         return view('admin.login');
     }
@@ -23,9 +23,9 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->filled('remember_me'))) {
             $request->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+            return redirect()->intended(route('dashboard'));
         }
 
         // Return one error message only
