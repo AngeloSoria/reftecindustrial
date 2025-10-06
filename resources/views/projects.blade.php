@@ -9,7 +9,7 @@
         <div class="flex flex-col items-center justify-center my-12">
             <p class="text-2xl md:text-3xl font-inter font-black">
                 <span class="text-accent-black_2">OUR </span>
-                <span class="text-accent-yellow">PROJECTS</span>
+                <span class="text-accent-orange-300">PROJECTS</span>
             </p>
             <p class="text-gray-800 text-sm font-medium text-center">FROM VISING TO REALITY - SEE WHAT WE'VE BUILT!</p>
         </div>
@@ -17,10 +17,15 @@
 
         <section class="border border-black p-4">
             {{-- filter tools --}}
-            <section class="flex flex-col md:flex-row items-end justify-end gap-2">
-                <div class="flex flex-wrap items-end gap-2 justify-end w-full md:w-fit">
-                    <x-searchbox id="searchbox_projects" class="grow w-full md:w-64 rounded-sm" />
-                    <x-dropdown name="show_item_count" id="dropdown_show_item_count" class="rounded-sm"
+            <x-button_primary id="btn_apply_filters" class="px-4 py-2 rounded-sm cursor-pointer font-medium"
+                title="Apply Filters">
+                Apply Filters
+            </x-button_primary>
+
+            <section class="bg-red-300 flex flex-col md:flex-row items-end justify-end gap-2">
+                <div class="bg-blue-300 flex flex-wrap items-end gap-2 justify-end w-full md:w-fit">
+
+                    <x-dropdown name="show_item_count" id="dropdown_show_item_count" class="rounded-sm grow"
                         label="Show item count">
                         <option value="10" selected>10</option>
                         <option value="15">15</option>
@@ -30,11 +35,11 @@
                         <option value="50">50</option>
                         <option value="100">100</option>
                     </x-dropdown>
-                    <x-dropdown name="filter_status" id="dropdown_filter_status" class="rounded-sm"
+                    <x-dropdown name="filter_status" id="dropdown_filter_status" class="rounded-sm grow"
                         label="Project Status" title="Select Project Status">
                         <option>All</option>
-                        <option value="ongoing" class="text-accent-yellow p-1">Ongoing</option>
-                        <option value="completed" class="text-accent-green p-1">Completed</option>
+                        <option value="ongoing" class="text-accent-orange-300 p-1">Ongoing</option>
+                        <option value="completed" class="text-accent-lightscreen-50 p-1">Completed</option>
                     </x-dropdown>
 
                     {{-- TODO: Fill the option with detected years from projects. --}}
@@ -47,11 +52,9 @@
                             </option>
                         @endfor
                     </x-dropdown>
+
+                    <x-searchbox id="searchbox_projects" class="grow w-full md:w-64 rounded-sm" />
                 </div>
-                <x-button_primary id="btn_apply_filters" class="px-4 py-2 rounded-sm cursor-pointer font-medium"
-                    title="Apply Filters">
-                    Apply Filters
-                </x-button_primary>
             </section>
 
             {{-- Data --}}
@@ -107,11 +110,11 @@
                 @if (count($fake_data) > 1)
                     @foreach ($fake_data as $project)
                         <div class="w-88 h-60 grow relative border cursor-pointer" x-data @click="
-                                    $dispatch('preview_project_info', {
-                                        modalId: 'modal_previewProject',
-                                        projectInfo: @js($project)
-                                    })
-                                ">
+                                            $dispatch('preview_project_info', {
+                                                modalId: 'modal_previewProject',
+                                                projectInfo: @js($project)
+                                            })
+                                        ">
                             {{-- Image --}}
                             <img src="{{ $project['thumbnail'] }}" alt="Project Thumbnail"
                                 class="w-full h-full absolute top-0 left-0 object-cover bg-gray-200">
@@ -122,15 +125,15 @@
 
                                 <div class="w-full h-full relative bg-red-300/50">
                                     <div
-                                        class="relative w-full h-full bg-brand-primary/75 text-white p-4 pb-6 flex flex-col items-center justify-end">
+                                        class="relative w-full h-full bg-brand-primary-950/75 text-white p-4 pb-6 flex flex-col items-center justify-end">
                                         @if ($project['status'] === 'ongoing')
                                             <p
-                                                class="bg-accent-yellow absolute top-2 right-2 font-medium uppercase text-black px-2 py-1 rounded-full text-xs mb-2">
+                                                class="bg-accent-orange-300 absolute top-2 right-2 font-medium uppercase text-black px-2 py-1 rounded-full text-xs mb-2">
                                                 Ongoing
                                             </p>
                                         @else
                                             <p
-                                                class="bg-accent-green absolute top-2 right-2 font-medium uppercase text-white px-2 py-1 rounded-full text-xs mb-2">
+                                                class="bg-accent-lightscreen-50 absolute top-2 right-2 font-medium uppercase text-white px-2 py-1 rounded-full text-xs mb-2">
                                                 Completed
                                             </p>
                                         @endif
@@ -139,7 +142,7 @@
                                             <h2 class="text-lg font-black text-wrap text-center w-full">
                                                 {{ $project['title'] }}
                                             </h2>
-                                            <h3 class="text-accent-yellow text-md text-center w-full">
+                                            <h3 class="text-accent-orange-300 text-md text-center w-full">
                                                 {{ $project['description'] }}
                                             </h3>
                                         </section>

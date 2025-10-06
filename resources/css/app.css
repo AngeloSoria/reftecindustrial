@@ -6,64 +6,126 @@
 @source '../**/*.js';
 
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 [x-cloak] {
-  display: none !important;
+    display: none !important;
 }
 
 @theme {
-  --breakpoint-xs: 475px;
+    --breakpoint-xs: 475px;
 
-  --text-xxs: 0.625rem; /* 10px */
+    --text-xxs: 0.625rem;
+    /* 10px */
 
-  --backdrop-blur-xss: 2px;
+    --backdrop-blur-xss: 2px;
 
-  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-      'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
 
-  --font-organetto: 'Organetto', serif;
-  --font-castle: 'Castle', serif;
-  --font-inter: 'Inter', sans-serif;
+    --font-organetto: 'Organetto', serif;
+    --font-castle: 'Castle', serif;
+    --font-inter: 'Inter', sans-serif;
 
-  --color-brand: #1e40af;
-  --color-brand-light: #3b82f6;
-  --color-brand-dark: #1e3a8a;
-  --color-accent-green: #10b981;
-  --color-accent-red: #ef4444;
-  --color-accent-yellow: #f59e0b;
-  --color-accent-yellow-darker: #d97706;
-  --color-accent-blue: #3b82f6;
-  --color-accent-black_2: #2C2C2C;
-  --color-accent-black_2_ligher: #4d4d4d;
 
-  --color-brand-primary: #07092F;
+    --color-brand-primary-50: #f0f0f3;
+    --color-brand-primary-100: #e2e2e7;
+    --color-brand-primary-200: #c6c5cf;
+    --color-brand-primary-300: #aaa9b8;
+    --color-brand-primary-400: #8f8ea1;
+    --color-brand-primary-500: #75738b;
+    --color-brand-primary-600: #5b5a75;
+    --color-brand-primary-700: #424260;
+    --color-brand-primary-800: #2b2c4c;
+    --color-brand-primary-900: #121738;
+    --color-brand-primary-950: #07092f;
+
+    --color-brand-secondary-50: #ffe2dd;
+    --color-brand-secondary-100: #ffc6bd;
+    --color-brand-secondary-200: #fd8a7e;
+    --color-brand-secondary-300: #ef4444;
+    --color-brand-secondary-400: #ca3c3b;
+    --color-brand-secondary-500: #a63532;
+    --color-brand-secondary-600: #832d29;
+    --color-brand-secondary-700: #622420;
+    --color-brand-secondary-800: #421c18;
+    --color-brand-secondary-900: #25120f;
+    --color-brand-secondary-950: #170b08;
+
+    --color-brand-tertiary-50: #f4f3fb;
+    --color-brand-tertiary-100: #e9e8f7;
+    --color-brand-tertiary-200: #d3d1ee;
+    --color-brand-tertiary-300: #bdbae5;
+    --color-brand-tertiary-400: #a7a4dd;
+    --color-brand-tertiary-500: #908fd4;
+    --color-brand-tertiary-600: #797acb;
+    --color-brand-tertiary-700: #6066c2;
+    --color-brand-tertiary-800: #4553b8;
+    --color-brand-tertiary-900: #1e40af;
+    --color-brand-tertiary-950: #1c2354;
+
+    --color-accent-lightseagreen-50: #10b981;
+    --color-accent-lightseagreen-100: #15ae7a;
+    --color-accent-lightseagreen-200: #1a996c;
+    --color-accent-lightseagreen-300: #1d855e;
+    --color-accent-lightseagreen-400: #1e7150;
+    --color-accent-lightseagreen-500: #1d5e43;
+    --color-accent-lightseagreen-600: #1b4b36;
+    --color-accent-lightseagreen-700: #18392a;
+    --color-accent-lightseagreen-800: #14281e;
+    --color-accent-lightseagreen-900: #0d1813;
+    --color-accent-lightseagreen-950: #070e0a;
+
+    --color-accent-orange-50: #ffeeda;
+    --color-accent-orange-100: #ffdeb5;
+    --color-accent-orange-200: #ffbe6c;
+    --color-accent-orange-300: #f59e0b;
+    --color-accent-orange-400: #ce8612;
+    --color-accent-orange-500: #a96e15;
+    --color-accent-orange-600: #855816;
+    --color-accent-orange-700: #634214;
+    --color-accent-orange-800: #432d12;
+    --color-accent-orange-900: #251a0c;
+    --color-accent-orange-950: #171006;
+
+    --color-accent-darkslategray-50: #f2f2f2;
+    --color-accent-darkslategray-100: #e5e5e5;
+    --color-accent-darkslategray-200: #cbcbcb;
+    --color-accent-darkslategray-300: #b2b2b2;
+    --color-accent-darkslategray-400: #9a9a9a;
+    --color-accent-darkslategray-500: #828282;
+    --color-accent-darkslategray-600: #6b6b6b;
+    --color-accent-darkslategray-700: #555555;
+    --color-accent-darkslategray-800: #404040;
+    --color-accent-darkslategray-900: #2c2c2c;
+    --color-accent-darkslategray-950: #191919;
 }
 
 @font-face {
-  font-family: 'Organetto';
-  src: url('../fonts/Organetto/Fontspring-DEMO-organetto-regular.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Castle';
-  src: url('../fonts/Castle/CastleTOT-Boo.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Inter';
-  src: url('../fonts/Inter/Inter_24pt-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
+    font-family: 'Organetto';
+    src: url('../fonts/Organetto/Fontspring-DEMO-organetto-regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: 'Inter';
-  src: url('../fonts/Inter/Inter_24pt-Black.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
+    font-family: 'Castle';
+    src: url('../fonts/Castle/CastleTOT-Boo.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
 }
 
+@font-face {
+    font-family: 'Inter';
+    src: url('../fonts/Inter/Inter_24pt-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('../fonts/Inter/Inter_24pt-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}

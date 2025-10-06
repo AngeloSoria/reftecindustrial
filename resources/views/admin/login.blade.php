@@ -26,14 +26,14 @@
                     <div class="flex flex-col gap-1">
                         <label for="input_Username" class="text-sm font-medium">Username</label>
                         <input
-                            class="px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary focus:outline-none"
+                            class="px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none"
                             id="input_Username" name="username" type="text" placeholder="Enter your Username" required
                             autocomplete="on" aria-required="true" />
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="input_Password" class="text-sm font-medium">Password</label>
                         <input
-                            class="px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary focus:outline-none"
+                            class="px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none"
                             id="input_Password" name="password" type="password" placeholder="Enter your Password"
                             required aria-required="true" />
                     </div>
@@ -41,7 +41,7 @@
                         <x-checkbox id="input_RememberMe" type="checkbox" name="remember_me" label="Remember me" />
                     </div>
                     <button type="submit"
-                        class="mt-4 bg-accent-yellow hover:bg-accent-yellow-darker text-white p-2 rounded font-medium cursor-pointer">SIGN
+                        class="mt-4 bg-accent-orange-300 hover:bg-accent-orange-400 text-white p-2 rounded font-medium cursor-pointer">SIGN
                         IN</button>
                 </form>
                 @error('login_request')

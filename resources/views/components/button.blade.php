@@ -3,10 +3,10 @@
     $buttonType = $attributes->get('button_type');
     switch ($buttonType) {
         case 'primary':
-            $classes = 'bg-accent-yellow text-white hover:bg-accent-yellow-darker';
+            $classes = 'bg-accent-orange-300 text-white hover:bg-accent-orange-400';
             break;
         case 'secondary':
-            $classes = 'bg-accent-black_2 text-white hover:bg-accent-black_2_ligher';
+            $classes = 'bg-accent-darkslategray-900 text-white hover:bg-accent-darkslategray-800';
             break;
         default:
             $classes = 'bg-white';

@@ -91,7 +91,7 @@
         <template x-for="(slide, i) in slides" :key="i">
             <button
                 @click="go(i)"
-                :class="{'w-8 bg-accent-yellow': i === idx, 'w-4 bg-gray-300': i !== idx}"
+                :class="{'w-8 bg-accent-orange-300': i === idx, 'w-4 bg-gray-300': i !== idx}"
                 class="h-2 rounded-full transition-all duration-150"
                 :aria-current="i === idx"
                 :aria-label="`Go to slide ${i+1}`"

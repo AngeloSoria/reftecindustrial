@@ -32,7 +32,7 @@
                     @foreach ($nav_links as $link)
                         <li class="px-2 py-2">
                             <a href="{{ route($link['route']) }}"
-                                class="{{ Route::currentRouteName() === $link['route'] ? 'font-bold text-accent-yellow' : 'text-black font-regular' }} text-sm uppercase hover:font-bold">
+                                class="{{ Route::currentRouteName() === $link['route'] ? 'font-bold text-accent-orange-300' : 'text-black font-regular' }} text-sm uppercase hover:font-bold">
                                 {{ $link['name'] }}
                             </a>
                         </li>
@@ -52,7 +52,7 @@
                         @if (Route::has($link['route']))
                             <li class="w-full px-4 py-2 text-center font-inter">
                                 <a href="{{ route($link['route']) }}"
-                                    class="{{ Route::currentRouteName() === $link['route'] ? 'font-bold text-accent-yellow' : 'text-black font-regular' }} text-sm uppercase hover:font-bold">
+                                    class="{{ Route::currentRouteName() === $link['route'] ? 'font-bold text-accent-orange-300' : 'text-black font-regular' }} text-sm uppercase hover:font-bold">
                                     {{ $link['name'] }}
                                 </a>
                             </li>

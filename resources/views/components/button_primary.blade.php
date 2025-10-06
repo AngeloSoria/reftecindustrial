@@ -8,10 +8,10 @@
     };
 
     $colorClasses = match ($color ?? 'primary') {
-        'primary' => 'bg-accent-yellow text-black hover:bg-yellow-600',
-        'secondary' => 'bg-brand-primary text-white hover:bg-brand-dark',
+        'primary' => 'bg-accent-orange-300 text-black hover:bg-yellow-600',
+        'secondary' => 'bg-brand-primary-950 text-white hover:bg-brand-tertiary-950',
         'danger' => 'bg-red-600 text-white hover:bg-red-700',
-        default => 'bg-accent-yellow text-black hover:bg-yellow-400',
+        default => 'bg-accent-orange-300 text-black hover:bg-yellow-400',
     };
 @endphp
 

@@ -9,7 +9,7 @@
         <div class="flex flex-col items-center justify-center my-12">
             <p class="text-2xl md:text-3xl font-inter font-black">
                 <span class="text-accent-black_2">OUR </span>
-                <span class="text-accent-yellow">PRODUCTS</span>
+                <span class="text-accent-orange-300">PRODUCTS</span>
             </p>
             <p class="text-gray-800 text-sm font-medium text-center">THINKING OF INNOVATION? WE GOT YOU COVERED!</p>
         </div>
@@ -39,7 +39,7 @@
                     "
                     >
                     <img src="{{ $item['image'] }}" class="w-full grow max-h-[200px] object-cover" />
-                    <div class="bg-brand-primary p-2 lg:p-4">
+                    <div class="bg-brand-primary-950 p-2 lg:p-4">
                         <p class="text-sm md:text-lg font-inter font-medium text-white">{{ $item['title'] }}</p>
                     </div>
                 </div>

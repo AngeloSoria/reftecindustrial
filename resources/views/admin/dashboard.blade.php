@@ -11,7 +11,7 @@
             x-data
             type="submit"
             @click="$el.disabled = true"
-            class="px-4 py-2 rounded bg-accent-yellow hover:bg-accent-yellow-darker transition-colors font-medium cursor-pointer">
+            class="px-4 py-2 rounded bg-accent-orange-300 hover:bg-accent-orange-400 transition-colors font-medium cursor-pointer">
             Logout-1
         </button>
     </form> --}}

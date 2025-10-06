@@ -8,7 +8,7 @@
     <div class="flex flex-col items-center justify-center my-12">
         <p class="text-2xl md:text-3xl font-inter font-black">
             <span class="text-accent-black_2">GET TO </span>
-            <span class="text-accent-yellow">KNOW US</span>
+            <span class="text-accent-orange-300">KNOW US</span>
         </p>
         <p class="text-gray-800 text-sm font-medium text-center">PASSION FOR INNOVATION, COMMITMENT TO EXCELLENCE - THIS
             IS WHO WE ARE!</p>
@@ -49,7 +49,7 @@
                 <div class="bg-transparent border-3 border-accent-yellow px-8 py-14 ">
                     {{-- TODO: Make the text here server-sided. --}}
                     <p class="font-inter text-xl font-medium">
-                        Founded in 2005 as a sole proprietorship, <span class="font-black text-accent-red">REFTEC
+                        Founded in 2005 as a sole proprietorship, <span class="font-black text-brand-secondary-300">REFTEC
                             Industrial
                             Supply and Services Inc.</span> is a 100%
                         Filipino-owned company. In 2011, it was officially registered as a corporation with the
@@ -73,17 +73,17 @@
         <div data-aos="fade-right" data-aos-anchor-placement="top-center"
             style="background-image: url({{ asset('images/bulan.jpg') }});"
             class="relative bg-center bg-cover p-16 py-16 flex flex-col items-center justify-center text-center">
-            <h2 class="font-black text-2xl text-accent-yellow z-2">MISSION</h2>
+            <h2 class="font-black text-2xl text-accent-orange-300 z-2">MISSION</h2>
             <p class="text-white z-2">To provide the finest quality in all our products and services for the benefit of
                 customers, shareholders, employees and community.</p>
-            <div class="absolute inset-0 w-full h-full bg-accent-black_2_ligher/75"></div>
+            <div class="absolute inset-0 w-full h-full bg-accent-darkslategray-800/75"></div>
         </div>
         <div data-aos="fade-left" data-aos-anchor-placement="top-center"
             style="background-image: url({{ asset('images/footerbg.jpg') }});"
             class="relative bg-center bg-cover p-16 py-16 flex flex-col items-center justify-center text-center">
-            <h2 class="font-black text-2xl text-accent-yellow z-2">VISION</h2>
+            <h2 class="font-black text-2xl text-accent-orange-300 z-2">VISION</h2>
             <p class="text-white z-2">To be the company that best understands customers' needs.</p>
-            <div class="absolute inset-0 w-full h-full bg-accent-black_2_ligher/75"></div>
+            <div class="absolute inset-0 w-full h-full bg-accent-darkslategray-800/75"></div>
         </div>
     </secti55>
 

@@ -1,5 +1,5 @@
 <section
-    class="bg-brand-primary text-white w-full min-h-[52px] font-inter px-2 md:px-4 py-1 
+    class="bg-brand-primary-950 text-white w-full min-h-[52px] font-inter px-2 md:px-4 py-1
     hidden md:grid grid-cols-2 md:grid-cols-3 gap-y-1 md:gap-y-0 overflow-hidden">
     <div class="flex gap-2 items-center justify-center sm:justify-start">
         <x-zondicon-location class="w-4 h-4" />

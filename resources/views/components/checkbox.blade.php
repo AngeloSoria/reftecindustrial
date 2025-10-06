@@ -17,7 +17,7 @@
 
     <!-- Custom Checkbox -->
     <div class="w-4 h-4 border-2 border-gray-400 rounded-sm flex items-center justify-center
-                peer-checked:bg-brand-primary peer-checked:border-brand-primary transition duration-200 ease-in-out">
+                peer-checked:bg-brand-primary-950 peer-checked:border-brand-primary-950 transition duration-200 ease-in-out">
         <!-- Check Icon -->
         @svg('zondicon-checkmark', "w-full h-full text-white peer-checked:block")
     </div>

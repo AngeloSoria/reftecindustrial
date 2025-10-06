@@ -1,6 +1,6 @@
 <nav class="relative">
     {{-- Topbar --}}
-    <section class="bg-brand-primary py-2 px-2 lg:px-6 flex shadow-lg font-inter">
+    <section class="bg-brand-primary-950 py-2 px-2 lg:px-6 flex shadow-lg font-inter">
         {{-- Menu control --}}
         <div class="px-4 flex items-center text-white gap-4 grow">
             <button aria-label="Toggle menu button" title="Toggle Menu"

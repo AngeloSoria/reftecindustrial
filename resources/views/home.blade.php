@@ -36,13 +36,13 @@ $defaultHeroImage = 'images/bulan.jpg';
         {{-- Product Lines --}}
         <section class="px-4 my-6 relative">
             <div class="flex flex-col items-center justify-center">
-                <p class="text-2xl md:text-3xl font-inter font-black text-accent-yellow">PRODUCT LINES</p>
+                <p class="text-2xl md:text-3xl font-inter font-black text-accent-orange-300">PRODUCT LINES</p>
                 <p class="text-black text-sm font-medium text-center">HERE TO PROVIDE YOU TOP NOTCH SERVICES AND PRODUCTS</p>
             </div>
 
             {{-- TODO: Server rendered product lines. --}}
             <div data-aos="fade-up" data-aos-anchor-placement="center-center"
-                class="mt-4 bg-accent-black_2 grid gap-1 md:gap-0 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 relative">
+                class="mt-4 bg-accent-darkslategray-900 grid gap-1 md:gap-0 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 relative">
                 @php
                     // TODO: This will be replaced by server rendered product lines.
                     $productLines = [
@@ -85,7 +85,7 @@ $defaultHeroImage = 'images/bulan.jpg';
                 class="flex flex-col mb-10 items-center md:items-start md:ms-[80px]">
                 <p class="text-2xl md:text-3xl font-inter font-black">
                     <span class="text-accent-black_2">OUR</span>
-                    <span class="text-accent-yellow">HISTORY</span>
+                    <span class="text-accent-orange-300">HISTORY</span>
                 </p>
             </div>
 
@@ -95,7 +95,7 @@ $defaultHeroImage = 'images/bulan.jpg';
                 <div data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-duration="1200"
                     class="text-black order-2 md:order-1 bg-[#ecf0f1] shadow-md flex flex-col justify-center item-end -border-4 -border-accent-yellow p-6 rounded">
                     <p class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
-                        Founded in 2005 as Single Proprietorship,<span class="font-black text-accent-red"> REFTEC
+                        Founded in 2005 as Single Proprietorship,<span class="font-black text-brand-secondary-300"> REFTEC
                             Industrial Supply and Services Inc.</span> is 100%
                         Filipino-owned Company and was registered with Securities and Exchange Commission as Corporation
                         in 2011.
@@ -129,7 +129,7 @@ $defaultHeroImage = 'images/bulan.jpg';
             <div data-aos="fade-down" data-aos-duration="1200" class="flex flex-col items-center">
                 <p class="text-2xl md:text-3xl font-inter font-black">
                     <span class="text-accent-black_2">AND</span>
-                    <span class="text-accent-yellow">PROJECTS</span>
+                    <span class="text-accent-orange-300">PROJECTS</span>
                 </p>
             </div>
 
@@ -143,21 +143,21 @@ $defaultHeroImage = 'images/bulan.jpg';
                             'description' => 'Brief description of Project 1. This is a placeholder text.',
                             'image' => asset('images/layout_light_16x9.png'),
                             'status' => 'COMPLETED',
-                            'status_color' => 'bg-accent-green',
+                            'status_color' => 'bg-accent-lightscreen-50',
                         ],
                         [
                             'title' => 'Project Title 2',
                             'description' => 'Brief description of Project 2. This is a placeholder text.',
                             'image' => asset('images/layout_light_16x9.png'),
                             'status' => 'COMPLETED',
-                            'status_color' => 'bg-accent-green',
+                            'status_color' => 'bg-accent-lightscreen-50',
                         ],
                         [
                             'title' => 'Project Title 3',
                             'description' => 'Brief description of Project 3. This is a placeholder text.',
                             'image' => asset('images/layout_light_16x9.png'),
                             'status' => 'ON GOING',
-                            'status_color' => 'bg-accent-yellow',
+                            'status_color' => 'bg-accent-orange-300',
                         ],
                     ];
                 @endphp
@@ -183,7 +183,7 @@ $defaultHeroImage = 'images/bulan.jpg';
                                     <span
                                         class="text-sm text-white {{ $project['status_color'] }} px-2 py-1 font-medium">{{ $project['status'] }}</span>
                                 </div>
-                                <div class="p-4 md:bg-brand-primary text-black md:text-white">
+                                <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
                                     <h2 class="text-xl font-bold">{{ $project['title'] }}</h2>
                                     <p class="text-sm">{{ $project['description'] }}</p>
                                 </div>
@@ -196,7 +196,7 @@ $defaultHeroImage = 'images/bulan.jpg';
                                     <span
                                         class="text-sm text-white {{ $project['status_color'] }} px-2 py-1 font-medium">{{ $project['status'] }}</span>
                                 </div>
-                                <div class="p-4 md:bg-brand-primary text-black md:text-white">
+                                <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
                                     <h2 class="text-xl font-bold">{{ $project['title'] }}</h2>
                                     <p class="text-sm">{{ $project['description'] }}</p>
                                 </div>

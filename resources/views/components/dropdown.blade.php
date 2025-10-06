@@ -5,15 +5,15 @@
 
     <div class="relative">
         <select
-        
+
             @if($id ?? false) id="{{ $id }}" @endif
             @if($name ?? false) name="{{ $name }}" @endif
             @if($title ?? false) title="{{ $title }}" @endif
             @if($required ?? false) required @endif
             @if($multiple ?? false) multiple @endif
-            
-            class="min-w-[150px] md:min-w-[200px] font-medium border px-4 py-2 appearance-none {{ $attributes->get('class') }} bg-brand-primary text-white">
-            
+
+            class="min-w-[150px] md:min-w-[200px] font-medium px-4 py-2 appearance-none {{ $attributes->get('class') }} bg-brand-primary-950 hover:bg-brand-primary-950-light text-white">
+
             @if ($placeholder ?? false)
                 <option disabled selected class="text-gray-500">{{ $placeholder }}</option>
             @endif
