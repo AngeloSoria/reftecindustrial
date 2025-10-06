@@ -76,6 +76,8 @@
         </div>
 
         
+        
+        
         <div class="w-full grow p-4 flex flex-col overflow-y-auto">
             <img class="mb-2 w-full h-30 object-contain hidden md:block" src="<?php echo e(asset('images/reftec_logo_transparent.png')); ?>">
 
