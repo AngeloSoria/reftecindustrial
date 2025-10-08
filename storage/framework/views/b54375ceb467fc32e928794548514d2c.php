@@ -286,7 +286,7 @@
                                 <a href="<?php echo e(route('about_us')); ?>" class="hover:underline text-sm">About Us</a>
                             </li>
                             <li>
-                                <a href="<?php echo e(route('admin.login.form')); ?>" class="hover:underline text-sm">Admin Panel</a>
+                                <a href="<?php echo e(route('login')); ?>" class="hover:underline text-sm">Admin Panel</a>
                             </li>
                         </ul>
                     </div>

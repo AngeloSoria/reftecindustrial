@@ -157,4 +157,4 @@ unset($__errorArgs, $__bag); ?>
 </body>
 
 </html>
-<?php /**PATH C:\xampp\htdocs\reftecindustrial\resources\views/admin/login.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\xampp\htdocs\reftecindustrial\resources\views/auth/login.blade.php ENDPATH**/ ?>
