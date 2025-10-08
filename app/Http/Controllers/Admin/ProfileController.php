@@ -11,11 +11,7 @@ class ProfileController extends Controller
 {
     public function show($id = null)
     {
-        if ($id && !Auth::user()->is_admin) {
-            abort(403);
-        }
-
         $user = $id ? User::findOrFail($id) : Auth::user();
-        return view('admin.profile', compact('user'));
+        return view('auth.profile', compact('user'));
     }
 }
