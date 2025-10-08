@@ -11,9 +11,9 @@ class LoginController extends Controller
     public function showForm()
     {
         if(Auth::check()){
-            return view('dashboard');
+            return redirect()->intended(route('dashboard'));
         }
-        return view('admin.login');
+        return view('auth.login');
     }
 
     public function submit(Request $request)
