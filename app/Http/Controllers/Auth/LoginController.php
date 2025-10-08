@@ -10,7 +10,7 @@ class LoginController extends Controller
 {
     public function showForm()
     {
-        if(Auth::check()){
+        if (Auth::check()) {
             return redirect()->intended(route('dashboard'));
         }
         return view('auth.login');

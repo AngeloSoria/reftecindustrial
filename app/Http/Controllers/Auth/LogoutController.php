@@ -20,6 +20,6 @@ class LogoutController extends Controller
         $request->session()->regenerateToken();
 
         // redirect based on role
-        return redirect()->route('admin.login.form');
+        return redirect()->route('login');
     }
 }
