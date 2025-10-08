@@ -1,0 +1,25 @@
+How to deploy to Prod?
+
+[Step 1]:
+    - Change the .env values.
+        - APP_ENV=production
+        - APP_URL="https://temp.reftecindustrial.com"
+        - APP_DEBUG=false [This is optional]
+
+[Step 2];
+    - in terminal run these:
+        - php artisan config:cache
+        - php artisan route:cache
+        - php artisan view:cache
+        - npm install
+        - npm run build
+
+[Step 3]:
+    - locate the project's directory.
+    - compress the project.
+    - go to file explorer of the hosting.
+    - upload the compressed project.
+    - decompress the project.
+
+[Step 4]:
+    - export the local database data into hosting database.
