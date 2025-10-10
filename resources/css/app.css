@@ -17,7 +17,7 @@ html {
     --breakpoint-xs: 475px;
 
     --text-xxs: 0.625rem;
-    /* 10px */
+
 
     --backdrop-blur-xss: 2px;
 
@@ -27,7 +27,6 @@ html {
     --font-organetto: 'Organetto', serif;
     --font-castle: 'Castle', serif;
     --font-inter: 'Inter', sans-serif;
-
 
     --color-brand-primary-50: #f0f0f3;
     --color-brand-primary-100: #e2e2e7;

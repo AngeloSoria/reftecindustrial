@@ -1,12 +1,12 @@
 <?php
 
-namespace App\View\Components;
+namespace App\View\Components\public\modal;
 
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class head extends Component
+class preview_project extends Component
 {
     /**
      * Create a new component instance.
@@ -21,6 +21,6 @@ class head extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.public.head');
+        return view('components.public.modal.preview_project');
     }
 }

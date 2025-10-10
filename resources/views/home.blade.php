@@ -1,19 +1,14 @@
-<?php
-// Retrieve hero image from server path, but load the static image for now.
-$defaultHeroImage = 'images/bulan.jpg';
-?>
-
 <!DOCTYPE html>
 <html lang="en">
-<x-head />
+<x-partials.head />
 
 <body class="bg-white">
-    <x-navbar_public />
+    <x-public.navbar />
 
     {{-- Hero section --}}
     {{-- TODO: Server rendered background-image of hero section. --}}
     <section class="w-full h-100 bg-cover bg-center flex items-center justify-start relative"
-        style="background-image: url('{{ asset($defaultHeroImage) }}');">
+        style="background-image: url('{{ asset('images/bulan.jpg') }}');">
         <div class="block absolute top-0 left-0 w-full h-full bg-black/85 z-0"></div>
         <section class="max-w-6xl z-1 mx-auto flex items-center justify-center sm:justify-start w-full px-2 md:px-6">
             <div
@@ -25,19 +20,20 @@ $defaultHeroImage = 'images/bulan.jpg';
                     class="text-2xl md:text-4xl text-white uppercase font-black text-wrap max-w-2xl text-center sm:text-start">
                     Reliable Refrigeration & Water System Engineering</h1>
                 <div class="mt-4 flex space-x-4">
-                    <x-button button_type="primary" href="#footer_">Contact Us</x-button>
-                    <x-button button_type="secondary" href="#OurHistory_">Learn More</x-button>
+                    <x-public.button button_type="primary" href="#footer_">Contact Us</x-public.button>
+                    <x-public.button button_type="secondary" href="#OurHistory_">Learn More</x-public.button>
                 </div>
             </div>
         </section>
     </section>
 
-    <x-public-content-container>
+    <x-public.content_container>
         {{-- Product Lines --}}
         <section class="px-4 my-6 relative">
             <div class="flex flex-col items-center justify-center">
                 <p class="text-2xl md:text-3xl font-inter font-black text-accent-orange-300">PRODUCT LINES</p>
-                <p class="text-black text-sm font-medium text-center">HERE TO PROVIDE YOU TOP NOTCH SERVICES AND PRODUCTS</p>
+                <p class="text-black text-sm font-medium text-center">HERE TO PROVIDE YOU TOP NOTCH SERVICES AND
+                    PRODUCTS</p>
             </div>
 
             {{-- TODO: Server rendered product lines. --}}
@@ -95,7 +91,8 @@ $defaultHeroImage = 'images/bulan.jpg';
                 <div data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-duration="1200"
                     class="text-black order-2 md:order-1 bg-[#ecf0f1] shadow-md flex flex-col justify-center item-end -border-4 -border-accent-orange-300 p-6 rounded">
                     <p class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
-                        Founded in 2005 as Single Proprietorship,<span class="font-black text-brand-secondary-300"> REFTEC
+                        Founded in 2005 as Single Proprietorship,<span class="font-black text-brand-secondary-300">
+                            REFTEC
                             Industrial Supply and Services Inc.</span> is 100%
                         Filipino-owned Company and was registered with Securities and Exchange Commission as Corporation
                         in 2011.
@@ -108,8 +105,10 @@ $defaultHeroImage = 'images/bulan.jpg';
                         water industry and refrigeration.
                     </p>
                     <section class="flex justify-end w-full">
-                        <x-button_primary href="{{ route('about_us') }}" class="mt-4 rounded" size="md"
-                            color="secondary" suffixIcon="move-right">Learn More</x-button_primary>
+                        <x-public.button button_type="secondary" href="{{ route('aboutus') }}" class="mt-4 rounded flex items-center gap-2">
+                            Learn More
+                            @svg('fluentui-arrow-right-16-o', 'w-4 h-4 text-white')
+                        </x-public.button>
                     </section>
                 </div>
 
@@ -213,16 +212,14 @@ $defaultHeroImage = 'images/bulan.jpg';
             </section>
 
             <div data-aos="fade-up" class="w-full flex justify-center items-center p-8">
-                <x-button_primary href="{{ route('projects') }}" class="rounded font-bold text-white" size="xl"
-                    color="primary" suffixIcon="move-right">View All Projects</x-button_primary>
+                <x-public.button button_type="primary" href="{{ route('projects') }}" class="rounded font-bold text-white" size="2xl">
+                    View All Projects
+                </x-public.button>
             </div>
         </section>
-    </x-public-content-container>
+    </x-public.content_container>
 
-
-    <x-footer_public />
-
-    <x-btn_backtotop />
+    <x-public.footer />
 </body>
 
 </html>

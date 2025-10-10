@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<x-head />
+<x-partials.head />
 
 <body>
-    <x-navbar_public currentRouteName="products" />
+    <x-public.navbar />
 
-    <x-public-content-container minHeight="min-h-[10vh]">
+    <x-public.content_container minHeight="min-h-[10vh]">
         <div class="flex flex-col items-center justify-center my-12">
             <p class="text-2xl md:text-3xl font-inter font-black">
                 <span class="text-accent-black_2">OUR </span>
@@ -45,12 +45,11 @@
                 </div>
             @endforeach
         </div>
-    </x-public-content-container>
+    </x-public.content_container>
 
-    <x-image_preview escKeyToClose clickOutsideToClose />
+    <x-public.modal.image_preview escKeyToClose clickOutsideToClose />
 
-    <x-footer_public />
-    <x-btn_backtotop />
+    <x-public.footer />
 </body>
 
 </html>
