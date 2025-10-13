@@ -10,7 +10,7 @@
             <div class="px-4 flex items-center text-white gap-4 grow">
                 <button aria-label="Open sidebar button" title="Open sidebar"
                     x-data
-                    @click="document.getElementById('nav_sidebar').classList.add('sidebar_show');"
+                    @click.stop="document.getElementById('nav_sidebar').classList.add('sidebar_show');"
                     class="p-1 rounded transition-colors cursor-pointer">
                     @svg('zondicon-menu', 'w-5 h-5')
                 </button>
@@ -71,7 +71,10 @@
         {{-- Sidebar --}}
         <section
             id="nav_sidebar"
-            class="sidebar flex flex-col items-center justify-start z-50 bg-white fixed top-0 left-0 h-screen shadow-lg p-4 w-full md:max-w-xs">
+            class="sidebar flex flex-col items-center justify-start z-50 bg-white fixed top-0 left-0 h-screen shadow-lg p-4 w-full md:max-w-xs"
+            x-data
+            @click.away="if ($el.classList.contains('sidebar_show')) { $el.classList.remove('sidebar_show'); }"
+            >
             {{-- top --}}
             <div class="w-full flex items-center justify-between md:justify-end">
                 <img class="mb-2 h-15 object-contain block md:hidden" src="{{ asset('images/reftec_logo_transparent.png') }}">
@@ -160,5 +163,7 @@
                 </div>
             </footer>
         </section>
+
+
     </section>
 </nav>
