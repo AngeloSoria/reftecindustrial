@@ -9,7 +9,7 @@
 <body class="bg-gray-200">
     <x-auth.navbar :viewName="$viewName"/>
 
-    <main>
+    <main class="{{ $attributes->get('class') }}">
         {{ $slot }}
     </main>
 </body>

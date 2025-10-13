@@ -39,7 +39,7 @@
                     </div>
 
                     {{-- popup --}}
-                    <div class="absolute top-full left-0 w-full bg-white rounded shadow-lg" x-show="isOpen" x-transition>
+                    <div class="absolute top-full left-0 w-full bg-white rounded shadow-lg" x-show="isOpen" x-transition x-cloak>
                         <ul class="p-2 [&>*]:p-1 [&>*]:rounded-sm [&_*]:cursor-pointer text-sm">
                             <li class="hover:bg-gray-200">
                                 <a href="{{ route('profile') }}" class="block w-full p-1">
