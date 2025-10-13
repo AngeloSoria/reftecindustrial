@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Models\Visit;
+use App\Http\Controllers\VisitController;
+use App\Http\Controllers\UploadController;
 
 Route::get('/', function () {
     return view('home');
@@ -45,4 +48,16 @@ Route::middleware('auth')->group(function () {
         return view('auth.users');
     })->name('users');
 
+
+    Route::post('/upload', [UploadController::class, 'upload'])->name('upload');
 });
+
+Route::get('/visit-stats', function () {
+    $data = Visit::selectRaw('country, COUNT(*) as total')
+        ->groupBy('country')
+        ->orderByDesc('total')
+        ->get();
+
+    return response()->json($data);
+});
+Route::post('/track-visit', [VisitController::class, 'track']);
