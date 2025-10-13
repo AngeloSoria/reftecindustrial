@@ -25,13 +25,24 @@ Route::post('/login', [LoginController::class, 'submit'])->name('login');
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [App\Http\Controllers\Auth\LogoutController::class, 'perform'])->name('logout');
 
-    Route::get('/dashboard', function () {
-        return view('auth.dashboard');
-    })->name('dashboard');
-
     Route::get('/profile', function () {
         return view('auth.user_profile');
     })->name('profile');
 
+    Route::get('/dashboard', function () {
+        return view('auth.dashboard');
+    })->name('dashboard');
+    Route::get('/content', function () {
+        return view('auth.content');
+    })->name('content');
+    Route::get('/site_monitor', function () {
+        return view('auth.site_monitor');
+    })->name('site_monitor');
+    Route::get('/cartrack', function () {
+        return view('auth.cartrack');
+    })->name('cartrack');
+    Route::get('/users', function () {
+        return view('auth.users');
+    })->name('users');
 
 });
