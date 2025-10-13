@@ -34,7 +34,7 @@
     class="z-40 absolute inset-0 bg-black/75 w-full h-screen"></div>
 
     {{-- Header --}}
-    <div class="z-50 p-4 absolute top-0 right-0 w-full flex items-center justify-end">
+    <div class="z-100 p-4 absolute top-0 right-0 w-full flex items-center justify-end">
         <button
             @click="open = false"
             class="bg-white cursor-pointer hover:bg-gray-200 py-2 px-3 flex items-center gap-2 rounded" title="Close Preview" aria-label="close preview button">
