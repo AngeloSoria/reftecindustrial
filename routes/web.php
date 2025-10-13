@@ -50,14 +50,14 @@ Route::middleware('auth')->group(function () {
 
 
     Route::post('/upload', [UploadController::class, 'upload'])->name('upload');
-});
 
-Route::get('/visit-stats', function () {
-    $data = Visit::selectRaw('country, COUNT(*) as total')
-        ->groupBy('country')
-        ->orderByDesc('total')
-        ->get();
+    Route::get('/visit-stats', function () {
+        $data = Visit::selectRaw('country, COUNT(*) as total')
+            ->groupBy('country')
+            ->orderByDesc('total')
+            ->get();
 
-    return response()->json($data);
+        return response()->json($data);
+    });
+    Route::post('/track-visit', [VisitController::class, 'track']);
 });
-Route::post('/track-visit', [VisitController::class, 'track']);
