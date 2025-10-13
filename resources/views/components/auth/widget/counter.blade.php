@@ -4,7 +4,7 @@
     'label' => '<<PUT LABEL HERE>>'
 ])
 
-<div class="bg-white px-4 py-5 rounded-xl shadow-md inline-block m-1 font-inter">
+<div class="bg-white px-4 py-5 rounded-xl shadow-md inline-block font-inter {{ $attributes->get('class') }}">
     <div class="bg-green-300/0 min-w-[150px] flex flex-col gap-1">
 
         {{-- icon --}}
