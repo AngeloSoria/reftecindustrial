@@ -13,7 +13,7 @@ class LoginController extends Controller
         if (Auth::check()) {
             return redirect()->intended(route('dashboard'));
         }
-        return view('auth.login');
+        return view('login');
     }
 
     public function submit(Request $request)
