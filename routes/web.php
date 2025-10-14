@@ -32,9 +32,11 @@ Route::middleware('auth')->group(function () {
         return view('auth.user_profile');
     })->name('profile');
 
+
     Route::get('/dashboard', function () {
         return view('auth.dashboard');
     })->name('dashboard');
+
     Route::get('/content', function () {
         return view('auth.content');
     })->name('content');
@@ -60,4 +62,8 @@ Route::middleware('auth')->group(function () {
         return response()->json($data);
     });
     Route::post('/track-visit', [VisitController::class, 'track']);
+    Route::get('/visits/total', [VisitController::class, 'getTotalVisits'])->name('visits.total');
+    Route::get('/visits/this-month', [VisitController::class, 'getTotalVisitsThisMonth'])->name('visits.this-month');
+    Route::get('/visits/countries-this-month', [VisitController::class, 'getVisitsByCountryThisMonth']);
+    Route::get('/visits/widget-data', [VisitController::class, 'getDataForWidgetCounter'])->name('visits.widget-data');
 });
