@@ -1,7 +1,7 @@
 import Chart from 'chart.js/auto';
 
 export function initAcquisitionsChart() {
-    const canvas = document.getElementById('chart_acquisitions');
+    const canvas = document.getElementById('chart_cartrack_trips');
     if (!canvas) return; // Prevent errors if the canvas doesn't exist
 
     const data = [
@@ -15,16 +15,22 @@ export function initAcquisitionsChart() {
     ];
 
     new Chart(canvas, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: data.map(row => row.year),
             datasets: [
                 {
-                    label: 'Acquisitions by year',
+                    label: 'Total Car Trips',
                     data: data.map(row => row.count),
-                    backgroundColor: '#3b82f6',
+                    fill: true,
+                    borderColor: '#f59e0b',
+                    tension: 0.1
                 }
             ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
         }
     });
 }
