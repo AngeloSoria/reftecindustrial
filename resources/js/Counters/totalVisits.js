@@ -24,8 +24,9 @@ export async function initVisitorsChart() {
             }
             if (ratioElement) {
                 const ratioValue = data.ratio;
-                ratioElement.textContent = (ratioValue >= 0 ? '+' : '') + ratioValue.toFixed(2) + '%';
-                ratioElement.classList.toggle('text-green-600', ratioValue >= 0);
+                ratioElement.textContent = (ratioValue > 0 ? '+' : '') + ratioValue.toFixed(2) + '%';
+                ratioElement.classList.toggle('text-gray-500', ratioValue == 0);
+                ratioElement.classList.toggle('text-green-600', ratioValue > 0);
                 ratioElement.classList.toggle('text-red-600', ratioValue < 0);
             }
         } catch (error) {
