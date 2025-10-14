@@ -1,23 +1,18 @@
-<x-layouts.auth.app viewName="Dashboard" class="p-2 flex gap-2">
-    <section class="flex flex-col gap-2">
-        <section class="flex items-center gap-2">
-            <x-auth.widget.counter
-                counter="11"
-                change="11"
-                ratio="100"
-                ratioType="increase"
-                icon="fluentui-person-16-o"
-                iconColor="bg-brand-secondary-300"
-                label="Total Visits (Month)" />
-            <x-auth.widget.counter icon="fluentui-vehicle-car-16-o" iconColor="bg-accent-orange-300"
-                label="Total Car Trips (Month)" />
-            <x-auth.widget.counter icon="fluentui-camera-dome-16-o" iconColor="bg-accent-lightseagreen-100"
-                label="Total Camera (Active)" />
-        </section>
-        <x-auth.widget.chart_test class="" />
+<x-layouts.auth.app viewName="Dashboard" class="p-2 flex flex-col flex-wrap gap-2">
+    <section class="gap-2 flex flex-wrap ">
+        <x-auth.widget.counter class="grow basis-full sm:basis-[48%] lg:basis-[32%]" id="widget_counter_total_visits"
+            icon="fluentui-person-16-o" iconColor="bg-brand-secondary-300"
+            label="Total Visits ({{ now()->format('F') }})" />
+
+        <x-auth.widget.counter class="grow basis-full sm:basis-[48%] lg:basis-[32%]" icon="fluentui-vehicle-car-16-o"
+            iconColor="bg-accent-orange-300" label="Total Car Trips (Month)" />
+
+        <x-auth.widget.counter class="grow basis-full sm:basis-[48%] lg:basis-[32%]" icon="fluentui-camera-dome-16-o"
+            iconColor="bg-accent-lightseagreen-100" label="Total Camera (Active)" />
     </section>
 
-    <section class="grow flex flex-col gap-2">
-        <x-auth.widget.chart_visitors class="" />
+    <section class="flex flex-wrap gap-2 justify-center overflow-hidden grow">
+        <x-auth.widget.chart_visitors class="basis-full md:basis-[49%] grow" />
+        <x-auth.widget.chart_completed_car_trips class="basis-full md:basis-[49%] grow" />
     </section>
 </x-layouts.auth.app>
