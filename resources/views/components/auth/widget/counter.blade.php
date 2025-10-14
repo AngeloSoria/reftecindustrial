@@ -1,11 +1,13 @@
 @props([
+    'id' => null,
+
     'icon' => 'fluentui-person-16-o',
     'iconColor' => 'bg-brand-secondary-300',
     'label' => '<<PUT LABEL HERE>>',
 
-    'counter' => '0',
-    'change' => '0',
-    'ratio' => '0',
+    'counter' => 'loading...',
+    'change' => 'loading...',
+    'ratio' => 'loading...',
     'ratioType' => null, // increase | decrease | neutral | null
 
 ])
@@ -37,7 +39,7 @@
     }
 @endphp
 
-<div class="bg-white px-4 py-5 rounded-xl shadow-md inline-block font-inter {{ $attributes->get('class') }}">
+<div id="{{ $id }}" class="bg-white px-4 py-5 rounded-xl shadow-md inline-block font-inter max-h-[170px] {{ $attributes->get('class') }}">
     <div class="bg-green-300/0 min-w-[150px] flex flex-col gap-1">
 
         {{-- icon --}}
@@ -47,11 +49,11 @@
 
         {{-- counter --}}
         <div class="flex items-center gap-3">
-            <p class="text-2xl font-bold">{{ $counter }}</p>
+            <p class="counter-value text-2xl font-bold">{{ $counter }}</p>
             <div class="{{ $textColor }} flex items-center gap-1">
                 {{-- up/low icon value --}}
-                @svg($changeIcon, 'w-4 h-4')
-                {{ $change }}
+                {{-- @svg($changeIcon, 'w-4 h-4') --}}
+                <span class="change-value hidden">{{ $change }}</span>
             </div>
         </div>
 
@@ -61,8 +63,8 @@
         {{-- ratio --}}
         <div class="{{ $textColor }} flex items-center text-sm gap-2 font-medium">
             {{-- increase/decrease icon value --}}
-            @svg($ratioIcon, 'w-6 h-6')
-            <p>{{ $ratio }}&percnt;</p>
+            {{-- @svg($ratioIcon, 'w-6 h-6') --}}
+            <p class="ratio-value">{{ $ratio }}&percnt;</p>
         </div>
     </div>
 </div>
