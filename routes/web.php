@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Models\Visit;
-use App\Http\Controllers\VisitController;
+
 use App\Http\Controllers\UploadController;
 
 Route::get('/', function () {
@@ -25,18 +25,17 @@ Route::get('/about', function () {
 Route::get('/login', [LoginController::class, 'showForm'])->name('login');
 Route::post('/login', [LoginController::class, 'submit'])->name('login');
 
+
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\Auth\LogoutController::class, 'perform'])->name('logout');
+    Route::post('/logout', [App\Http\Controllers\Auth\LogoutController::class, 'logout'])->name('logout');
 
     Route::get('/profile', function () {
         return view('auth.user_profile');
     })->name('profile');
 
-
     Route::get('/dashboard', function () {
         return view('auth.dashboard');
     })->name('dashboard');
-
     Route::get('/content', function () {
         return view('auth.content');
     })->name('content');
@@ -49,21 +48,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/users', function () {
         return view('auth.users');
     })->name('users');
+    Route::get('/logs', function () {
+        return view('auth.logs');
+    })->name('logs');
 
 
     Route::post('/upload', [UploadController::class, 'upload'])->name('upload');
 
-    Route::get('/visit-stats', function () {
-        $data = Visit::selectRaw('country, COUNT(*) as total')
-            ->groupBy('country')
-            ->orderByDesc('total')
-            ->get();
 
-        return response()->json($data);
+    Route::group(['prefix' => 'visitors'], function () {
+        Route::get('/total', [VisitorController::class, 'getTotalVisitors'])->name('visitors.total');
+        Route::get('/unique', [VisitorController::class, 'getUniqueVisitors'])->name('visitors.unique');
+        Route::get('/top-pages/{limit?}', [VisitorController::class, 'getTopVisitedPages'])->name('visitors.top-pages');
+        Route::get('/countries', [VisitorController::class, 'getCountries'])->name('visitors.countries');
+        Route::get('/os', [VisitorController::class, 'getOs'])->name('visitors.os');
+        Route::get('/devices', [VisitorController::class, 'getDevices'])->name('visitors.devices');
+        Route::get('/countries-this-month', [VisitorController::class, 'getVisitsByCountryThisMonth'])->name('visitors.countries-this-month');
+        Route::get('/widget-data', [VisitorController::class, 'getDataForWidgetCounter'])->name('visitors.widget-data');
     });
-    Route::post('/track-visit', [VisitController::class, 'track']);
-    Route::get('/visits/total', [VisitController::class, 'getTotalVisits'])->name('visits.total');
-    Route::get('/visits/this-month', [VisitController::class, 'getTotalVisitsThisMonth'])->name('visits.this-month');
-    Route::get('/visits/countries-this-month', [VisitController::class, 'getVisitsByCountryThisMonth']);
-    Route::get('/visits/widget-data', [VisitController::class, 'getDataForWidgetCounter'])->name('visits.widget-data');
 });
