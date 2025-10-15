@@ -6,7 +6,6 @@ import Alpine from 'alpinejs'
 // Charts
 import { initAcquisitionsChart } from './Charts/acquisitionsCharts';
 import { initVisitorsChart } from './Charts/visitorsCharts';
-import { trackVisit } from './tracker';
 import { initVisitorsChart as initTotalVisitsCounter } from './Counters/totalVisits';
 
 
@@ -18,10 +17,9 @@ AOS.init({
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    initAcquisitionsChart();
-    initVisitorsChart();
-    initTotalVisitsCounter();
+    initVisitorsChart(); // Chart visualization
 
+    initTotalVisitsCounter(); // Counter widget
 
-    trackVisit();
+    initAcquisitionsChart(); // Sample
 });
