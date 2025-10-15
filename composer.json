@@ -13,7 +13,9 @@
         "blade-ui-kit/blade-zondicons": "^1.6",
         "codeat3/blade-fluentui-system-icons": "^1.34",
         "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
+        "monishroy/visitor-tracking": "^1.1",
         "owenvoke/blade-entypo": "^2.3"
     },
     "require-dev": {
