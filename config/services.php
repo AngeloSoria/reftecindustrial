@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'myapi' => [
+        'key' => env('MYAPI_KEY'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
