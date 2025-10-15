@@ -127,6 +127,12 @@
                                 'active_name' => 'Users',
                                 'icon' => 'fluentui-person-28-o',
                             ],
+                            [
+                                'route' => route('logs'),
+                                'label' => 'Logs',
+                                'active_name' => 'Logs',
+                                'icon' => 'fluentui-document-endnote-24-o',
+                            ],
                         ];
                     @endphp
                     @foreach ($sidebar_links as $link)
