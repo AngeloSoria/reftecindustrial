@@ -5,7 +5,7 @@ export async function initVisitorsChart() {
 
     async function fetchAndRefreshValue() {
         try {
-            const response = await fetch('/visits/widget-data');
+            const response = await fetch('/visitors/widget-data');
             const data = await response.json();
 
             const counterElement = document.querySelector('#widget_counter_total_visits .counter-value');
@@ -17,7 +17,7 @@ export async function initVisitorsChart() {
             }
             if (changeElement) {
                 const changeValue = data.change;
-                changeElement.textContent = (changeValue > 0 ? '+' : '') + changeValue.toLocaleString();
+                changeElement.textContent = (changeValue > 0 ? '+' : '') + changeValue.toLocaleString() + ' visitors';
                 changeElement.classList.toggle('hidden', changeValue == 0);
                 changeElement.classList.toggle('text-green-600', changeValue > 0);
                 changeElement.classList.toggle('text-red-600', changeValue < 0);

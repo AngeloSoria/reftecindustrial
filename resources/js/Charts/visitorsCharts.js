@@ -73,7 +73,7 @@ export async function initVisitorsChart() {
     // Function to fetch data and update chart
     async function fetchAndUpdateChart() {
         try {
-            const response = await fetch('/visits/countries-this-month');
+            const response = await fetch('/visitors/countries-this-month');
             const data = await response.json();
 
             // 🟨 Store full and truncated names
