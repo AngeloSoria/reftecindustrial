@@ -14,3 +14,13 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
+
+@if(session('toast'))
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        toast(@json(session('toast.message')), @json(session('toast.type')));
+    });
+</script>
+@endif
+
+<x-public.toast />
