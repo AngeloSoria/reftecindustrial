@@ -26,19 +26,19 @@ class UniqueVisitorTracking
             session(['visitor_tracked' => true]);
         }
 
-        // 🧩 Option 2 (alternative): track once every 6 hours per IP
-        /*
-        $ip = $request->ip();
-
-        $recentVisit = VisitorModel::where('ip', $ip)
-            ->where('created_at', '>', Carbon::now()->subHours(6))
-            ->exists();
-
-        if (!$recentVisit) {
-            (new Visitor())->logVisitor();
-        }
-        */
-
         return $next($request);
     }
 }
+
+// 🧩 Option 2 (alternative): track once every 6 hours per IP
+/*
+$ip = $request->ip();
+
+$recentVisit = VisitorModel::where('ip', $ip)
+    ->where('created_at', '>', Carbon::now()->subHours(6))
+    ->exists();
+
+if (!$recentVisit) {
+    (new Visitor())->logVisitor();
+}
+*/
