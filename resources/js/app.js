@@ -18,8 +18,6 @@ AOS.init({
 
 document.addEventListener('DOMContentLoaded', () => {
     initVisitorsChart(); // Chart visualization
-
     initTotalVisitsCounter(); // Counter widget
-
     initAcquisitionsChart(); // Sample
 });
