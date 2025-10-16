@@ -17,7 +17,7 @@ export async function initVisitorsChart() {
             }
             if (changeElement) {
                 const changeValue = data.change;
-                changeElement.textContent = (changeValue > 0 ? '+' : '') + changeValue.toLocaleString() + ' visitors';
+                changeElement.textContent = (changeValue > 0 ? '+' : '') + changeValue.toLocaleString() + ' difference';
                 changeElement.classList.toggle('hidden', changeValue == 0);
                 changeElement.classList.toggle('text-green-600', changeValue > 0);
                 changeElement.classList.toggle('text-red-600', changeValue < 0);
