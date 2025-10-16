@@ -1,8 +1,8 @@
-<x-layouts.auth.app viewName="Content" class="font-inter">
+<x-layouts.auth.app viewName="Content" class="font-inter px-2">
     <div class="bg-white rounded-xl shadow-sm min-h-[400px] max-w-7xl my-2 mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <!-- Tabs Navigation -->
         <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8 [&>*]:cursor-pointer" aria-label="Tabs">
+            <nav class="-mb-px justify-center-safe sm:justify-start flex space-x-8 [&>*]:cursor-pointer" aria-label="Tabs">
                 <button id="general-tab" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" onclick="openTab('general')">
                     General
                 </button>
