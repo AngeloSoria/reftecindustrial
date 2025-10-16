@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\Auth\LoginController;
-
 use App\Http\Controllers\UploadController;
+
 
 Route::get('/', function () {
     return view('home');
@@ -24,6 +24,7 @@ Route::get('/about', function () {
 
 Route::get('/login', [LoginController::class, 'showForm'])->name('login');
 Route::post('/login', [LoginController::class, 'submit'])->name('login');
+
 
 
 Route::middleware('auth')->group(function () {
