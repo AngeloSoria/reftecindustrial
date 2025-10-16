@@ -3,7 +3,7 @@
     <section class="gap-2 flex flex-wrap ">
         <x-auth.widget.counter class="grow basis-full sm:basis-[48%] lg:basis-[32%]" id="widget_counter_total_visits"
             icon="fluentui-person-16-o" iconColor="bg-brand-secondary-300"
-            label="Total Visits ({{ now()->format('F') }})" />
+            label="Total Site Visits ({{ now()->format('F') }})" />
 
         <x-auth.widget.counter class="grow basis-full sm:basis-[48%] lg:basis-[32%]" icon="fluentui-vehicle-car-16-o"
             iconColor="bg-accent-orange-300" label="Total Car Trips (Month)" />

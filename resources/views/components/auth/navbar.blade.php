@@ -2,7 +2,7 @@
     'viewName' => null
 ])
 
-<nav class="sticky top-0">
+<nav class="sticky top-0 z-50">
     <section class="relative">
         {{-- Topbar --}}
         <section class="sticky bg-brand-primary-950 py-3 px-2 lg:px-6 flex shadow-lg font-inter">
@@ -173,3 +173,4 @@
 
     </section>
 </nav>
+
