@@ -1,6 +1,7 @@
 @props([
     'privateUpload' => false, // Default to private uploads
     'uploadMultiple' => false, // Allow multiple file uploads
+    'action' => route('update.content.section.hero')
 ])
 
 <div
@@ -123,7 +124,7 @@
                 formData.append('is_private', this.privateUpload ? 1 : 0);
 
                 try {
-                    const res = await fetch('/upload', {
+                    const res = await fetch(@js($action), {
                         method: 'POST',
                         headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
                         body: formData
