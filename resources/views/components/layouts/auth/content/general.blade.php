@@ -1,105 +1,75 @@
-<section class="">
+<section class="font-inter flex item-start justify-start flex-wrap flex-col md:flex-row pb-2">
 
-    <div class="w-full mx-auto">
-        <div x-data="{selected:null}">
-            <ul class="[&>*]:relative [&>*]:border-b [&>*]:border-gray-200 [&>*:last-child]:border-0">
+    <div x-data="{ activeTab: 'hero' }" class="flex flex-col md:flex-row gap-6">
+        {{-- Tabs links --}}
+        <div class="md:min-w-[200px]">
+            <div class="sticky top-14 md:px-8 md:py-6 md:border-r-2 border-gray-200/75">
+                <ul
+                    class="
+                    list-outside flex flex-wrap flex-row md:flex-col gap-3 justify-center sm:justify-start
+                    [&>*]:hover:bg-accent-darkslategray-200/50 [&>*]:cursor-pointer [&>*]:px-3 [&>*]:py-1 [&>*]:text-sm
+                    ">
 
-                <!-- Accordion Item 1 -->
-                <li>
-                    <button type="button" title="toggle" class="cursor-pointer hover:bg-gray-200 w-full px-8 py-6 text-left"
-                        @click="selected !== 1 ? selected = 1 : selected = null">
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-medium text-gray-900">
-                                Hero Section
-                            </span>
-                            <span x-ref="container1" x-bind:class="selected == 1 ? '-rotate-90' : ''"
-                                class="transition-transform">
-                                @svg('fluentui-chevron-down-20', 'accordion-icon rotate-90 w-6 h-6')
-                            </span>
-                        </div>
-                    </button>
-                    <div class="bg-gray-100 relative overflow-hidden transition-all max-h-0 duration-700" style=""
-                        x-ref="container1"
-                        x-bind:style="selected == 1 ? 'max-height: ' + $refs.container1.scrollHeight + 'px' : ''">
-                        <div class="p-6">
-                            <x-layouts.file_upload_drag privateUpload="false" uploadMultiple="false" />
-                            <button class="px-4 py-2 bg-brand-secondary-300 text-white" x-data @click="
-                                    $dispatch('image_preview_event', {
-                                        previewInfo: @js(['image' => asset('images/lubricants.png')])
-                                    })
-                                ">
-                                Test
-                            </button>
-                        </div>
-                    </div>
-                </li>
+                    <li :class="activeTab === 'hero' ? 'text-accent-orange-300 border-b-3 border-accent-orange-300  md:border-none md:list-disc' : ''"
+                        @click="activeTab = 'hero'">
+                        Hero Section
+                    </li>
+                    <li :class="activeTab === 'products' ? 'text-accent-orange-300 border-b-3 border-accent-orange-300  md:border-none md:list-disc' : ''"
+                        @click="activeTab = 'products'">
+                        Product Lines
+                    </li>
+                    <li :class="activeTab === 'history' ? 'text-accent-orange-300 border-b-3 border-accent-orange-300 md:border-none md:list-disc' : ''"
+                        @click="activeTab = 'history'">
+                        History
+                    </li>
+                    <li :class="activeTab === 'about' ? 'text-accent-orange-300 border-b-3 border-accent-orange-300 md:border-none md:list-disc' : ''"
+                        @click="activeTab = 'about'">
+                        About Us
+                    </li>
+                </ul>
 
-                <!-- Accordion Item 2 -->
-                <li>
-                    <button type="button" title="toggle" class="cursor-pointer hover:bg-gray-200 w-full px-8 py-6 text-left"
-                        @click="selected !== 2 ? selected = 2 : selected = null">
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-medium text-gray-900">
-                                Accordion Item 2
-                            </span>
-                            <span x-ref="container2" x-bind:class="selected == 2 ? '-rotate-90' : ''"
-                                class="transition-transform">
-                                @svg('fluentui-chevron-down-20', 'accordion-icon rotate-90 w-6 h-6')
-                            </span>
-                        </div>
-                    </button>
-                    <div class="relative overflow-hidden transition-all max-h-0 duration-700" style=""
-                        x-ref="container2"
-                        x-bind:style="selected == 2 ? 'max-height: ' + $refs.container2.scrollHeight + 'px' : ''">
-                        <div class="p-6">
-                            <p class="text-gray-700">Content for accordion item 2 goes here. You can add any HTML
-                                content.
-                            </p>
-                            <p class="text-gray-700">Content for accordion item 2 goes here. You can add any HTML
-                                content.
-                            </p>
-                            <p class="text-gray-700">Content for accordion item 2 goes here. You can add any HTML
-                                content.
-                            </p>
-                            <p class="text-gray-700">Content for accordion item 2 goes here. You can add any HTML
-                                content.
-                            </p>
-                            <p class="text-gray-700">Content for accordion item 2 goes here. You can add any HTML
-                                content.
-                            </p>
-                            <p class="text-gray-700">Content for accordion item 2 goes here. You can add any HTML
-                                content.
-                            </p>
-                        </div>
-                    </div>
-                </li>
+            </div>
+        </div>
 
-                <!-- Accordion Item 3 -->
-                <li>
-                    <button type="button" title="toggle" class="cursor-pointer hover:bg-gray-200 w-full px-8 py-6 text-left"
-                        @click="selected !== 3 ? selected = 3 : selected = null">
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-medium text-gray-900">
-                                Accordion Item 3
-                            </span>
-                            <span x-ref="container3" x-bind:class="selected == 3 ? '-rotate-90' : ''"
-                                class="transition-transform">
-                                @svg('fluentui-chevron-down-20', 'accordion-icon rotate-90 w-6 h-6')
-                            </span>
-                        </div>
-                    </button>
-                    <div class="relative overflow-hidden transition-all max-h-0 duration-700" style=""
-                        x-ref="container3"
-                        x-bind:style="selected == 3 ? 'max-height: ' + $refs.container3.scrollHeight + 'px' : ''">
-                        <div class="p-6">
-                            <p class="text-gray-700">Content for accordion item 3 goes here. You can add any HTML
-                                content.
-                            </p>
-                        </div>
-                    </div>
-                </li>
+        {{-- Preview / Tab Content --}}
+        <div class="grow min-h-[300px] p-4">
+            <div x-show="activeTab === 'hero'" x-transition>
 
-            </ul>
+                <h2 class="font-medium text-xl my-2">Hero Section Backdrop Image</h2>
+
+                {{-- Hero section image preview --}}
+                <div class="bg-gray-300 rounded max-w-150 overflow-hidden">
+                    <img src="{{ asset('images/bulan.jpg') }}" class="w-full cursor-pointer" title="preview image"
+                        x-data @click="
+                        $dispatch('image_preview_event', {
+                            previewInfo: @js(['image' => asset('images/bulan.jpg')])
+                        })
+                    " />
+                </div>
+
+                <x-layouts.file_upload_drag />
+                {{-- <form method="POST" action="{{ route('update.content.section.hero') }}">
+                    @csrf
+                    <button type="submit"
+                        class="px-4 py-2 bg-accent-lightseagreen-100 rounded cursor-pointer hover:bg-accent-lightseagreen-200">TEST</button>
+                </form> --}}
+
+            </div>
+
+            <div x-show="activeTab === 'products'" x-transition>
+                <h2 class="text-xl font-bold mb-2">Product Lines</h2>
+                <p>Display your different product categories or featured products here.</p>
+            </div>
+
+            <div x-show="activeTab === 'history'" x-transition>
+                <h2 class="text-xl font-bold mb-2">History</h2>
+                <p>Tell your brand’s story, milestones, or achievements in this section.</p>
+            </div>
+
+            <div x-show="activeTab === 'about'" x-transition>
+                <h2 class="text-xl font-bold mb-2">About Us</h2>
+                <p>Introduce your team, mission, and company values here.</p>
+            </div>
         </div>
     </div>
 
