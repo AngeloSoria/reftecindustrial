@@ -23,13 +23,13 @@
             this.toasts = this.toasts.filter(t => t.id !== id);
         }
     }" @toast.window="add($event.detail.message, $event.detail.type, $event.detail.duration)"
-    class="fixed bottom-5 right-5 z-50 flex flex-col gap-2">
+    class="fixed bottom-5 right-5 z-[150] flex flex-col gap-2">
     <template x-for="toast in toasts" :key="toast.id">
         <div x-transition:enter="transform ease-out duration-300 transition"
             x-transition:enter-start="translate-x-20 opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
             x-transition:leave="transform ease-in duration-200 transition"
             x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-20 opacity-0"
-            class="relative overflow-hidden px-4 py-3 rounded-lg shadow-lg text-white min-w-[250px] max-w-[300px] flex items-start justify-between"
+            class="relative overflow-hidden px-4 py-3 rounded-lg shadow-lg text-white min-w-[300px] max-w-[400px] flex items-start justify-between"
             :class="{
                 'bg-green-600': toast.type === 'success',
                 'bg-red-600': toast.type === 'error',
