@@ -5,6 +5,11 @@ use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UploadController;
 
+use App\Http\Controllers\Contents\GeneralController;
+
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
+
 
 Route::get('/', function () {
     return view('home');
@@ -28,12 +33,9 @@ Route::post('/login', [LoginController::class, 'submit'])->name('login');
 
 
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\Auth\LogoutController::class, 'logout'])->name('logout');
-
     Route::get('/profile', function () {
         return view('auth.user_profile');
     })->name('profile');
-
     Route::get('/dashboard', function () {
         return view('auth.dashboard');
     })->name('dashboard');
@@ -52,8 +54,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/logs', function () {
         return view('auth.logs');
     })->name('logs');
+    Route::get('/files', function () {
+        return view('auth.files');
+    })->name('files');
 
 
+    Route::post('/logout', [App\Http\Controllers\Auth\LogoutController::class, 'logout'])->name('logout');
     Route::post('/upload', [UploadController::class, 'upload'])->name('upload');
 
 
@@ -66,5 +72,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/devices', [VisitorController::class, 'getDevices'])->name('visitors.devices');
         Route::get('/countries-this-month', [VisitorController::class, 'getVisitsByCountryThisMonth'])->name('visitors.countries-this-month');
         Route::get('/widget-data', [VisitorController::class, 'getDataForWidgetCounter'])->name('visitors.widget-data');
+    });
+
+    Route::group(['prefix' => 'content'], function () {
+        Route::post('update/section/hero', [GeneralController::class, 'setHeroSection'])->name('update.content.section.hero');
     });
 });
