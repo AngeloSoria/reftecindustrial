@@ -133,6 +133,12 @@
                                 'active_name' => 'Logs',
                                 'icon' => 'fluentui-document-endnote-24-o',
                             ],
+                            [
+                                'route' => route('files'),
+                                'label' => 'Files',
+                                'active_name' => 'Files',
+                                'icon' => 'fluentui-folder-28-o',
+                            ],
                         ];
                     @endphp
                     @foreach ($sidebar_links as $link)
