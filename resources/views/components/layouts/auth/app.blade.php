@@ -12,6 +12,8 @@
     <main class="{{ $attributes->get('class') }}">
         {{ $slot }}
     </main>
+
+    <x-public.btn_backtotop scrollDetectValue="200" />
 </body>
 
 </html>
