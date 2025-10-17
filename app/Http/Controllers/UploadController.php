@@ -7,6 +7,7 @@ use App\Models\Upload;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class UploadController extends Controller
 {
@@ -65,6 +66,7 @@ class UploadController extends Controller
                 'is_private' => $isPrivate,
             ]);
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return response()->json([
                 'error' => 'File upload failed: ' . $e->getMessage()
             ], 500);
