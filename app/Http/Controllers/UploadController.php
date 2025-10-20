@@ -2,47 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Upload;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Exception;
+use App\Models\Upload;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class UploadController extends Controller
 {
+    /**
+     * Handle both single and multiple file uploads.
+     */
     public function upload(Request $request)
     {
         try {
-            // Validate inputs
+            // 1. Validate
             $request->validate([
-                'file' => 'nullable|mimes:jpg,png,jpeg,bmp,gif,pdf,xlsx,docx|max:' . env('APP_MAX_UPLOAD_SIZE', 10240),
-                'files.*' => 'nullable|mimes:jpg,png,jpeg,bmp,gif,pdf,xlsx,docx|max:' . env('APP_MAX_UPLOAD_SIZE', 10240),
+                'file' => 'nullable|file|mimes:jpg,png,jpeg,bmp,gif,pdf,xlsx,docx|max:' . env('APP_MAX_UPLOAD_SIZE', 10240),
+                'files.*' => 'nullable|file|mimes:jpg,png,jpeg,bmp,gif,pdf,xlsx,docx|max:' . env('APP_MAX_UPLOAD_SIZE', 10240),
                 'is_private' => 'nullable|boolean',
             ]);
 
-            // Gather file(s)
+            // 2. Determine input field(s)
             $files = $request->file('files') ?? $request->file('file');
 
             if (!$files) {
-                return response()->json(['error' => 'No files received'], 400);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No file(s) received in the request.',
+                ], 400);
             }
 
-            // Normalize single file into array
+            // Normalize single upload to an array
             if (!is_array($files)) {
                 $files = [$files];
             }
 
-            // Use Laravel’s built-in boolean helper
-            $isPrivate = $request->boolean('is_private'); // replaces filter_var()
-
-
-            // Choose disk dynamically
+            $isPrivate = $request->boolean('is_private');
             $disk = $isPrivate ? 'private' : 'public';
 
-            $uploadedPaths = [];
+            $uploaded = [];
 
-            // Handle uploads
+            // 3. Process uploads
             foreach ($files as $file) {
                 if (!$file) continue;
 
@@ -53,22 +55,32 @@ class UploadController extends Controller
                     'filename'    => $filename,
                     'path'        => $path,
                     'uploaded_by' => Auth::id(),
-                    'is_private'  => $isPrivate, // boolean; Eloquent will cast to 0/1
+                    'is_private'  => $isPrivate,
                 ]);
 
-                $uploadedPaths[] = $path;
+                $uploaded[] = [
+                    'filename' => $filename,
+                    'path' => $path,
+                    'url' => $isPrivate ? null : asset('storage/' . $path),
+                ];
             }
 
-            // Respond
+            // 4. Build response
             return response()->json([
-                'message' => 'File(s) uploaded successfully',
-                'paths' => $uploadedPaths,
+                'success' => true,
+                'message' => count($uploaded) > 1
+                    ? 'Files uploaded successfully.'
+                    : 'File uploaded successfully.',
+                'files' => $uploaded,
                 'is_private' => $isPrivate,
-            ]);
+            ], 200);
+
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            Log::error('Upload failed: ' . $e->getMessage());
             return response()->json([
-                'error' => 'File upload failed: ' . $e->getMessage()
+                'success' => false,
+                'message' => 'File upload failed.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
