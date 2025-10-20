@@ -1,11 +1,10 @@
 <section class="font-inter flex item-start justify-start flex-wrap flex-col md:flex-row pb-2">
 
-    <div x-data="{ activeTab: 'hero' }" class="flex flex-col md:flex-row gap-6">
+    <div x-data="{ activeTab: 'hero' }" class="w-full flex flex-col md:flex-row gap-6">
         {{-- Tabs links --}}
         <div class="md:min-w-[200px]">
             <div class="sticky top-14 md:px-8 md:py-6 md:border-r-2 border-gray-200/75">
-                <ul
-                    class="
+                <ul class="
                     list-outside flex flex-wrap flex-row md:flex-col gap-3 justify-center sm:justify-start
                     [&>*]:hover:bg-accent-darkslategray-200/50 [&>*]:cursor-pointer [&>*]:px-3 [&>*]:py-1 [&>*]:text-sm
                     ">
@@ -32,43 +31,21 @@
         </div>
 
         {{-- Preview / Tab Content --}}
-        <div class="grow min-h-[300px] p-4">
+        <div class="grow min-h-[300px] p-4 w-full">
             <div x-show="activeTab === 'hero'" x-transition>
-
-                <h2 class="font-medium text-xl my-2">Hero Section Backdrop Image</h2>
-
-                {{-- Hero section image preview --}}
-                <div class="bg-gray-300 rounded max-w-150 overflow-hidden">
-                    <img src="{{ asset('images/bulan.jpg') }}" class="w-full cursor-pointer" title="preview image"
-                        x-data @click="
-                        $dispatch('image_preview_event', {
-                            previewInfo: @js(['image' => asset('images/bulan.jpg')])
-                        })
-                    " />
-                </div>
-
-                <x-layouts.file_upload_drag />
-                {{-- <form method="POST" action="{{ route('update.content.section.hero') }}">
-                    @csrf
-                    <button type="submit"
-                        class="px-4 py-2 bg-accent-lightseagreen-100 rounded cursor-pointer hover:bg-accent-lightseagreen-200">TEST</button>
-                </form> --}}
-
+                <x-auth.content.general.hero_section />
             </div>
 
             <div x-show="activeTab === 'products'" x-transition>
-                <h2 class="text-xl font-bold mb-2">Product Lines</h2>
-                <p>Display your different product categories or featured products here.</p>
+                <x-auth.content.general.product_lines />
             </div>
 
             <div x-show="activeTab === 'history'" x-transition>
-                <h2 class="text-xl font-bold mb-2">History</h2>
-                <p>Tell your brand’s story, milestones, or achievements in this section.</p>
+                <x-auth.content.general.history />
             </div>
 
             <div x-show="activeTab === 'about'" x-transition>
-                <h2 class="text-xl font-bold mb-2">About Us</h2>
-                <p>Introduce your team, mission, and company values here.</p>
+                <x-auth.content.general.about_us />
             </div>
         </div>
     </div>
