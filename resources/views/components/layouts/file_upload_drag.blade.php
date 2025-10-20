@@ -1,18 +1,24 @@
+@php
+    $generatedId = uniqid('fileUpload_');
+@endphp
+
 @props([
-    'privateUpload' => false, // Default to private uploads
-    'uploadMultiple' => false, // Allow multiple file uploads
-    'action' => route('update.content.section.hero')
+    'privateUpload' => false,
+    'uploadMultiple' => false,
+    'action' => null,
 ])
 
 <div
+    id="{{ $generatedId }}"
     x-data="fileUploadHandler({
-        multiple: {{ $uploadMultiple ? 'true' : 'false' }},
-        privateUpload: {{ $privateUpload ? 'true' : 'false' }}
+        multiple: {{ $uploadMultiple }},
+        privateUpload: {{ $privateUpload ? 'true' : 'false' }},
+        action: @js($action)
     })"
     x-on:drop.prevent="drop($event)"
     x-on:dragover.prevent="dragOver = true"
     x-on:dragleave.prevent="dragOver = false"
-    class="relative w-full max-w-2xl p-6 border-2 border-dashed rounded-lg transition duration-200"
+    class="relative w-full max-w-2xl p-6 border-2 border-dashed rounded-lg transition duration-200 {{ $attributes->get('class') }}"
     :class="dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white hover:border-gray-400'"
 >
     <input
@@ -25,7 +31,6 @@
 
     <div class="text-center space-y-2">
         @svg('zondicon-upload', 'w-10 h-10 mx-auto text-gray-400')
-
         <p class="text-gray-700 font-semibold">Drag & drop files here</p>
         <p class="text-sm text-gray-500">or</p>
         <button type="button"
@@ -38,19 +43,47 @@
     <!-- File list -->
     <template x-if="files.length > 0">
         <div class="mt-6 space-y-3">
-            <template x-for="(file, index) in files" :key="index">
-                <div class="flex items-center justify-between p-3 border rounded">
-                    <div class="flex items-center space-x-3">
-                        <template x-if="file.preview">
-                            <img :src="file.preview" class="w-12 h-12 object-cover rounded" />
-                        </template>
-                        <div>
-                            <p class="text-sm font-medium text-gray-800" x-text="file.name"></p>
-                            <p class="text-xs text-gray-500" x-text="(file.size/1024).toFixed(1) + ' KB'"></p>
+            <template x-for="(file, index) in files" :key="file.name">
+                <!-- ✅ Added transitions -->
+                <div
+                    class="flex flex-col gap-2 p-3 border rounded bg-white shadow-sm"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 -translate-y-2"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-300"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 translate-y-2"
+                >
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <template x-if="file.preview">
+                                <img :src="file.preview" class="w-12 h-12 object-cover rounded" />
+                            </template>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800" x-text="file.name"></p>
+                                <p class="text-xs text-gray-500" x-text="(file.size/1024).toFixed(1) + ' KB'"></p>
+                            </div>
                         </div>
+                        <button type="button" class="text-sm text-red-600 hover:underline"
+                            @click="removeFile(index)"
+                            x-show="!file.uploading">Remove</button>
                     </div>
-                    <button type="button" class="text-sm text-red-600 hover:underline"
-                        @click="removeFile(index)">Remove</button>
+
+                    <!-- Progress bar -->
+                    <template x-if="file.uploading">
+                        <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
+                            <div class="h-2 bg-green-500 transition-all duration-200"
+                                :style="`width: ${file.progress}%;`"></div>
+                        </div>
+                    </template>
+
+                    <template x-if="file.done">
+                        <p class="text-xs text-green-600 font-medium">✅ Uploaded</p>
+                    </template>
+
+                    <template x-if="file.error">
+                        <p class="text-xs text-red-600 font-medium">❌ Upload failed</p>
+                    </template>
                 </div>
             </template>
         </div>
@@ -66,6 +99,7 @@
     </div>
 </div>
 
+
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('fileUploadHandler', (config) => ({
@@ -74,11 +108,12 @@
             uploading: false,
             multiple: config.multiple ?? false,
             privateUpload: config.privateUpload ?? false,
+            action: config.action,
 
             filesAdded(e) {
                 const newFiles = Array.from(e.target.files);
                 this.addFiles(newFiles);
-                e.target.value = ''; // reset input for next drag/select
+                e.target.value = '';
             },
 
             drop(e) {
@@ -88,21 +123,33 @@
             },
 
             addFiles(newFiles) {
-                // If single mode: replace existing file
                 if (!this.multiple) {
-                    this.clearPreviews();
-                    const file = newFiles[0];
-                    if (file) {
-                        const preview = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
-                        this.files = [{ file, name: file.name, size: file.size, preview }];
+                    if (this.files.length > 0) {
+                        const removed = this.files.pop();
+                        if (removed?.preview) URL.revokeObjectURL(removed.preview);
+                        setTimeout(() => {
+                            this.files = [this.makeFileObj(newFiles[0])];
+                        }, 300);
+                    } else {
+                        this.files = [this.makeFileObj(newFiles[0])];
                     }
                 } else {
-                    // Multi mode: append
-                    newFiles.forEach(file => {
-                        const preview = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
-                        this.files.push({ file, name: file.name, size: file.size, preview });
-                    });
+                    newFiles.forEach(file => this.files.push(this.makeFileObj(file)));
                 }
+            },
+
+            makeFileObj(file) {
+                return {
+                    file,
+                    name: file.name,
+                    size: file.size,
+                    preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+                    progress: 0,
+                    uploading: false,
+                    done: false,
+                    error: false,
+                    uploadedPath: null
+                };
             },
 
             removeFile(index) {
@@ -110,41 +157,100 @@
                 if (removed?.preview) URL.revokeObjectURL(removed.preview);
             },
 
-            clearPreviews() {
-                this.files.forEach(f => f.preview && URL.revokeObjectURL(f.preview));
+            // ✅ new method to reset upload state
+            resetFiles() {
+                this.files.forEach(f => {
+                    if (f.preview) URL.revokeObjectURL(f.preview);
+                });
                 this.files = [];
+                this.uploading = false;
             },
 
             async uploadFiles() {
+                if (!this.action) {
+                    window.dispatchEvent(new CustomEvent('toast', {
+                        detail: { message: 'No upload endpoint provided.', type: 'error' }
+                    }));
+                    return;
+                }
+
                 if (this.files.length === 0) return;
+
                 this.uploading = true;
+                const uploads = this.files.map(f => this.uploadSingleFile(f));
+                await Promise.all(uploads);
+                this.uploading = false;
 
-                const formData = new FormData();
-                this.files.forEach(f => formData.append('files[]', f.file));
-                formData.append('is_private', this.privateUpload ? 1 : 0);
+                // ✅ after all uploads done — reset files instead of reloading
+                const allDone = this.files.every(f => f.done);
+                if (allDone) {
+                    window.dispatchEvent(new CustomEvent('toast', {
+                        detail: { message: 'All files uploaded successfully!', type: 'success' }
+                    }));
+                    this.resetFiles();
+                }
+            },
 
-                try {
-                    const res = await fetch(@js($action), {
-                        method: 'POST',
-                        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                        body: formData
+            uploadSingleFile(fileObj) {
+                return new Promise((resolve) => {
+                    const xhr = new XMLHttpRequest();
+                    const formData = new FormData();
+                    formData.append(this.multiple ? 'files[]' : 'file', fileObj.file);
+                    formData.append('is_private', this.privateUpload ? 1 : 0);
+
+                    fileObj.uploading = true;
+
+                    xhr.open('POST', this.action, true);
+                    xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+
+                    xhr.upload.addEventListener('progress', (e) => {
+                        if (e.lengthComputable) {
+                            fileObj.progress = Math.round((e.loaded / e.total) * 100);
+                        }
                     });
 
-                    if (res.ok) {
-                        const data = await res.json();
-                        toast(`Upload successful! (${data.is_private ? 'Private' : 'Public'})`, 'success');
-                        this.clearPreviews();
-                    } else {
-                        const err = await res.json();
-                        toast('Upload failed: ' + (err.error || 'Unknown error'), 'error');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    toast('Upload error: ' + err.message, 'error');
-                } finally {
-                    this.uploading = false;
-                }
+                    xhr.onload = () => {
+                        fileObj.uploading = false;
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                fileObj.done = true;
+                                fileObj.progress = 100;
+                                window.dispatchEvent(new CustomEvent('toast', {
+                                    detail: {
+                                        message: response?.message || `Uploaded: ${fileObj.name}`,
+                                        type: 'success',
+                                        refreshOnComplete: true
+                                    }
+                                }));
+                            } else {
+                                throw new Error(response.error || 'Upload failed');
+                            }
+                        } catch (err) {
+                            fileObj.error = true;
+                            window.dispatchEvent(new CustomEvent('toast', {
+                                detail: {
+                                    message: err.message,
+                                    type: 'error'
+                                }
+                            }));
+                        }
+                        resolve();
+                    };
+
+                    xhr.onerror = () => {
+                        fileObj.uploading = false;
+                        fileObj.error = true;
+                        window.dispatchEvent(new CustomEvent('toast', {
+                            detail: { message: 'Network error during upload.', type: 'error' }
+                        }));
+                        resolve();
+                    };
+
+                    xhr.send(formData);
+                });
             }
         }));
     });
+
 </script>
