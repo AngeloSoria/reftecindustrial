@@ -8,7 +8,24 @@
     {{-- Hero section --}}
     {{-- TODO: Server rendered background-image of hero section. --}}
     <section class="w-full h-100 bg-cover bg-center flex items-center justify-start relative"
-        style="background-image: url('{{ asset('images/bulan.jpg') }}');">
+        style="background-image: url('{{ asset('images/bulan.jpg') }}');"
+        x-ref="heroBackdrop"
+        x-data="{async init() {
+                try {
+                    const response = await fetch('{{ route('content.get.section.hero') }}');
+                    const data = await response.json();
+
+                    const img = new Image();
+                    img.src = '/storage/' + data.image_path;
+                    // Wait until the actual image is fully loaded
+                    img.onload = () => {
+                        this.$refs.heroBackdrop.style.backgroundImage = 'url(' + img.src + ')';
+                    };
+                } catch (e) {
+                    console.error('Failed to load hero image:', e);
+                }
+            }
+        }">
         <div class="block absolute top-0 left-0 w-full h-full bg-black/85 z-0"></div>
         <section class="max-w-6xl z-1 mx-auto flex items-center justify-center sm:justify-start w-full px-2 md:px-6">
             <div
