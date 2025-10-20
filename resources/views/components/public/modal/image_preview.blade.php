@@ -13,7 +13,6 @@
     x-data="{ open: false, previewInfo: {}, }"
     @image_preview_event.window="
         previewInfo = $event.detail.previewInfo;
-        console.log(previewInfo);
         if(!previewInfo.image) {
             return;
         }
@@ -43,9 +42,9 @@
     </div>
 
     {{-- image container --}}
-    <div class="z-50 w-full h-full max-h-[90%] max-w-[90%] rounded-sm flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <div class="z-50 max-h-[90%] max-w-[90%] rounded-sm flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <img
-            class="max-w-[90%] max-h-[90%] w-full aspect-video"
+            class="bg-gray-300 aspect-video"
             x-show="open"
             x-transition
             :src="previewInfo.image" />
