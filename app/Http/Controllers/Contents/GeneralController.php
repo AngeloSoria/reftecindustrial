@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Contents\General;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\UploadController;
 
 class GeneralController extends Controller
@@ -26,8 +25,6 @@ class GeneralController extends Controller
             if(!$data || !$data['success']) {
                 throw new Exception($data['message']);
             }
-
-            Log::info($data);
 
             General::updateOrCreate(['section' => 'hero'], [
                 'image_path' => $data['files'][0]['path'] ?? null
