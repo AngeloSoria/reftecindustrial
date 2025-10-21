@@ -66,9 +66,11 @@ Route::middleware('auth')->group(function () {
     Route::prefix('content')->name('content.')->controller(GeneralController::class)->group(function () {
         // POST
         Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
-
-        // GET
-        Route::get('section/hero', 'getHeroSection')->name('get.section.hero');
+        Route::post('section/history', 'setHistory')->name('update.section.history');
     });
-
+});
+Route::prefix('content')->name('content.')->controller(GeneralController::class)->group(function () {
+    // GET
+    Route::get('section/hero', 'getHeroSection')->name('get.section.hero');
+    Route::get('section/history', 'getHistory')->name('get.section.history');
 });
