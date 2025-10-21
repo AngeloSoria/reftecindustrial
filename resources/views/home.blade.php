@@ -8,9 +8,7 @@
     {{-- Hero section --}}
     {{-- TODO: Server rendered background-image of hero section. --}}
     <section class="w-full h-100 bg-cover bg-center flex items-center justify-start relative"
-        style="background-image: url('{{ asset('images/bulan.jpg') }}');"
-        x-ref="heroBackdrop"
-        x-data="{async init() {
+        style="background-image: url('{{ asset('images/bulan.jpg') }}');" x-ref="heroBackdrop" x-data="{async init() {
                 try {
                     const response = await fetch('{{ route('content.get.section.hero') }}');
                     const data = await response.json();
@@ -107,7 +105,18 @@
                 {{-- Text --}}
                 <div data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-duration="1200"
                     class="text-black order-2 md:order-1 bg-[#ecf0f1] shadow-md flex flex-col justify-center item-end -border-4 -border-accent-orange-300 p-6 rounded">
-                    <p class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
+                    <p x-ref="data_history" x-data="{
+                        async init() {
+                            const response = await fetch('{{ route('content.get.section.history') }}');
+                            const data = await response.json();
+
+                            if(data) {
+                                this.$refs.data_history.innerHTML = data.content;
+                            }
+                        },
+                    }"
+                    class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
+                        {{-- placeholder before the updated data from the database. --}}
                         Founded in 2005 as Single Proprietorship,<span class="font-black text-brand-secondary-300">
                             REFTEC
                             Industrial Supply and Services Inc.</span> is 100%
@@ -122,7 +131,8 @@
                         water industry and refrigeration.
                     </p>
                     <section class="flex justify-end w-full">
-                        <x-public.button button_type="secondary" href="{{ route('aboutus') }}" class="mt-4 rounded flex items-center gap-2">
+                        <x-public.button button_type="secondary" href="{{ route('aboutus') }}"
+                            class="mt-4 rounded flex items-center gap-2">
                             Learn More
                             @svg('fluentui-arrow-right-16-o', 'w-4 h-4 text-white')
                         </x-public.button>
@@ -229,7 +239,8 @@
             </section>
 
             <div data-aos="fade-up" class="w-full flex justify-center items-center p-8">
-                <x-public.button button_type="primary" href="{{ route('projects') }}" class="rounded font-bold text-white" size="2xl">
+                <x-public.button button_type="primary" href="{{ route('projects') }}"
+                    class="rounded font-bold text-white" size="2xl">
                     View All Projects
                 </x-public.button>
             </div>

@@ -6,14 +6,16 @@
     'privateUpload' => false,
     'uploadMultiple' => false,
     'action' => null,
+    'hiddenData' => [], // ✅ supports multiple dynamic hidden inputs
+    'renderHiddenInputs' => true, // ✅ whether to render <input type="hidden">
 ])
-
 <div
     id="{{ $generatedId }}"
     x-data="fileUploadHandler({
-        multiple: {{ $uploadMultiple }},
+        multiple: {{ $uploadMultiple ? 'true' : 'false' }},
         privateUpload: {{ $privateUpload ? 'true' : 'false' }},
-        action: @js($action)
+        action: @js($action),
+        hiddenData: @js($hiddenData)
     })"
     x-on:drop.prevent="drop($event)"
     x-on:dragover.prevent="dragOver = true"
@@ -21,6 +23,13 @@
     class="relative w-full max-w-2xl p-6 border-2 border-dashed rounded-lg transition duration-200 {{ $attributes->get('class') }}"
     :class="dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white hover:border-gray-400'"
 >
+    {{-- ✅ Optional visible hidden inputs for debugging / form mirror --}}
+    @if($renderHiddenInputs && !empty($hiddenData))
+        @foreach($hiddenData as $key => $value)
+            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+        @endforeach
+    @endif
+
     <input
         type="file"
         x-ref="input"
@@ -44,7 +53,6 @@
     <template x-if="files.length > 0">
         <div class="mt-6 space-y-3">
             <template x-for="(file, index) in files" :key="file.name">
-                <!-- ✅ Added transitions -->
                 <div
                     class="flex flex-col gap-2 p-3 border rounded bg-white shadow-sm"
                     x-transition:enter="transition ease-out duration-300"
@@ -69,7 +77,6 @@
                             x-show="!file.uploading">Remove</button>
                     </div>
 
-                    <!-- Progress bar -->
                     <template x-if="file.uploading">
                         <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
                             <div class="h-2 bg-green-500 transition-all duration-200"
@@ -89,7 +96,6 @@
         </div>
     </template>
 
-    <!-- Upload button -->
     <div class="mt-4 flex justify-end" x-show="files.length > 0">
         <button type="button" @click="uploadFiles()" :disabled="uploading"
             class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-60">
@@ -98,7 +104,6 @@
         </button>
     </div>
 </div>
-
 
 <script>
     document.addEventListener('alpine:init', () => {
@@ -109,6 +114,7 @@
             multiple: config.multiple ?? false,
             privateUpload: config.privateUpload ?? false,
             action: config.action,
+            hiddenData: config.hiddenData ?? {},
 
             filesAdded(e) {
                 const newFiles = Array.from(e.target.files);
@@ -147,8 +153,7 @@
                     progress: 0,
                     uploading: false,
                     done: false,
-                    error: false,
-                    uploadedPath: null
+                    error: false
                 };
             },
 
@@ -157,7 +162,6 @@
                 if (removed?.preview) URL.revokeObjectURL(removed.preview);
             },
 
-            // ✅ new method to reset upload state
             resetFiles() {
                 this.files.forEach(f => {
                     if (f.preview) URL.revokeObjectURL(f.preview);
@@ -181,7 +185,6 @@
                 await Promise.all(uploads);
                 this.uploading = false;
 
-                // ✅ after all uploads done — reset files instead of reloading
                 const allDone = this.files.every(f => f.done);
                 if (allDone) {
                     window.dispatchEvent(new CustomEvent('toast', {
@@ -191,12 +194,18 @@
                 }
             },
 
-            uploadSingleFile(fileObj) {
+            async uploadSingleFile(fileObj) {
                 return new Promise((resolve) => {
                     const xhr = new XMLHttpRequest();
                     const formData = new FormData();
+
                     formData.append(this.multiple ? 'files[]' : 'file', fileObj.file);
                     formData.append('is_private', this.privateUpload ? 1 : 0);
+
+                    // ✅ Add all hidden fields dynamically
+                    for (const [key, value] of Object.entries(this.hiddenData)) {
+                        formData.append(key, value);
+                    }
 
                     fileObj.uploading = true;
 
@@ -229,10 +238,7 @@
                         } catch (err) {
                             fileObj.error = true;
                             window.dispatchEvent(new CustomEvent('toast', {
-                                detail: {
-                                    message: err.message,
-                                    type: 'error'
-                                }
+                                detail: { message: err.message, type: 'error' }
                             }));
                         }
                         resolve();
@@ -252,5 +258,4 @@
             }
         }));
     });
-
 </script>

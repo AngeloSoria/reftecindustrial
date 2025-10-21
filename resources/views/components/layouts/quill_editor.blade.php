@@ -1,14 +1,38 @@
+@props([
+    'id' => null,
+    'name' => 'content',
+    'content' => '',
+    'height' => '300px',
+])
+
 @php
-    // Collect all Alpine-related attributes (x-*, @*, :)
+    // Preserve Alpine-related attributes
     $alpineAttributes = collect($attributes->getAttributes())
-        ->filter(function ($value, $key) {
-            return str_starts_with($key, 'x-')
-                || str_starts_with($key, '@')
-                || str_starts_with($key, ':');
-        })
-        ->mapWithKeys(fn($value, $key) => [$key => $value])
-        ->all(); // ✅ convert to plain array
+        ->filter(fn($value, $key) =>
+            str_starts_with($key, 'x-') ||
+            str_starts_with($key, '@') ||
+            str_starts_with($key, ':')
+        )
+        ->all();
+
+    // Assign unique editor ID if none provided
+    $editorId = $id ?? 'editor-' . uniqid();
 @endphp
 
-<div id="{{ $attributes->get('id') }}" {{ $attributes->except(array_keys($alpineAttributes))->merge(['class' => 'quill-editor min-w-[300px] min-h-[100px]'])->merge($alpineAttributes) }}>
-</div>
+<div
+    id="{{ $editorId }}"
+    data-name="{{ $name }}"
+    data-content="{{ e($content) }}"
+    data-height="{{ $height }}"
+    {{ $attributes
+        ->except(array_keys($alpineAttributes))
+        ->merge([
+            'class' => 'quill-editor overflow-hidden'
+        ])
+        ->merge($alpineAttributes)
+    }}
+    style="min-width:300px; min-height:100px; height:{{ $height }};"
+></div>
+
+{{-- Hidden input for form binding --}}
+<input type="hidden" name="{{ $name }}" id="hidden_{{ $editorId }}" value="{{ e($content) }}">
