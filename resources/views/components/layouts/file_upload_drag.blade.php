@@ -187,10 +187,8 @@
 
                 const allDone = this.files.every(f => f.done);
                 if (allDone) {
-                    window.dispatchEvent(new CustomEvent('toast', {
-                        detail: { message: 'All files uploaded successfully!', type: 'success' }
-                    }));
-                    this.resetFiles();
+                    // ✅ Reload window so session flash toast will appear
+                    window.location.reload();
                 }
             },
 
@@ -225,21 +223,22 @@
                             if (xhr.status >= 200 && xhr.status < 300) {
                                 fileObj.done = true;
                                 fileObj.progress = 100;
-                                window.dispatchEvent(new CustomEvent('toast', {
-                                    detail: {
-                                        message: response?.message || `Uploaded: ${fileObj.name}`,
-                                        type: 'success',
-                                        refreshOnComplete: true
-                                    }
-                                }));
+                                // window.dispatchEvent(new CustomEvent('toast', {
+                                //     detail: {
+                                //         message: response?.message || `Uploaded: ${fileObj.name}`,
+                                //         type: 'success',
+                                //         refreshOnComplete: true
+                                //     }
+                                // }));
                             } else {
                                 throw new Error(response.error || 'Upload failed');
                             }
                         } catch (err) {
                             fileObj.error = true;
-                            window.dispatchEvent(new CustomEvent('toast', {
-                                detail: { message: err.message, type: 'error' }
-                            }));
+                            // window.dispatchEvent(new CustomEvent('toast', {
+                            //     detail: { message: err.message, type: 'error' }
+                            // }));
+                            console.error(message);
                         }
                         resolve();
                     };
@@ -247,9 +246,10 @@
                     xhr.onerror = () => {
                         fileObj.uploading = false;
                         fileObj.error = true;
-                        window.dispatchEvent(new CustomEvent('toast', {
-                            detail: { message: 'Network error during upload.', type: 'error' }
-                        }));
+                        // window.dispatchEvent(new CustomEvent('toast', {
+                        //     detail: { message: 'Network error during upload.', type: 'error' }
+                        // }));
+                        console.error(message);
                         resolve();
                     };
 
