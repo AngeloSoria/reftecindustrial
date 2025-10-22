@@ -143,7 +143,22 @@
                 {{-- TODO: Use server sided image here. --}}
                 <div data-aos="fade-left" data-aos-anchor-placement="top-bottom" data-aos-duration="1000"
                     class="order-1 md:order-2 w-full md:h-auto aspect-video md:aspect-auto overflow-hidden">
-                    <img src="{{ asset('images/our_history.png') }}" alt="Our History"
+                    <img
+                        x-ref="image_history"
+                        x-data="{
+                            async init() {
+                                try {
+                                    const response = await fetch('{{ route('content.get.section.history') }}');
+                                    const data = await response.json();
+
+                                    this.$refs.image_history.src = data.data.image
+                                } catch (e) {
+                                    console.error('Failed to load history image:', e);
+                                }
+                            },
+                        }"
+                        src="{{ asset('images/our_history.png') }}"
+                        alt="Our History"
                         class="w-full h-full object-cover" loading="lazy" />
                 </div>
 
