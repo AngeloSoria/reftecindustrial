@@ -16,10 +16,24 @@ Route::view('/projects', 'projects')->name('projects');
 Route::view('/products', 'products')->name('products');
 Route::view('/about', 'aboutus')->name('aboutus');
 
+// Auth - Login
 Route::controller(LoginController::class)->group(function () {
     Route::get('/login', 'showForm')->name('login');
     Route::post('/login', 'submit')->name('login.submit');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Shared Content (Accessible without auth)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('content')
+    ->name('content.')
+    ->controller(GeneralController::class)
+    ->group(function () {
+        Route::get('section/hero', 'getHeroSection')->name('get.section.hero');
+        Route::get('section/history', 'getHistory')->name('get.section.history');
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -28,49 +42,55 @@ Route::controller(LoginController::class)->group(function () {
 */
 Route::middleware('auth')->group(function () {
 
-    // Simple view-only pages
-    Route::view('/profile', 'auth.user_profile')->name('profile');
-    Route::view('/dashboard', 'auth.dashboard')->name('dashboard');
-    Route::view('/content', 'auth.content')->name('content');
-    Route::view('/site_monitor', 'auth.site_monitor')->name('site_monitor');
-    Route::view('/cartrack', 'auth.cartrack')->name('cartrack');
-    Route::view('/users', 'auth.users')->name('users');
-    Route::view('/logs', 'auth.logs')->name('logs');
-    Route::view('/files', 'auth.files')->name('files');
+    // Simple static views
+    $authViews = [
+        'profile' => 'auth.user_profile',
+        'dashboard' => 'auth.dashboard',
+        'content' => 'auth.content',
+        'site_monitor' => 'auth.site_monitor',
+        'cartrack' => 'auth.cartrack',
+        'users' => 'auth.users',
+        'logs' => 'auth.logs',
+        'files' => 'auth.files',
+    ];
 
-    // Controllers
+    foreach ($authViews as $route => $view) {
+        Route::view("/{$route}", $view)->name($route);
+    }
+
+    // Core actions
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
     Route::post('/upload', [UploadController::class, 'upload'])->name('upload');
 
     /*
     |--------------------------------------------------------------------------
-    | Visitor Analytics Routes
+    | Visitor Analytics
     |--------------------------------------------------------------------------
     */
-    Route::prefix('visitors')->name('visitors.')->controller(VisitorController::class)->group(function () {
-        Route::get('/total', 'getTotalVisitors')->name('total');
-        Route::get('/unique', 'getUniqueVisitors')->name('unique');
-        Route::get('/top-pages/{limit?}', 'getTopVisitedPages')->name('top-pages');
-        Route::get('/countries', 'getCountries')->name('countries');
-        Route::get('/os', 'getOs')->name('os');
-        Route::get('/devices', 'getDevices')->name('devices');
-        Route::get('/countries-this-month', 'getVisitsByCountryThisMonth')->name('countries-this-month');
-        Route::get('/widget-data', 'getDataForWidgetCounter')->name('widget-data');
-    });
+    Route::prefix('visitors')
+        ->name('visitors.')
+        ->controller(VisitorController::class)
+        ->group(function () {
+            Route::get('total', 'getTotalVisitors')->name('total');
+            Route::get('unique', 'getUniqueVisitors')->name('unique');
+            Route::get('top-pages/{limit?}', 'getTopVisitedPages')->name('top-pages');
+            Route::get('countries', 'getCountries')->name('countries');
+            Route::get('os', 'getOs')->name('os');
+            Route::get('devices', 'getDevices')->name('devices');
+            Route::get('countries-this-month', 'getVisitsByCountryThisMonth')->name('countries-this-month');
+            Route::get('widget-data', 'getDataForWidgetCounter')->name('widget-data');
+        });
 
     /*
     |--------------------------------------------------------------------------
-    | Content Management Routes
+    | Content Management (POST only)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('content')->name('content.')->controller(GeneralController::class)->group(function () {
-        // POST
-        Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
-        Route::post('section/history', 'setHistory')->name('update.section.history');
-    });
-});
-Route::prefix('content')->name('content.')->controller(GeneralController::class)->group(function () {
-    // GET
-    Route::get('section/hero', 'getHeroSection')->name('get.section.hero');
-    Route::get('section/history', 'getHistory')->name('get.section.history');
+    Route::prefix('content')
+        ->name('content.')
+        ->controller(GeneralController::class)
+        ->group(function () {
+            Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
+            Route::post('section/history', 'setHistory')->name('update.section.history');
+        });
 });
