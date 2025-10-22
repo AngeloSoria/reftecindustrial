@@ -14,7 +14,8 @@
                     const data = await response.json();
 
                     const img = new Image();
-                    img.src = '/storage/' + data.image_path;
+                    img.src = data.data.image;
+
                     // Wait until the actual image is fully loaded
                     img.onload = () => {
                         this.$refs.heroBackdrop.style.backgroundImage = 'url(' + img.src + ')';
@@ -109,9 +110,8 @@
                         async init() {
                             const response = await fetch('{{ route('content.get.section.history') }}');
                             const data = await response.json();
-
                             if(data) {
-                                this.$refs.data_history.innerHTML = data.content;
+                                this.$refs.data_history.innerHTML = data.data.description;
                             }
                         },
                     }"
