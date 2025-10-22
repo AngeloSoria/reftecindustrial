@@ -13,9 +13,9 @@
                     const response = await fetch('{{ route('content.get.section.history') }}');
                     const data = await response.json();
 
-                    if(data.image_path) {
+                    if(data.data.image) {
                         const img = new Image();
-                        img.src = '/storage/' + data.image_path;
+                        img.src = data.data.image;
 
                         // Wait until the actual image is fully loaded
                         img.onload = () => {
@@ -68,15 +68,12 @@
             this.quill = window.quills ? window.quills['editor-history'] : null;
 
             if (this.quill) {
-                // ✅ Load content
-                this.quill.root.innerHTML = data.content || '';
-                this.originalContent = data.content || '';
+                this.quill.root.innerHTML = data.data.description || '';
+                this.originalContent = data.data.description || '';
 
-                // ✅ Keep reference to toolbar for toggling visibility
                 this.toolbar = this.quill.getModule('toolbar')?.container;
                 if (this.toolbar) this.toolbar.style.display = 'none';
 
-                // ✅ Start read-only
                 this.quill.enable(false);
                 this.quill.root.setAttribute('contenteditable', false);
             }
@@ -128,14 +125,6 @@
                         class="cursor-pointer px-4 py-2 rounded font-medium bg-accent-orange-300 hover:bg-accent-orange-400 text-accent-darkslategray-900 font-inter disabled:opacity-60 disabled:cursor-not-allowed">
                         <span x-show="!loading">Save & Update</span>
                         <span x-show="loading" class="flex items-center gap-2">
-                            {{-- <svg class="animate-spin w-4 h-4 text-accent-darkslategray-900"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4">
-                                </circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
-                                </path>
-                            </svg> --}}
                             @svg('mdi-loading', 'animate-spin w-4 h-4 text-accent-darkslategray-900')
                             Saving...
                         </span>
