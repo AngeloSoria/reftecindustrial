@@ -37,6 +37,11 @@ class GeneralController extends Controller
             // Clear cache for hero section after updating
             Cache::forget('section_hero');
 
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => 'Hero section updated.',
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Hero section updated.',
@@ -75,11 +80,13 @@ class GeneralController extends Controller
 
                     Cache::forget('section_history');
 
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'History text saved successfully!',
-                        'type' => 'success',
-                    ]);
+                    return redirect()->back()->with('toast', ['type' => 'success', 'message' => 'History text saved successfully!']);
+
+                    // return response()->json([
+                    //     'success' => true,
+                    //     'message' => 'History text saved successfully!',
+                    //     'type' => 'success',
+                    // ]);
 
                 case 'content_image':
                     $uploadController = new UploadController();
@@ -97,6 +104,11 @@ class GeneralController extends Controller
                     ]);
 
                     Cache::forget('section_history');
+
+                    session()->flash('toast', [
+                        'type' => 'success',
+                        'message' => 'History image has been updated!'
+                    ]);
 
                     return response()->json([
                         'success' => true,
