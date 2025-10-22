@@ -65,6 +65,13 @@ class UploadController extends Controller
                 ];
             }
 
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => count($uploaded) > 1
+                    ? 'Files uploaded successfully.'
+                    : 'File uploaded successfully.',
+            ]);
+
             // 4. Build response
             return response()->json([
                 'success' => true,
@@ -74,9 +81,14 @@ class UploadController extends Controller
                 'files' => $uploaded,
                 'is_private' => $isPrivate,
             ], 200);
-
         } catch (Exception $e) {
             Log::error('Upload failed: ' . $e->getMessage());
+
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'File upload failed.',
