@@ -13,7 +13,7 @@
                     const data = await response.json();
 
                     const img = new Image();
-                    img.src = '/storage/' + data.image_path;
+                    img.src = data.data.image;
 
                     // Wait until the actual image is fully loaded
                     img.onload = () => {
