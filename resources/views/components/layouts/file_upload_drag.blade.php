@@ -38,13 +38,14 @@
         class="hidden"
     >
 
-    <div class="text-center space-y-2">
+    <div class="text-center space-y-2 flex flex-col items-center justify-center gap-2">
         @svg('zondicon-upload', 'w-10 h-10 mx-auto text-gray-400')
         <p class="text-gray-700 font-semibold">Drag & drop files here</p>
         <p class="text-sm text-gray-500">or</p>
         <button type="button"
             @click="$refs.input.click()"
-            class="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-accent-orange-300 rounded hover:bg-accent-orange-400">
+            class="flex items-center gap-2 cursor-pointer px-4 py-2 text-sm font-medium text-white bg-accent-orange-300 rounded hover:bg-accent-orange-400">
+            @svg('fluentui-folder-20', 'w-5 h-5')
             Browse Files
         </button>
     </div>
