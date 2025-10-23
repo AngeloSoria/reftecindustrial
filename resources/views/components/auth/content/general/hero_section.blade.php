@@ -1,4 +1,4 @@
-<h2 class="font-bold text-xl mb-4">Hero Section Backdrop Image</h2>
+<h2 class="font-medium text-lg mb-4">Hero Section Backdrop Image</h2>
 
 {{-- Hero section image preview --}}
 <div class="bg-gray-300 rounded max-w-150 w-full aspect-video overflow-hidden">
