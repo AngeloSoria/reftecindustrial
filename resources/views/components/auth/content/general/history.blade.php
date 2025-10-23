@@ -1,7 +1,7 @@
 <section class="flex flex-col gap-4">
 
 <div class="mb-8">
-    <h2 class="font-medium text-xl my-2">Brief History Image</h2>
+    <h2 class="font-medium text-lg my-2">Brief History Image</h2>
 
     {{-- Hero section image preview --}}
     <div class="bg-gray-300 rounded max-w-150 w-full aspect-video overflow-hidden">
@@ -112,7 +112,8 @@
             <!-- Edit -->
             <div class="flex gap-2" x-show="!editing">
                 <button type="button" @click="toggleEditing(true)"
-                    class="cursor-pointer px-4 py-2 rounded font-medium bg-accent-lightseagreen-50 hover:bg-accent-lightseagreen-100 text-accent-darkslategray-900 font-inter">
+                    class="flex items-center gap-2 cursor-pointer px-4 py-2 rounded font-medium bg-accent-lightseagreen-50 hover:bg-accent-lightseagreen-100 text-accent-darkslategray-900 font-inter">
+                    @svg('fluentui-edit-20', 'w-4 h-4')
                     Edit Data
                 </button>
             </div>
@@ -123,7 +124,10 @@
                 <div x-data="{ loading: false }">
                     <button id="btn-submit" type="submit" @click="loading = true; $el.form.submit()" :disabled="loading"
                         class="cursor-pointer px-4 py-2 rounded font-medium bg-accent-orange-300 hover:bg-accent-orange-400 text-accent-darkslategray-900 font-inter disabled:opacity-60 disabled:cursor-not-allowed">
-                        <span x-show="!loading">Save & Update</span>
+                        <span x-show="!loading" class="flex items-center gap-2">
+                            @svg('fluentui-save-20', 'w-5 h-5')
+                            Save & Update
+                        </span>
                         <span x-show="loading" class="flex items-center gap-2">
                             @svg('mdi-loading', 'animate-spin w-4 h-4 text-accent-darkslategray-900')
                             Saving...
