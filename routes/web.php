@@ -92,5 +92,6 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
             Route::post('section/history', 'setHistory')->name('update.section.history');
+            Route::post('section/product_lines', 'addProductLines')->name('add.section.product_lines');
         });
 });
