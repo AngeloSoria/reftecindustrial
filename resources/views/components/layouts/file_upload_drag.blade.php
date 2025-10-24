@@ -6,9 +6,11 @@
     'privateUpload' => false,
     'uploadMultiple' => false,
     'action' => null,
-    'hiddenData' => [], // ✅ supports multiple dynamic hidden inputs
-    'renderHiddenInputs' => true, // ✅ whether to render <input type="hidden">
+    'hiddenData' => [],
+    'renderHiddenInputs' => true,
+    'acceptFile' => null,
 ])
+
 <div
     id="{{ $generatedId }}"
     x-data="fileUploadHandler({
@@ -23,7 +25,7 @@
     class="relative w-full max-w-2xl p-6 border-2 border-dashed rounded-lg transition duration-200 {{ $attributes->get('class') }}"
     :class="dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white hover:border-gray-400'"
 >
-    {{-- ✅ Optional visible hidden inputs for debugging / form mirror --}}
+    {{-- Optional hidden inputs --}}
     @if($renderHiddenInputs && !empty($hiddenData))
         @foreach($hiddenData as $key => $value)
             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
@@ -35,16 +37,19 @@
         x-ref="input"
         x-on:change="filesAdded($event)"
         :multiple="multiple"
+        @if(!empty($acceptFile)) accept="{{ $acceptFile }}" @else {{ 'dahek' }} @endif
         class="hidden"
     >
 
-    <div class="text-center space-y-2 flex flex-col items-center justify-center gap-2">
+    <div class="text-center flex flex-col items-center gap-2">
         @svg('zondicon-upload', 'w-10 h-10 mx-auto text-gray-400')
         <p class="text-gray-700 font-semibold">Drag & drop files here</p>
         <p class="text-sm text-gray-500">or</p>
-        <button type="button"
+        <button
+            type="button"
             @click="$refs.input.click()"
-            class="flex items-center gap-2 cursor-pointer px-4 py-2 text-sm font-medium text-white bg-accent-orange-300 rounded hover:bg-accent-orange-400">
+            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-accent-orange-300 rounded hover:bg-accent-orange-400"
+        >
             @svg('fluentui-folder-20', 'w-5 h-5')
             Browse Files
         </button>
@@ -52,64 +57,32 @@
 
     <!-- File list -->
     <template x-if="files.length > 0">
-        <div class="mt-6 space-y-3">
+        <div class="mt-4 space-y-3">
             <template x-for="(file, index) in files" :key="file.name">
-                <div
-                    class="flex flex-col gap-2 p-3 border rounded bg-white shadow-sm"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 -translate-y-2"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-300"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 translate-y-2"
-                >
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <template x-if="file.preview">
-                                <img :src="file.preview" class="w-12 h-12 object-cover rounded" />
-                            </template>
-                            <div>
-                                <p class="text-sm font-medium text-gray-800" x-text="file.name"></p>
-                                <p class="text-xs text-gray-500" x-text="(file.size/1024).toFixed(1) + ' KB'"></p>
-                            </div>
+                <div class="flex items-center justify-between border rounded p-2 bg-gray-50">
+                    <div class="flex items-center gap-3">
+                        <template x-if="file.preview">
+                            <img :src="file.preview" class="w-10 h-10 object-cover rounded" />
+                        </template>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800" x-text="file.name"></p>
+                            <p class="text-xs text-gray-500" x-text="(file.size/1024).toFixed(1) + ' KB'"></p>
                         </div>
-                        <button type="button" class="text-sm text-red-600 hover:underline"
-                            @click="removeFile(index)"
-                            x-show="!file.uploading">Remove</button>
                     </div>
-
-                    <template x-if="file.uploading">
-                        <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
-                            <div class="h-2 bg-green-500 transition-all duration-200"
-                                :style="`width: ${file.progress}%;`"></div>
-                        </div>
-                    </template>
-
-                    <template x-if="file.done">
-                        <p class="text-xs text-green-600 font-medium">✅ Uploaded</p>
-                    </template>
-
-                    <template x-if="file.error">
-                        <p class="text-xs text-red-600 font-medium">❌ Upload failed</p>
-                    </template>
+                    <button type="button"
+                        class="text-xs text-red-600 hover:underline"
+                        @click="removeFile(index)">Remove</button>
                 </div>
             </template>
         </div>
     </template>
-
-    <div class="mt-4 flex justify-end" x-show="files.length > 0">
-        <button type="button" @click="uploadFiles()" :disabled="uploading"
-            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-60">
-            <span x-show="!uploading">Upload</span>
-            <span x-show="uploading">Uploading...</span>
-        </button>
-    </div>
 </div>
 
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('fileUploadHandler', (config) => ({
             files: [],
+            uploadedData: [], // ✅ stores uploaded file info (e.g. from backend)
             dragOver: false,
             uploading: false,
             multiple: config.multiple ?? false,
@@ -131,17 +104,10 @@
 
             addFiles(newFiles) {
                 if (!this.multiple) {
-                    if (this.files.length > 0) {
-                        const removed = this.files.pop();
-                        if (removed?.preview) URL.revokeObjectURL(removed.preview);
-                        setTimeout(() => {
-                            this.files = [this.makeFileObj(newFiles[0])];
-                        }, 300);
-                    } else {
-                        this.files = [this.makeFileObj(newFiles[0])];
-                    }
+                    this.resetFiles();
+                    this.files = [this.makeFileObj(newFiles[0])];
                 } else {
-                    newFiles.forEach(file => this.files.push(this.makeFileObj(file)));
+                    newFiles.forEach(f => this.files.push(this.makeFileObj(f)));
                 }
             },
 
@@ -152,9 +118,9 @@
                     size: file.size,
                     preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
                     progress: 0,
-                    uploading: false,
                     done: false,
-                    error: false
+                    error: false,
+                    response: null,
                 };
             },
 
@@ -164,33 +130,29 @@
             },
 
             resetFiles() {
-                this.files.forEach(f => {
-                    if (f.preview) URL.revokeObjectURL(f.preview);
-                });
+                this.files.forEach(f => f.preview && URL.revokeObjectURL(f.preview));
                 this.files = [];
-                this.uploading = false;
+                this.uploadedData = [];
             },
 
+            // ✅ Call this from your modal’s SAVE button
             async uploadFiles() {
-                if (!this.action) {
-                    window.dispatchEvent(new CustomEvent('toast', {
-                        detail: { message: 'No upload endpoint provided.', type: 'error' }
-                    }));
-                    return;
-                }
-
-                if (this.files.length === 0) return;
+                if (!this.action || this.files.length === 0) return [];
 
                 this.uploading = true;
                 const uploads = this.files.map(f => this.uploadSingleFile(f));
                 await Promise.all(uploads);
                 this.uploading = false;
 
-                const allDone = this.files.every(f => f.done);
-                if (allDone) {
-                    // ✅ Reload window so session flash toast will appear
-                    window.location.reload();
-                }
+                // ✅ Collect uploaded file responses (e.g. path, name)
+                this.uploadedData = this.files
+                    .filter(f => f.done && f.response)
+                    .map(f => f.response);
+
+                // ✅ Emit to parent (use Alpine’s dispatch)
+                this.$dispatch('uploaded', { files: this.uploadedData });
+
+                return this.uploadedData;
             },
 
             async uploadSingleFile(fileObj) {
@@ -201,7 +163,6 @@
                     formData.append(this.multiple ? 'files[]' : 'file', fileObj.file);
                     formData.append('is_private', this.privateUpload ? 1 : 0);
 
-                    // ✅ Add all hidden fields dynamically
                     for (const [key, value] of Object.entries(this.hiddenData)) {
                         formData.append(key, value);
                     }
@@ -223,23 +184,12 @@
                             const response = JSON.parse(xhr.responseText);
                             if (xhr.status >= 200 && xhr.status < 300) {
                                 fileObj.done = true;
-                                fileObj.progress = 100;
-                                // window.dispatchEvent(new CustomEvent('toast', {
-                                //     detail: {
-                                //         message: response?.message || `Uploaded: ${fileObj.name}`,
-                                //         type: 'success',
-                                //         refreshOnComplete: true
-                                //     }
-                                // }));
+                                fileObj.response = response; // ✅ store API response
                             } else {
-                                throw new Error(response.error || 'Upload failed');
+                                fileObj.error = true;
                             }
-                        } catch (err) {
+                        } catch {
                             fileObj.error = true;
-                            // window.dispatchEvent(new CustomEvent('toast', {
-                            //     detail: { message: err.message, type: 'error' }
-                            // }));
-                            console.error(message);
                         }
                         resolve();
                     };
@@ -247,10 +197,6 @@
                     xhr.onerror = () => {
                         fileObj.uploading = false;
                         fileObj.error = true;
-                        // window.dispatchEvent(new CustomEvent('toast', {
-                        //     detail: { message: 'Network error during upload.', type: 'error' }
-                        // }));
-                        console.error(message);
                         resolve();
                     };
 
