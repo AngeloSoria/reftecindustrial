@@ -1,6 +1,6 @@
 <h2 class="font-medium text-lg mb-2">Product Lines</h2>
 
-<button @click="$dispatch('open-modal', {'id':'exampleModal'})"
+<button @click="$dispatch('open_modal', {'modalID':'add_product_line'})"
     class="flex items-center gap-2 cursor-pointer px-4 py-2 rounded bg-accent-orange-300 hover:bg-accent-orange-400 transition-colors">
     @svg('fluentui-add-circle-24-o', 'w-5 h-5')
     Add Product Line
@@ -27,13 +27,12 @@
 
                 {{-- controls --}}
                 <div class="grow flex items-center justify-end gap-2">
-                    <button title="Edit"
-                        class="p-2 rounded-full shadow-sm cursor-pointer hover:outline-1 transition-colors
-                        outline-accent-darkslategray-200 hover:bg-blue-600 hover:text-white">
+                    <button title="Edit" class="p-2 rounded-full shadow-sm cursor-pointer hover:outline-1 transition-colors
+                            outline-accent-darkslategray-200 hover:bg-blue-600 hover:text-white">
                         @svg('fluentui-edit-20', 'w-4 h-4')
                     </button>
                     <button title="Delete" class="p-2 rounded-full shadow-sm cursor-pointer transition-colors
-                             hover:outline-1 outline-accent-darkslategray-200 hover:bg-red-500 hover:text-white">
+                                 hover:outline-1 outline-accent-darkslategray-200 hover:bg-red-500 hover:text-white">
                         @svg('fluentui-delete-20-o', 'w-4 h-4')
                     </button>
                 </div>
@@ -42,4 +41,19 @@
     @endforeach
 </section>
 
-<x-auth.modal.add_product_line title="Add new Product Line" />
+{{-- <x-auth.modal.add_product_line title="Add new Product Line" /> --}}
+<x-layouts.modal titleHeaderText="Add new Product Line" modalID="add_product_line" promptAlertBeforeClosing="true">
+    <div class="flex flex-col gap-1">
+        <label for="input_productLineName" class="text-sm font-medium">Name</label>
+        <input class="px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none"
+            id="input_productLineName" name="product_line_name" type="text" placeholder="Enter product line name..."
+            required aria-required="true" />
+    </div>
+
+    <br />
+
+    <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium">Image</label>
+        <x-layouts.file_upload_drag />
+    </div>
+</x-layouts.modal>
