@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 
 use App\Models\Contents\General;
+use App\Models\Contents\GeneralProductLines as ProductLines;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UploadController;
 
@@ -17,6 +18,94 @@ class GeneralController extends Controller
 {
 
     // CREATE | POST
+    public function addProductLine(Request $request) {
+        try {
+            $request->validate([
+                'product_line_name' => 'string',
+                'file' => 'file|mimes:jpg,png,jpeg,bmp,gif|max:' . env('APP_MAX_UPLOAD_SIZE', 10240), // Image only
+            ]);
+
+            // upload
+            $uploadController = new UploadController();
+            $uploadResponse = $uploadController->upload($request); // Call directly
+
+            // Get the data as array if it's a JsonResponse
+            $data = $uploadResponse->getData(true);
+
+            if (!$data || !$data['success']) {
+                throw new Exception($data['message']);
+            }
+
+            ProductLines::create([
+
+            ]);
+
+        } catch(Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('toast', [
+                'type' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    // READ | GET
+    public function getHeroSection(Request $request)
+    {
+        try {
+            $response = Cache::remember('section_hero', env('CACHE_EXPIRATION', 3600), function () {
+                $record = General::where('section', 'hero')->first(['image_path']);
+
+                return [
+                    'success' => true,
+                    'data' => [
+                        'image' => $record && $record->image_path
+                            ? asset('storage/' . $record->image_path)
+                            : asset('images/reftec_logo_transparent_16x9.png'), // Default
+                    ],
+                ];
+            });
+
+            return response()->json($response);
+        } catch (Exception $e) {
+            Log::error('Error fetching hero section: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load hero section.',
+            ], 500);
+        }
+    }
+
+    public function getHistory(Request $request)
+    {
+        try {
+            $response = Cache::remember('section_history', env('CACHE_EXPIRATION', 3600), function () {
+                $record = General::where('section', 'history')->first(['content', 'image_path']);
+
+                return [
+                    'success' => true,
+                    'data' => [
+                        'description' => $record->content,
+                        'image' => $record && $record->image_path
+                            ? asset('storage/' . $record->image_path)
+                            : asset('images/reftec_logo_transparent_16x9.png'),
+                    ],
+                ];
+            });
+            return response()->json($response);
+        } catch (Exception $e) {
+            Log::error('Error fetching history: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch history: ' . $e->getMessage(),
+                'type' => 'error',
+            ], 500);
+        }
+    }
+
+    // UPDATE | POST
     public function setHeroSection(Request $request)
     {
         try {
@@ -126,64 +215,6 @@ class GeneralController extends Controller
             ], 500);
         }
     }
-
-    // READ | GET
-    public function getHeroSection(Request $request)
-    {
-        try {
-            $response = Cache::remember('section_hero', env('CACHE_EXPIRATION', 3600), function () {
-                $record = General::where('section', 'hero')->first(['image_path']);
-
-                return [
-                    'success' => true,
-                    'data' => [
-                        'image' => $record && $record->image_path
-                            ? asset('storage/' . $record->image_path)
-                            : asset('images/reftec_logo_transparent_16x9.png'), // Default
-                    ],
-                ];
-            });
-
-            return response()->json($response);
-        } catch (Exception $e) {
-            Log::error('Error fetching hero section: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to load hero section.',
-            ], 500);
-        }
-    }
-
-    public function getHistory(Request $request)
-    {
-        try {
-            $response = Cache::remember('section_history', env('CACHE_EXPIRATION', 3600), function () {
-                $record = General::where('section', 'history')->first(['content', 'image_path']);
-
-                return [
-                    'success' => true,
-                    'data' => [
-                        'description' => $record->content,
-                        'image' => $record && $record->image_path
-                            ? asset('storage/' . $record->image_path)
-                            : asset('images/reftec_logo_transparent_16x9.png'),
-                    ],
-                ];
-            });
-            return response()->json($response);
-        } catch (Exception $e) {
-            Log::error('Error fetching history: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch history: ' . $e->getMessage(),
-                'type' => 'error',
-            ], 500);
-        }
-    }
-
-    // UPDATE | POST
 
     // DELETE | POST
 
