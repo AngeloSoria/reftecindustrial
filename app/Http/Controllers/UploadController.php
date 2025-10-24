@@ -49,10 +49,12 @@ class UploadController extends Controller
                 if (!$file) continue;
 
                 $filename = time() . '_' . Str::random(6) . '_' . $file->getClientOriginalName();
+                $filetype = $file->getClientMimeType();
                 $path = $file->storeAs('uploads', $filename, $disk);
 
                 Upload::create([
                     'filename'    => $filename,
+                    'type' => $filetype,
                     'path'        => $path,
                     'uploaded_by' => Auth::id(),
                     'is_private'  => $isPrivate,
@@ -95,5 +97,13 @@ class UploadController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function getAllUploadedFiles(Request $request) {
+        $request->validate([
+            'type' => 'nullabe|string' // Determine file type request for proper sorting.
+        ]);
+
+        // TODO: complete this api.
     }
 }
