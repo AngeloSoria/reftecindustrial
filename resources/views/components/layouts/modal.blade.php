@@ -6,7 +6,7 @@
     'enableCloseOnEscKeyPressed' => true,
     'modalMaxWidth' => 'xl', // md, xl, ... full
     'modalID' => uniqid('modal_'),
-    'promptAlertBeforeClosing' => false,
+    'promptAlertBeforeClosing' => null,
     'modalPosition' => 'center-center',
 ])
 
@@ -42,12 +42,33 @@
     id="{{ $modalID }}"
     x-show="modalOpen"
     x-cloak
+    x-ref="modal_modal"
     x-data='{
         modal_id: "{{ $modalID }}",
         modalOpen: false,
+        hasInput: false,
+        init() {
+            const inputs = this.$el.querySelectorAll("input, select, textarea");
+
+            [...inputs].forEach(input => {
+                input.addEventListener("input", function (e) {
+                    this.hasInput = true;
+                });
+            });
+        },
+        checkInputs() {
+            const inputs = $refs.modal_modal.querySelectorAll("input, textarea, select");
+                this.hasInput = Array.from(inputs).some(input => {
+                    if (["checkbox", "radio"].includes(input.type)) {
+                        if (input.checked) return true;
+                    }
+                    if (input.name !== "_token" && !input.hasAttribute("skip")) return input.value.trim() !== "";
+            });
+        },
         closeModal() {
+            this.checkInputs();
             if(passed_modal_id !== this.modal_id) { return; }
-            if(@json($promptAlertBeforeClosing)) {
+            if(@json($promptAlertBeforeClosing ?? false) && this.hasInput) {
                 if(!confirm("Closing this modal will reset all progress.")) { return; }
                     this.modalOpen = false;
 
@@ -69,7 +90,11 @@
                                 break;
                         }
                     });
+                    modalElement.querySelectorAll("[x-data]").forEach(el => {
+                        el.dispatchEvent(new CustomEvent("reset-file-upload"));
+                    });
             } else {
+                console.log("No inputs inserted, closing modal directly.");
                 this.modalOpen = false;
             }
         },
@@ -100,20 +125,20 @@
         @keydown.escape.window="closeModal()"
     @endif
 
-    class="p-4 bg-white rounded outline-1 outline-accent-darkslategray-400 w-full h-fit max-w-{{ $modalMaxWidth }} overflow-x-hidden overflow-y-auto"
+    class="p-4 bg-white rounded outline-1 outline-accent-darkslategray-400 w-full h-fit max-w-{{ $modalMaxWidth }} max-h-[95%] overflow-x-hidden overflow-y-auto"
     >
-    {{-- Header --}}
-    <div class="flex items-center justify-between border-b border-gray-300/25">
-        <h1 class="text-xl font-medium">{{ $titleHeaderText }}</h1>
-        <div class="">
-            <button
-                title="Close"
-                @click="closeModal()"
-                class="p-1 rounded-full cursor-pointer text-black/50 hover:text-black outline-gray-400/25 hover:outline-1">
-                @svg('zondicon-close', 'w-4 h-4')
-            </button>
+        {{-- Header --}}
+        <div class="flex items-center justify-between border-b border-gray-300/50 pb-2 mb-4">
+            <h1 class="text-xl font-medium">{{ $titleHeaderText }}</h1>
+            <div class="">
+                <button
+                    title="Close"
+                    @click="closeModal()"
+                    class="p-1 rounded-full cursor-pointer text-black/50 hover:text-black outline-gray-400/25 hover:outline-1">
+                    @svg('zondicon-close', 'w-4 h-4')
+                </button>
+            </div>
         </div>
-    </div>
 
         {{ $slot }}
 
