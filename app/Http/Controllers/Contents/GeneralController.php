@@ -18,12 +18,22 @@ class GeneralController extends Controller
 {
 
     // CREATE | POST
-    public function addProductLine(Request $request) {
+    public function addProductLine(Request $request)
+    {
         try {
+
+            // Normalize checkbox input before validation
+            $request->merge([
+                'visibility' => $request->has('visibility') ? 1 : 0,
+            ]);
+
             $request->validate([
                 'product_line_name' => 'string',
                 'file' => 'file|mimes:jpg,png,jpeg,bmp,gif|max:' . env('APP_MAX_UPLOAD_SIZE', 10240), // Image only
+                'visibility' => 'boolean'
             ]);
+
+            Log::info($request);
 
             // upload
             $uploadController = new UploadController();
@@ -36,11 +46,44 @@ class GeneralController extends Controller
                 throw new Exception($data['message']);
             }
 
-            ProductLines::create([
+            // Check visibility
+            $visible = $request->visibility ?? false;
 
+            // Save to database.
+            ProductLines::create([
+                'name' => $request->product_line_name,
+                'image_path' => $data['files'][0]['path'],
+                'visibility' => $visible
             ]);
 
-        } catch(Exception $e) {
+            // Clear cache for hero section after updating
+            Cache::forget('section_product_lines');
+
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'products'
+            ]);
+
+            return redirect(url()->previous())->with('toast', [
+                'type' => 'success',
+                'message' => 'New product line has been added.'
+            ]);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('toast', [
+                'type' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function test(Request $request)
+    {
+        try {
+            // Log::info($request->product_line_name);
+            throw new Exception($request->product_line_name);
+            // return response()->json($request);
+        } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('toast', [
                 'type' => 'error',
@@ -105,6 +148,29 @@ class GeneralController extends Controller
         }
     }
 
+    public function getAllProductLines(Request $request)
+    {
+        try {
+            $response = Cache::remember('section_product_lines', env('CACHE_EXPIRATION', 3600), function () {
+                $record = ProductLines::get(['id', 'name', 'image_path', 'visibility']);
+
+                return [
+                    'success' => true,
+                    'data' => $record
+                ];
+            });
+            return response()->json($response);
+        } catch (Exception $e) {
+            Log::error('Error fetching product lines: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch product lines: ' . $e->getMessage(),
+                'type' => 'error',
+            ], 500);
+        }
+    }
+
     // UPDATE | POST
     public function setHeroSection(Request $request)
     {
@@ -126,22 +192,27 @@ class GeneralController extends Controller
             // Clear cache for hero section after updating
             Cache::forget('section_hero');
 
-            session()->flash('toast', [
-                'type' => 'success',
-                'message' => 'Hero section updated.',
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'hero'
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Hero section updated.',
+            return redirect(url()->previous())->with('toast', [
                 'type' => 'success',
+                'message' => 'Hero image has been updated!'
             ]);
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            return response()->json([
+
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'hero'
+            ]);
+
+            return redirect(url()->previous())->with('toast', [
                 'success' => false,
-                'message' => 'Error: ' . $e->getMessage(),
-                'type' => 'error'
+                'message' => 'Failed to update hero content: ' . $e->getMessage(),
+                'type' => 'error',
             ]);
         }
     }
@@ -169,13 +240,12 @@ class GeneralController extends Controller
 
                     Cache::forget('section_history');
 
-                    return redirect()->back()->with('toast', ['type' => 'success', 'message' => 'History text saved successfully!']);
+                    session()->flash('content', [
+                        'tab' => 'general',
+                        'section' => 'history'
+                    ]);
 
-                    // return response()->json([
-                    //     'success' => true,
-                    //     'message' => 'History text saved successfully!',
-                    //     'type' => 'success',
-                    // ]);
+                    return redirect()->back()->with('toast', ['type' => 'success', 'message' => 'History text saved successfully!']);
 
                 case 'content_image':
                     $uploadController = new UploadController();
@@ -194,25 +264,29 @@ class GeneralController extends Controller
 
                     Cache::forget('section_history');
 
-                    session()->flash('toast', [
-                        'type' => 'success',
-                        'message' => 'History image has been updated!'
+                    session()->flash('content', [
+                        'tab' => 'general',
+                        'section' => 'history'
                     ]);
 
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'History image has been updated!',
+                    return redirect(url()->previous())->with('toast', [
                         'type' => 'success',
+                        'message' => 'History image has been updated!'
                     ]);
             }
         } catch (Exception $e) {
             Log::error('Error saving history: ' . $e->getMessage());
 
-            return response()->json([
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'history'
+            ]);
+
+            return redirect(url()->previous())->with('toast', [
                 'success' => false,
-                'message' => 'Failed to save history: ' . $e->getMessage(),
+                'message' => 'Failed to update history content: ' . $e->getMessage(),
                 'type' => 'error',
-            ], 500);
+            ]);
         }
     }
 
