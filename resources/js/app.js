@@ -11,7 +11,8 @@ import { initVisitorsChart as initTotalVisitsCounter } from './Counters/totalVis
 // Quill
 import { initQuill } from './quillManager';
 
-
+// Sortable
+import { initSortableAboutUsGallery } from './Sortable/sortableAboutUsGallery'
 
 
 window.Alpine = Alpine
@@ -26,5 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initTotalVisitsCounter(); // Counter widget
     initAcquisitionsChart(); // Sample
     initQuill(); // Init Quill
+    initSortableAboutUsGallery() // Gallery SortableJS
 });
 
