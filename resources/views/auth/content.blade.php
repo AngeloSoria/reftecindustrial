@@ -54,7 +54,7 @@
 
         // Initialize the first tab as active
         document.addEventListener('DOMContentLoaded', function() {
-            openTab('general');
+            openTab("{{ session('content') ? session('content')['tab'] : 'general' }}");
         });
     </script>
 </x-layouts.auth.app>

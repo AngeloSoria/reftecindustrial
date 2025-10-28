@@ -1,6 +1,6 @@
 <section class="font-inter flex item-start justify-start flex-wrap flex-col md:flex-row pb-2">
 
-    <div x-data="{ activeTab: 'hero' }" class="w-full flex flex-col md:flex-row gap-6">
+    <div x-data="{ activeTab: '{{ session('content') ? session('content')['section'] : 'hero' }}' }" class="w-full flex flex-col md:flex-row gap-6">
         {{-- Tabs links --}}
         <div class="md:min-w-[200px]">
             <div class="sticky top-14 md:px-8 md:py-6 md:border-r-2 border-gray-200/75">
