@@ -20,6 +20,7 @@
         "aos": "^2.3.4",
         "chart.js": "^4.5.0",
         "chartjs-plugin-datalabels": "^2.2.0",
-        "quill": "^2.0.3"
+        "quill": "^2.0.3",
+        "sortablejs": "^1.15.6"
     }
 }
