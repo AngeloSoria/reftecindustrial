@@ -33,6 +33,7 @@ Route::prefix('content')
     ->group(function () {
         Route::get('section/hero', 'getHeroSection')->name('get.section.hero');
         Route::get('section/history', 'getHistory')->name('get.section.history');
+        Route::get('section/product_lines', 'getAllProductLines')->name('get.section.product_lines');
     });
 
 /*
@@ -92,6 +93,7 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
             Route::post('section/history', 'setHistory')->name('update.section.history');
-            Route::post('section/product_lines', 'addProductLines')->name('add.section.product_lines');
+            Route::post('section/product_lines', 'addProductLine')->name('add.section.product_lines');
+            Route::post('section/test', 'test')->name('add.section.test');
         });
 });
