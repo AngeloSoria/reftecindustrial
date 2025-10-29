@@ -33,8 +33,6 @@ class GeneralController extends Controller
                 'visibility' => 'boolean'
             ]);
 
-            Log::info($request);
-
             // upload
             $uploadController = new UploadController();
             $uploadResponse = $uploadController->upload($request); // Call directly
@@ -52,6 +50,7 @@ class GeneralController extends Controller
             // Save to database.
             ProductLines::create([
                 'name' => $request->product_line_name,
+                'upload_id' => $data['files'][0]['file_id'],
                 'image_path' => $data['files'][0]['path'],
                 'visibility' => $visible
             ]);
@@ -152,11 +151,27 @@ class GeneralController extends Controller
     {
         try {
             $response = Cache::remember('section_product_lines', env('CACHE_EXPIRATION', 3600), function () {
-                $record = ProductLines::get(['id', 'name', 'image_path', 'visibility']);
+                $record = ProductLines::get(['id', 'name', 'upload_id', 'visibility']);
+
+                $uploadController = new UploadController();
+
+                // Map each product line to include image_path
+                $newData = $record->map(function ($product_line) use ($uploadController) {
+                    $uploadResponse = $uploadController->getUploadedFile($product_line->upload_id);
+
+                    $data = $uploadResponse->getData(true);
+
+                    if(!$uploadResponse) { throw new Exception("No uploaded data found."); }
+
+                    $product_line->image_path = $data['data']['path'] ?? null;
+
+                    return $product_line;
+                });
+
 
                 return [
                     'success' => true,
-                    'data' => $record
+                    'data' => $newData
                 ];
             });
             return response()->json($response);
