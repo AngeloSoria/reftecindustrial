@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('contents_general_product_lines', function (Blueprint $table) {
-            $table->boolean('visibility')->default(false)->after('image_path');
+            //
         });
     }
 

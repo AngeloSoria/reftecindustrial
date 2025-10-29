@@ -14,7 +14,14 @@ return new class extends Migration
         Schema::create('contents_general_product_lines', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('image_path');
+
+            $table->foreignId('upload_id')
+              ->nullable() // optional, if not all records have an upload
+              ->constrained('uploads') // references 'id' on 'uploads' table
+              ->onDelete('cascade'); // optional: delete related rows automatically
+
+            $table->boolean('visibility')->default(false);
+
             $table->timestamps();
         });
     }
