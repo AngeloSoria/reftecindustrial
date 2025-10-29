@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Upload;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -52,7 +53,7 @@ class UploadController extends Controller
                 $filetype = $file->getClientMimeType();
                 $path = $file->storeAs('uploads', $filename, $disk);
 
-                Upload::create([
+                $instance = Upload::create([
                     'filename'    => $filename,
                     'type' => $filetype,
                     'path'        => $path,
@@ -61,6 +62,7 @@ class UploadController extends Controller
                 ]);
 
                 $uploaded[] = [
+                    'file_id' => $instance->id,
                     'filename' => $filename,
                     'path' => $path,
                     'url' => $isPrivate ? null : asset('storage/' . $path),
@@ -99,7 +101,35 @@ class UploadController extends Controller
         }
     }
 
-    public function getAllUploadedFiles(Request $request) {
+    public function getUploadedFile($upload_id)
+    {
+        try {
+
+            $record = Upload::findOrFail($upload_id);
+
+            return response()->json([
+                'type' => 'success',
+                'success' => true,
+                'data' => $record
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found.',
+                'type' => 'error'
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get uploaded file: ' . $e->getMessage(),
+                'type' => 'error'
+            ], 500);
+        }
+    }
+
+
+    public function getAllUploadedFiles(Request $request)
+    {
         $request->validate([
             'type' => 'nullabe|string' // Determine file type request for proper sorting.
         ]);
