@@ -151,11 +151,10 @@ class GeneralController extends Controller
     {
         try {
             $response = Cache::remember('section_product_lines', env('CACHE_EXPIRATION', 3600), function () {
-                $record = ProductLines::get(['id', 'name', 'upload_id', 'visibility']);
-
-                $uploadController = new UploadController();
+                $record = ProductLines::latest()->get(['id', 'name', 'upload_id', 'visibility']);
 
                 // Map each product line to include image_path
+                $uploadController = new UploadController();
                 $newData = $record->map(function ($product_line) use ($uploadController) {
                     $uploadResponse = $uploadController->getUploadedFile($product_line->upload_id);
 
