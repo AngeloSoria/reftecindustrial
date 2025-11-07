@@ -15,6 +15,8 @@ Route::view('/', 'home')->name('home');
 Route::view('/projects', 'projects')->name('projects');
 Route::view('/products', 'products')->name('products');
 Route::view('/about', 'aboutus')->name('aboutus');
+Route::view('/test', 'test')->name('test');
+
 
 // Auth - Login
 Route::controller(LoginController::class)->group(function () {
@@ -93,7 +95,8 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
             Route::post('section/history', 'setHistory')->name('update.section.history');
-            Route::post('section/product_lines', 'addProductLine')->name('add.section.product_lines');
+            Route::post('section/product_line/add', 'addProductLine')->name('add.section.product_line');
+            Route::post('section/product_line/edit', 'editProductLine')->name('edit.section.product_line');
             Route::post('section/test', 'test')->name('add.section.test');
         });
 });
