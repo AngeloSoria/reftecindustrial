@@ -8,6 +8,9 @@
     <title>{{ $title ?? config('app.name', 'Laravel Project') }}</title>
 
     <!-- Styles / Scripts -->
+    @livewireStyles
+    @livewireScripts
+
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
@@ -16,11 +19,11 @@
 </head>
 
 @if(session('toast'))
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        toast(@json(session('toast.message')), @json(session('toast.type')));
-    });
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            toast(@json(session('toast.message')), @json(session('toast.type')));
+        });
+    </script>
 @endif
 
 <x-public.toast />
