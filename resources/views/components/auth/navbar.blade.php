@@ -139,6 +139,12 @@
                                 'active_name' => 'Files',
                                 'icon' => 'fluentui-folder-28-o',
                             ],
+                            [
+                                'route' => route('test'),
+                                'label' => 'Test',
+                                'active_name' => 'Test',
+                                'icon' => 'fluentui-toolbox-28-o',
+                            ],
                         ];
                     @endphp
                     @foreach ($sidebar_links as $link)
