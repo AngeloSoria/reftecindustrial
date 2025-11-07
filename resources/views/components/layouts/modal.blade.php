@@ -47,6 +47,7 @@
         modal_id: "{{ $modalID }}",
         modalOpen: false,
         hasInput: false,
+        specialData: {},
         init() {
             const inputs = this.$el.querySelectorAll("input, select, textarea");
 
@@ -106,7 +107,27 @@
             return;
         }
         if(passed_modal_id === modal_id) {
+
             modalOpen = true;
+
+            if($event.detail.special_data) {
+                specialData[$event.detail.special_data[0]] = $event.detail.special_data[1];
+
+                $nextTick(() => {
+
+                    // extra microtask tick to allow x-if / nested x-data to mount
+                    setTimeout(() => {
+                        console.log('Passing data to passed_product_data...');
+                        // dispatch on window so any @...window listeners reliably receive it
+                        window.dispatchEvent(new CustomEvent('passed_product_data', {
+                            detail: { data: specialData },
+                            bubbles: true,
+                            composed: true
+                        }));
+                    }, 0);
+                });
+            }
+
         }
     "
     class="z-[300] bg-black/50 backdrop-blur-xs fixed inset-0 w-full h-screen p-4 flex font-inter {{ $flex_default }}"
@@ -124,6 +145,8 @@
     @if($enableCloseOnEscKeyPressed)
         @keydown.escape.window="closeModal()"
     @endif
+
+    {{-- x-bind:special_data="special_data" --}}
 
     class="p-4 bg-white rounded outline-1 outline-accent-darkslategray-400 w-full h-fit max-w-{{ $modalMaxWidth }} max-h-[95%] overflow-x-hidden overflow-y-auto"
     >
