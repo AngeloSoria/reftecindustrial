@@ -11,4 +11,9 @@
 
     <livewire:modal/>
 
+
+    <livewire:sender/>
+    <livewire:receiver/>
+    <livewire:modal/>
+
 </x-layouts.auth.app>
