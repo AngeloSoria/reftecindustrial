@@ -5,9 +5,11 @@
     'size' => 'sm',
     'customStateValue' => false,
     'label' => null,
+    'labelPosition' => 'right',
 ])
 
 @php
+    $labelPosition = in_array($labelPosition, ['top', 'bottom', 'left', 'right']) ? $labelPosition : 'right';
     $maxWidth = '';
     switch($size){
         case 'xxs':
@@ -46,9 +48,16 @@
     "
     class="w-full flex items-center gap-2"
 >
-    <div
-        class="w-full {{ $maxWidth }}"
-    >
+    @if ($label && $labelPosition == 'left' ?? false)
+        <label for="{{ $id }}" @click="checked = !checked" class="text-sm">{{ $label }}</label>
+    @endif
+
+    <div class="w-full">
+
+        @if ($label && $labelPosition == 'top' ?? false)
+        <label for="{{ $id }}" @click="checked = !checked" class="text-sm">{{ $label }}</label>
+    @endif
+
         <input
             type="hidden"
             :value="checked ? '1' : '0'"
@@ -58,7 +67,7 @@
 
         <div
             @click="checked = !checked"
-            class="relative flex items-center bg-gray-300 rounded-full cursor-pointer transition-colors duration-300"
+            class="{{ $maxWidth }} relative flex items-center bg-gray-300 rounded-full cursor-pointer transition-colors duration-300"
             :class="checked ? '{{ $checkedColor }}' : 'bg-gray-300'"
             style="aspect-ratio: 2 / 1;"
         >
@@ -69,7 +78,7 @@
             ></div>
         </div>
     </div>
-    @if ($label ?? false)
+    @if ($label && $labelPosition == 'right' ?? false)
         <label for="{{ $id }}" @click="checked = !checked" class="text-sm">{{ $label }}</label>
     @endif
 </section>
