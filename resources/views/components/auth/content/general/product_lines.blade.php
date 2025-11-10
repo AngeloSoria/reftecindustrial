@@ -32,6 +32,7 @@
         </template>
     </template>
 
+    {{-- Load real data once the fetching was completed. --}}
     <template x-for="product in product_lines" :key="product.name">
         <div class="border-2 border-accent-darkslategray-200/25 bg-white rounded shadow overflow-hidden">
             <div class="p-4 bg-accent-darkslategray-200 relative">
@@ -52,10 +53,19 @@
 
                 <!-- Action buttons -->
                 <div class="flex-shrink-0 flex items-center gap-2">
-                    <button title="Edit"
-                        @click="$dispatch('open_modal', {'modalID':'edit_product_line', 'special_data': ['product', product]})"
+                    <button title="Edit" @click="$dispatch(
+                            'modal-open',
+                            {
+                                view: 'livewire.partials.modal.edit-product-lines',
+                                data: { product: product },
+                                modalConfig: {
+                                    {{-- size: '3xl', --}}
+                                    modalHeaderText: 'Edit Product Line',
+                                }
+                            }
+                        )"
                         class="p-2 rounded-full shadow-sm cursor-pointer transition-colors outline-accent-darkslategray-200 hover:bg-blue-600 hover:text-white">
-                        @svg('fluentui-edit-20', 'w-4 h-4')
+                        @svg('fluentui-edit-20-o', 'w-4 h-4')
                     </button>
 
                     <button title="Delete" @click="deleteProduct(product)"
@@ -69,6 +79,8 @@
     </template>
 
 </section>
+
+<livewire:modal />
 
 {{-- Modal: ADD --}}
 <x-layouts.modal titleHeaderText="Add new Product Line" modalID="add_product_line" promptAlertBeforeClosing>
