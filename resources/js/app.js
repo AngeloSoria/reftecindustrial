@@ -1,6 +1,7 @@
 import './bootstrap';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import Alpine from 'alpinejs'
 
 // Charts
 import { initAcquisitionsChart } from './Charts/acquisitionsCharts';
@@ -13,6 +14,8 @@ import { initQuill } from './quillManager';
 // Sortable
 import { initSortableAboutUsGallery } from './Sortable/sortableAboutUsGallery'
 
+window.Alpine = Alpine
+Alpine.start()
 
 AOS.init({
     once: true, // Animate only once
