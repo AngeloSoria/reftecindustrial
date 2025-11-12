@@ -1,12 +1,9 @@
-
-
 @props([
     'titleHeaderText' => null,
     'enableCloseOnOutsideClick' => true,
     'enableCloseOnEscKeyPressed' => true,
     'modalMaxWidth' => 'xl', // md, xl, ... full
     'modalID' => uniqid('modal_'),
-    'promptAlertBeforeClosing' => null,
     'modalPosition' => 'center-center',
 ])
 
@@ -39,120 +36,75 @@
 @endphp
 
 <section
+    class="z-[300] bg-black/50 backdrop-blur-xs fixed inset-0 w-full h-screen p-4 flex font-inter {{ $flex_default }}"
     id="{{ $modalID }}"
-    x-show="modalOpen"
+    x-show="open"
     x-cloak
-    x-ref="modal_modal"
+    x-ref="mainModal_{{ $modalID }}"
     x-data='{
-        modal_id: "{{ $modalID }}",
-        modalOpen: false,
+        modal_id: @json($modalID),
+        open: false,
         hasInput: false,
         specialData: {},
-        init() {
-            const inputs = this.$el.querySelectorAll("input, select, textarea");
+        titleHeaderText: @json($titleHeaderText),
 
-            [...inputs].forEach(input => {
-                input.addEventListener("input", function (e) {
-                    this.hasInput = true;
-                });
-            });
-        },
-        checkInputs() {
-            const inputs = $refs.modal_modal.querySelectorAll("input, textarea, select");
-                this.hasInput = Array.from(inputs).some(input => {
-                    if (["checkbox", "radio"].includes(input.type)) {
-                        if (input.checked) return true;
-                    }
-                    if (input.name !== "_token" && !input.hasAttribute("skip")) return input.value.trim() !== "";
-            });
-        },
         closeModal() {
-            this.checkInputs();
-            if(passed_modal_id !== this.modal_id) { return; }
-            if(@json($promptAlertBeforeClosing ?? false) && this.hasInput) {
-                if(!confirm("Closing this modal will reset all progress.")) { return; }
-                    this.modalOpen = false;
-
-                    const modalElement = document.getElementById(this.modal_id);
-                    if (!modalElement) return;
-
-                    // Reset all physical form elements
-                    modalElement.querySelectorAll("input, textarea, select").forEach(el => {
-                        switch (el.type) {
-                            case "checkbox":
-                            case "radio":
-                                el.checked = false;
-                                break;
-                            case "file":
-                                el.value = null;
-                                break;
-                            default:
-                                el.value = "";
-                                break;
-                        }
-                    });
-                    modalElement.querySelectorAll("[x-data]").forEach(el => {
-                        el.dispatchEvent(new CustomEvent("reset-file-upload"));
-                    });
-            } else {
-                console.log("No inputs inserted, closing modal directly.");
-                this.modalOpen = false;
-            }
+            this.open = false;
+            $dispatch("modal_closed_fallback", { modalID: this.modal_id });
         },
     }'
-    @open_modal.window="
-        passed_modal_id = $event.detail.modalID
+
+    @openmodal.window ='
+        const passed_modal_id = $event.detail.modalID
+
         if(!passed_modal_id) {
-            console.error('No modal id passed.');
+            console.error("No modal id passed.");
             return;
         }
+
         if(passed_modal_id === modal_id) {
-
-            modalOpen = true;
-
+            titleHeaderText = $event.detail.modal_header_text || titleHeaderText;
+            open = true;
             if($event.detail.special_data) {
-                specialData[$event.detail.special_data[0]] = $event.detail.special_data[1];
-
-                $nextTick(() => {
-
-                    // extra microtask tick to allow x-if / nested x-data to mount
-                    setTimeout(() => {
-                        console.log('Passing data to passed_product_data...');
-                        // dispatch on window so any @...window listeners reliably receive it
-                        window.dispatchEvent(new CustomEvent('passed_product_data', {
-                            detail: { data: specialData },
-                            bubbles: true,
-                            composed: true
-                        }));
-                    }, 0);
-                });
+                $dispatch("passed_product_data", { data: $event.detail.special_data });
             }
+        }'
 
+    @set_modal_header_text.window ='
+        const passed_modal_id = $event.detail.modalID
+
+        if(!passed_modal_id) {
+            console.error("No modal id passed.");
+            return;
         }
-    "
-    class="z-[300] bg-black/50 backdrop-blur-xs fixed inset-0 w-full h-screen p-4 flex font-inter {{ $flex_default }}"
->
+
+        if(passed_modal_id === modal_id && $event.detail.text) {
+            titleHeaderText = $event.detail.text;
+            console.log("Modal header text set to:", titleHeaderText);
+        }
+    '
+    >
 
     {{-- modal --}}
     <div
-    x-show="modalOpen"
-    x-transition
-    x-cloak
+        x-show="open"
+        x-transition
+        x-cloak
 
-    @if($enableCloseOnOutsideClick)
-        @click.away.window="closeModal()"
-    @endif
-    @if($enableCloseOnEscKeyPressed)
-        @keydown.escape.window="closeModal()"
-    @endif
+        @if($enableCloseOnOutsideClick)
+            @click.away.window="closeModal()"
+        @endif
+        @if($enableCloseOnEscKeyPressed)
+            @keydown.escape.window="closeModal()"
+        @endif
 
-    {{-- x-bind:special_data="special_data" --}}
+        {{-- x-bind:special_data="special_data" --}}
 
-    class="p-4 bg-white rounded outline-1 outline-accent-darkslategray-400 w-full h-fit max-w-{{ $modalMaxWidth }} max-h-[95%] overflow-x-hidden overflow-y-auto"
+        class="p-4 bg-white rounded outline-1 outline-accent-darkslategray-400 w-full h-fit max-w-{{ $modalMaxWidth }} max-h-[95%] overflow-x-hidden overflow-y-auto"
     >
         {{-- Header --}}
         <div class="flex items-center justify-between border-b border-gray-300/50 pb-2 mb-4">
-            <h1 class="text-xl font-medium">{{ $titleHeaderText }}</h1>
+            <h1 class="text-xl font-medium" x-text="titleHeaderText"></h1>
             <div class="">
                 <button
                     title="Close"
@@ -168,4 +120,3 @@
     </div>
 
 </section>
-
