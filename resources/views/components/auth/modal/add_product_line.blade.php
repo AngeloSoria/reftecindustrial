@@ -13,7 +13,7 @@
     x-show="open"
     x-cloak
     @keydown.escape.window="open = false"
-    @open-modal.window="open = true"
+    @openModal.window="open = true"
     >
     <div
         x-transition
