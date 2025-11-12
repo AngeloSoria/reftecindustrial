@@ -8,6 +8,7 @@ use App\Models\Upload;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class UploadController extends Controller
@@ -127,7 +128,6 @@ class UploadController extends Controller
         }
     }
 
-
     public function getAllUploadedFiles(Request $request)
     {
         $request->validate([
@@ -135,5 +135,41 @@ class UploadController extends Controller
         ]);
 
         // TODO: complete this api.
+    }
+
+    public function deleteUploadedFile($upload_id)
+    {
+        try {
+            $record = Upload::findOrFail($upload_id);
+            // Delete the file from storage
+            $disk = $record->is_private ? 'private' : 'public';
+            Storage::disk($disk)->delete($record->path);
+
+            // Delete the database record
+            $record->delete();
+
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => 'File deleted successfully.',
+            ]);
+
+            return redirect()->back();
+        } catch (ModelNotFoundException $e) {
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'File not found.',
+            ]);
+
+            return redirect()->back();
+        } catch (Exception $e) {
+            Log::error('Failed to delete uploaded file: ' . $e->getMessage());
+
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Failed to delete file: ' . $e->getMessage(),
+            ]);
+
+            return redirect()->back();
+        }
     }
 }
