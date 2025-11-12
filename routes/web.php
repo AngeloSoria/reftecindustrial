@@ -95,8 +95,11 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
             Route::post('section/history', 'setHistory')->name('update.section.history');
+
             Route::post('section/product_line/add', 'addProductLine')->name('add.section.product_line');
-            Route::post('section/product_line/edit', 'editProductLine')->name('edit.section.product_line');
+            Route::post('section/product_line/edit', 'setProductLine')->name('edit.section.product_line');
+            Route::post('section/product_line/delete', 'deleteProductLine')->name('delete.section.product_line');
+
             Route::post('section/test', 'test')->name('add.section.test');
         });
 });
