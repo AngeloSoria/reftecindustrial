@@ -13,7 +13,6 @@ use App\Models\Contents\GeneralProductLines as ProductLines;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UploadController;
 
-
 class GeneralController extends Controller
 {
 
@@ -51,11 +50,10 @@ class GeneralController extends Controller
             ProductLines::create([
                 'name' => $request->product_line_name,
                 'upload_id' => $data['files'][0]['file_id'],
-                'image_path' => $data['files'][0]['path'],
                 'visibility' => $visible
             ]);
 
-            // Clear cache for hero section after updating
+            // Clear cache for product lines section after updating
             Cache::forget('section_product_lines');
 
             session()->flash('content', [
@@ -160,7 +158,9 @@ class GeneralController extends Controller
 
                     $data = $uploadResponse->getData(true);
 
-                    if(!$uploadResponse) { throw new Exception("No uploaded data found."); }
+                    if (!$uploadResponse) {
+                        throw new Exception("No uploaded data found.");
+                    }
 
                     $product_line->image_path = $data['data']['path'] ?? null;
 
@@ -304,6 +304,117 @@ class GeneralController extends Controller
         }
     }
 
-    // DELETE | POST
+    public function setProductLine(Request $request)
+    {
+        try {
+            // dd($request);
+            $request->validate([
+                'product_line_id' => 'required|exists:contents_general_product_lines,id',
+                'product_line_name' => 'string',
+                'file' => 'file|mimes:jpg,png,jpeg,bmp,gif|max:' . env('APP_MAX_UPLOAD_SIZE', 10240), // Image only
+                'visibility' => 'boolean'
+            ]);
 
+            // find the model / product_line row data.
+            $productLine = ProductLines::findOrFail($request->get('product_line_id'));
+
+            if ($request->hasFile('file')) {
+                // upload
+                $uploadController = new UploadController();
+                $uploadResponse = $uploadController->upload($request); // Call directly
+
+                // Get the data as array if it's a JsonResponse
+                $data = $uploadResponse->getData(true);
+
+                if (!$data || !$data['success'] || empty($data['files'][0]['file_id'])) {
+                    throw new Exception($data['message'] ?? "Upload failed or invalid response.");
+                }
+
+                // Update upload_id if new file uploaded
+                $productLine->upload_id = $data['files'][0]['file_id'];
+            }
+
+            // Update other fields
+            $productLine->name = $request->get('product_line_name');
+            $productLine->visibility = $request->get('visibility', 0);
+
+            // Clear cache for product lines section after updating
+            Cache::forget('section_product_lines');
+
+            $productLine->save();
+
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'products'
+            ]);
+
+            return redirect()->back()->with('toast', [
+                'type' => 'success',
+                'message' => 'Product line has been updated.'
+            ]);
+        } catch (Exception $e) {
+            return redirect()->back()->with('toast', [
+                'type' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    // DELETE | POST
+    public function deleteProductLine(Request $request)
+    {
+        // Define a global lock key (you can make it user-specific if needed)
+        $lockKey = 'delete_product_line_global_lock';
+
+        // Try to acquire the lock for up to 10 seconds
+        $lock = Cache::lock($lockKey, 10);
+
+        if ($lock->get()) { // Lock acquired
+            try {
+                $request->validate([
+                    'product_line_id' => 'required|exists:contents_general_product_lines,id',
+                ]);
+
+                // Find the product line
+                $productLine = ProductLines::findOrFail($request->get('product_line_id'));
+                // dd($productLine);
+
+                // Delete the associated upload file
+                $uploadController = new UploadController();
+                $uploadController->deleteUploadedFile($productLine->upload_id);
+
+                // Delete it
+                $productLine->delete();
+
+                // Clear cache
+                Cache::forget('section_product_lines');
+
+                // Session tab state
+                session()->flash('content', [
+                    'tab' => 'general',
+                    'section' => 'products'
+                ]);
+
+                return redirect()->back()->with('toast', [
+                    'type' => 'success',
+                    'message' => 'Product line has been deleted.'
+                ]);
+            } catch (Exception $e) {
+                Logger()->info('Error deleting product line: ' . $e->getMessage());
+                return redirect()->back()->with('toast', [
+                    'type' => 'error',
+                    'message' => $e->getMessage()
+                ]);
+            } finally {
+                // Release the lock no matter what
+                $lock->release();
+            }
+        } else {
+            // Lock not acquired (another deletion in progress)
+            return redirect()->back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Another deletion is in progress. Please try again shortly.'
+            ]);
+        }
+    }
 }
