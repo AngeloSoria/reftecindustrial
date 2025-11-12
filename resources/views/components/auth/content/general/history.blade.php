@@ -49,7 +49,7 @@
         </section>
 
         <section class="py-4 flex flex-wrap items-start justify-start">
-            <button @click="$dispatch('open_modal', {'modalID':'update_history_section_image'})"
+            <button @click="$dispatch('openmodal', {'modalID':'update_history_section_image'})"
                 class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-orange-400 bg-accent-orange-300">
                 @svg('fluentui-image-20-o', 'w-5 h-5')
                 Update Image
