@@ -55,20 +55,46 @@
 
 <x-layouts.modal titleHeaderText="Update Hero Image" modalID="update_hero_section_image" promptAlertBeforeClosing>
     <section>
-        <form action="{{ route('content.update.section.hero') }}" method="POST" enctype="multipart/form-data">
+        <form
+            action="{{ route('content.update.section.hero') }}"
+            method="POST"
+            enctype="multipart/form-data"
+            x-data="{
+                loading: false,
+                formDisabled: true,
+
+                async init() {
+                    // detect input changes to enable the form submission
+                    // TODO: disabling submit button if there's no input changed yet.
+                    this.$el.querySelector('input[type=file]').addEventListener('change', (event) => {
+                        if(event.target.files.length > 0) {
+                            this.formDisabled = false;
+                        } else {
+                            this.formDisabled = true;
+                        }
+                    });
+                },
+            }"
+            @submit.prevent="
+                loading = true;
+                $el.submit();
+            ">
             @csrf
             <section class="flex flex-col gap-2">
                 <h4>Upload an image to update hero section backdrop image:</h4>
                 <x-layouts.file_upload_drag />
             </section>
             <section class="mt-6 flex items-center justify-end gap-2">
-                <button type="button" @click="closeModal()"
+                <button type="button" @click="closeModal()" :disabled="loading"
                     class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-darkslategray-300 bg-accent-darkslategray-200">
                     Cancel
                 </button>
-                <button type="submit"
-                    class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-orange-400 bg-accent-orange-300">
-                    Submit
+                <button type="submit" :disabled="loading || formDisabled"
+                    class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-orange-400 bg-accent-orange-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <template x-if="loading">
+                        @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                    </template>
+                    <span x-text="loading ? 'Saving...' : 'Save'"></span>
                 </button>
             </section>
         </form>
