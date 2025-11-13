@@ -172,4 +172,38 @@ class UploadController extends Controller
             return redirect()->back();
         }
     }
+
+    public function deleteUploadedFileFromPath($file_path)
+    {
+        try {
+            $record = Upload::where('path', $file_path)->firstOrFail();
+            // Delete the file from storage
+            $disk = $record->is_private ? 'private' : 'public';
+            Storage::disk($disk)->delete($record->path);
+
+            // Delete the database record
+            $record->delete();
+
+            Log::info('File deleted successfully: ' . $file_path);
+            return response()->json([
+                'success' => true,
+                'message' => 'File deleted successfully: ' . $file_path,
+                'type' => 'success'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            Log::warning('File not found for deletion: ' . $file_path);
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found for deletion: ' . $file_path,
+                'type' => 'error'
+            ], 404);
+        } catch (Exception $e) {
+            Log::error('Failed to delete uploaded file: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete uploaded file: ' . $e->getMessage(),
+                'type' => 'error'
+            ], 404);
+        }
+    }
 }
