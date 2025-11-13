@@ -6,7 +6,6 @@
     <x-public.navbar />
 
     {{-- Hero section --}}
-    {{-- TODO: Server rendered background-image of hero section. --}}
     <section class="w-full h-100 bg-cover bg-center flex items-center justify-start relative"
         style="background-image: url('{{ asset('images/bulan.jpg') }}');" x-ref="heroBackdrop" x-data="{async init() {
                 try {
@@ -52,34 +51,32 @@
                     PRODUCTS</p>
             </div>
 
-            {{-- TODO: Server rendered product lines. --}}
-            <div data-aos="fade-up" data-aos-anchor-placement="center-center"
-                class="mt-4 bg-accent-darkslategray-900 grid gap-1 md:gap-0 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 relative">
-                @php
-                    // TODO: This will be replaced by server rendered product lines.
-                    $productLines = [
-                        [
-                            'name' => 'KINGSPAN RHINO WATER TANKS, AUSTRALIA',
-                            'image' => asset('images/kingspan.jpg'),
-                        ],
-                        [
-                            'name' => 'STARR PANEL, INDONESIA',
-                            'image' => asset('images/starr.jpg'),
-                        ],
-                        [
-                            'name' => 'VILTER REFRIGERATION EQUIPMENT, USA',
-                            'image' => asset('images/vilter_logo.png'),
-                        ],
-                    ];
-                @endphp
-                @foreach ($productLines as $productLine)
-                    <section class="w-full relative h-24 overflow-hidden">
+            <div
+                class="mt-4 bg-accent-darkslategray-900 grid gap-1 md:gap-0 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 relative"
+                data-aos="fade-up"
+                data-aos-anchor-placement="center-center"
+                x-data="{
+                    productLines: [],
+                    async init() {
+                        try {
+                            const response = await fetch('{{ route('content.get.section.product_lines.visible') }}');
+                            const data = await response.json();
+                            this.productLines = data.data;
+                            console.log(this.productLines);
+                        } catch (e) {
+                            console.error('Failed to load product lines:', e);
+                        }
+                    },
+                }"
+                >
+                <template x-for="line in productLines" :key="line.name">
+                    <section  class="w-full relative h-24 overflow-hidden">
                         {{-- Image --}}
-                        <img src="{{ $productLine['image'] }}" alt="{{ $productLine['name'] }}" class="w-full m-auto" />
+                        <img :src="'/storage/' + line.image_path" :alt="line.name" class="w-full m-auto" />
 
                         {{-- Product Name --}}
                         <div class="z-2 w-[90%] absolute bottom-0 left-1/2 -translate-x-1/2 p-2 text-white text-center">
-                            <h2 class="text-sm text-shadow font-medium">{{ $productLine['name'] }}</h2>
+                            <h2 class="text-sm text-shadow font-medium" x-text="line.name"></h2>
                         </div>
 
                         {{-- Bottom Vignette --}}
@@ -87,7 +84,7 @@
                             class="z-1 absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-black/90 to-transparent pointer-events-none">
                         </div>
                     </section>
-                @endforeach
+                </template>
             </div>
         </section>
 
@@ -140,7 +137,6 @@
                 </div>
 
                 {{-- Image --}}
-                {{-- TODO: Use server sided image here. --}}
                 <div data-aos="fade-left" data-aos-anchor-placement="top-bottom" data-aos-duration="1000"
                     class="order-1 md:order-2 w-full md:h-auto aspect-video md:aspect-auto overflow-hidden">
                     <img
