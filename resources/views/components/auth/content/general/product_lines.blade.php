@@ -188,6 +188,7 @@
             productData = {};
         " @submit.prevent="
             loading = true;
+            $dispatch('force_disable_modal_closing', { modalID: modal_id });
             $el.submit();
         " method="POST" :action="routes.delete">
 
