@@ -55,6 +55,7 @@ class GeneralController extends Controller
 
             // Clear cache for product lines section after updating
             Cache::forget('section_product_lines');
+            Cache::forget('section_product_lines_visible');
 
             session()->flash('content', [
                 'tab' => 'general',
@@ -78,7 +79,8 @@ class GeneralController extends Controller
     {
         try {
             // Log::info($request->product_line_name);
-            throw new Exception($request->product_line_name);
+            // Use input() with a null coalescing fallback to avoid undefined or missing values.
+            throw new Exception($request->input('product_line_name') ?? 'product_line_name not provided');
             // return response()->json($request);
         } catch (Exception $e) {
             Log::error($e->getMessage());
@@ -145,10 +147,11 @@ class GeneralController extends Controller
         }
     }
 
-    public function getAllProductLines(Request $request)
+    public function getAllProductLines()
     {
         try {
             $response = Cache::remember('section_product_lines', env('CACHE_EXPIRATION', 3600), function () {
+
                 $record = ProductLines::latest()->get(['id', 'name', 'upload_id', 'visibility']);
 
                 // Map each product line to include image_path
@@ -185,6 +188,49 @@ class GeneralController extends Controller
         }
     }
 
+    public function getAllVisibileProductLines()
+    {
+        try {
+            $response = Cache::remember('section_product_lines_visible', env('CACHE_EXPIRATION', 3600), function () {
+
+                $record = ProductLines::where('visibility', 1)->latest()->get(['id', 'name', 'upload_id']);
+
+                // Map each product line to include image_path
+                $uploadController = new UploadController();
+                $newData = $record->map(function ($product_line) use ($uploadController) {
+                    $uploadResponse = $uploadController->getUploadedFile($product_line->upload_id);
+
+                    $data = $uploadResponse->getData(true);
+
+                    if (!$uploadResponse) {
+                        throw new Exception("No uploaded data found.");
+                    }
+
+                    $product_line->image_path = $data['data']['path'] ?? null;
+
+                    return $product_line->makeHidden(['id', 'upload_id']);
+                });
+
+
+                return [
+                    'success' => true,
+                    'data' => $newData
+                ];
+            });
+            return response()->json($response);
+        } catch (Exception $e) {
+            Log::error('Error fetching product lines: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch product lines: ' . $e->getMessage(),
+                'type' => 'error',
+            ], 500);
+        }
+    }
+
+
+
     // UPDATE | POST
     public function setHeroSection(Request $request)
     {
@@ -197,6 +243,14 @@ class GeneralController extends Controller
 
             if (!$data || !$data['success']) {
                 throw new Exception($data['message']);
+            }
+
+            // Check if hero is already exists.
+            // If exists, check for the image_path to delete the old file.
+            $existingHero = General::where('section', 'hero')->first();
+            if ($existingHero && $existingHero->image_path) {
+                // Delete the old file
+                $uploadController->deleteUploadedFileFromPath($existingHero->image_path);
             }
 
             General::updateOrCreate(['section' => 'hero'], [
@@ -272,6 +326,14 @@ class GeneralController extends Controller
                         throw new Exception($data['message']);
                     }
 
+                    // Check if hero is already exists.
+                    // If exists, check for the image_path to delete the old file.
+                    $exisitingFile = General::where('section', 'history')->first();
+                    if ($exisitingFile && $exisitingFile->image_path) {
+                        // Delete the old file
+                        $uploadController->deleteUploadedFileFromPath($exisitingFile->image_path);
+                    }
+
                     General::updateOrCreate(['section' => 'history'], [
                         'image_path' => $data['files'][0]['path'] ?? null
                     ]);
@@ -287,6 +349,8 @@ class GeneralController extends Controller
                         'type' => 'success',
                         'message' => 'History image has been updated!'
                     ]);
+                default:
+                    throw new Exception("Invalid context value.");
             }
         } catch (Exception $e) {
             Log::error('Error saving history: ' . $e->getMessage());
@@ -340,6 +404,7 @@ class GeneralController extends Controller
 
             // Clear cache for product lines section after updating
             Cache::forget('section_product_lines');
+            Cache::forget('section_product_lines_visible');
 
             $productLine->save();
 
@@ -388,6 +453,7 @@ class GeneralController extends Controller
 
                 // Clear cache
                 Cache::forget('section_product_lines');
+                Cache::forget('section_product_lines_visible');
 
                 // Session tab state
                 session()->flash('content', [
