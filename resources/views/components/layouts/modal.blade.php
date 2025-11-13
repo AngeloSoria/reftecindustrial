@@ -47,8 +47,13 @@
         hasInput: false,
         specialData: {},
         titleHeaderText: @json($titleHeaderText),
+        closeEnabled: true,
 
         closeModal() {
+            if(!this.closeEnabled) {
+                console.warn("Modal closing is currently disabled.");
+                return;
+            }
             this.open = false;
             $dispatch("modal_closed_fallback", { modalID: this.modal_id });
         },
@@ -81,6 +86,19 @@
         if(passed_modal_id === modal_id && $event.detail.text) {
             titleHeaderText = $event.detail.text;
             console.log("Modal header text set to:", titleHeaderText);
+        }
+    '
+
+    @force_disable_modal_closing.window ='
+        const passed_modal_id = $event.detail.modalID
+
+        if(!passed_modal_id) {
+            console.error("No modal id passed.");
+            return;
+        }
+
+        if(passed_modal_id === modal_id) {
+            closeEnabled = false;
         }
     '
     >
