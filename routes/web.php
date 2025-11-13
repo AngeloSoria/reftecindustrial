@@ -35,7 +35,7 @@ Route::prefix('content')
     ->group(function () {
         Route::get('section/hero', 'getHeroSection')->name('get.section.hero');
         Route::get('section/history', 'getHistory')->name('get.section.history');
-        Route::get('section/product_lines', 'getAllProductLines')->name('get.section.product_lines');
+        Route::get('section/product_lines/visible', 'getAllVisibileProductLines')->name('get.section.product_lines.visible');
     });
 
 /*
@@ -99,6 +99,7 @@ Route::middleware('auth')->group(function () {
             Route::post('section/product_line/add', 'addProductLine')->name('add.section.product_line');
             Route::post('section/product_line/edit', 'setProductLine')->name('edit.section.product_line');
             Route::post('section/product_line/delete', 'deleteProductLine')->name('delete.section.product_line');
+            Route::get('section/product_lines', 'getAllProductLines')->name('get.section.product_lines');
 
             Route::post('section/test', 'test')->name('add.section.test');
         });
