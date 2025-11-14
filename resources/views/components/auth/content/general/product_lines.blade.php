@@ -67,7 +67,9 @@
                             {
                                 modalID: 'modal_product_line',
                                 modal_header_text: 'Edit Product Line',
-                                special_data: product
+                                special_data: {
+                                    product_data: product,
+                                },
                             }
                         )"
                         class="p-2 rounded-full shadow-sm cursor-pointer transition-colors outline-accent-darkslategray-200 hover:bg-blue-600 hover:text-white">
@@ -79,7 +81,9 @@
                             {
                                 modalID: 'modal_delete_product_line',
                                 modal_header_text: 'Delete Product Line',
-                                special_data: product
+                                special_data: {
+                                    product_data: product,
+                                }
                             }
                         )"
                         class="p-2 rounded-full shadow-sm cursor-pointer transition-colors outline-accent-darkslategray-200 hover:bg-red-500 hover:text-white">
@@ -104,8 +108,10 @@
                 update: '{{ route('content.edit.section.product_line') }}',
             },
         }" @passed_product_data.window="
-            productData = $event.detail.data;
-            if (productData && productData.modalID !== modal_id) { return }
+            if (!$event.detail.data) { console.error('No data passed.') }
+            if (!event.detail.modalID) { console.error('No modal ID passed. \n modal_id: ' + modal_id); }
+            if ($event.detail.modalID !== modal_id) { return }
+            productData = $event.detail.data.product_data;
             if(productData.visibility) {
                 productData.visibility = productData.visibility == 1 ? true : false;
             }
@@ -113,18 +119,21 @@
         " @modal_closed_fallback.window="
             if($event.detail.modalID !== modal_id ) { return }
             productData = {};
-        " method="POST" :action="productData.id ? routes.update : routes.add" enctype="multipart/form-data">
+        "
+        method="POST"
+        :action="productData && productData.id ? routes.update : routes.add"
+        enctype="multipart/form-data">
 
         @csrf
 
         <div class="flex flex-col flex-wrap items-start justify-center gap-4">
 
-            <template x-if="productData.id">
+            <template x-if="productData && productData.id">
                 <input type="hidden" name="product_line_id" :value="productData.id" />
             </template>
 
             {{-- Image --}}
-            <template x-if="productData.image_path">
+            <template x-if="productData && productData.image_path">
                 <div class="w-full flex items-center justify-center p-4 hover:bg-gray-300 transition-colors">
                     <img :src="'/storage/' + productData.image_path" alt="Product Image"
                         class="max-w-64 aspect-auto rounded-sm" />
@@ -134,18 +143,22 @@
 
             <div class="w-full flex flex-col gap-1">
                 <label for="input_productLineName" class="text-sm font-medium">Name</label>
-                <input x-model="productData.name"
+                <template x-if="productData">
+                    <input x-model="productData.name"
                     class="px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none"
                     id="input_productLineName" name="product_line_name" type="text"
                     placeholder="Enter product line name..." required aria-required="true" />
+                </template>
             </div>
 
             <div class="w-full ">
                 <div class="flex items-center justify-start gap-2">
-                    <input id="input_visibility" type="checkbox" name="visibility" x-model="productData.visibility"
+                    {{-- <template x-if="productData"> --}}
+                        <input id="input_visibility" type="checkbox" name="visibility" x-model="productData.visibility"
                         :checked="productData.visibility" :value="productData.visibility ? 1 : 0"
                         class="w-5 h-5 text-accent-orange-300 accent-orange-400 rounded-sm border-2 border-accent-darkslategray-700" />
-                    <label for="input_visibility" class="text-sm">Visible</label>
+                        <label for="input_visibility" class="text-sm">Visible</label>
+                    {{-- </template> --}}
                 </div>
             </div>
 
@@ -171,21 +184,22 @@
 
 
 {{-- Modal: Delete --}}
-<x-layouts.modal modalID="modal_delete_product_line">
+<x-layouts.modal modalID="modal_delete_product_line" modalMaxWidth="md">
     <form x-data="{
             modal_id: 'modal_delete_product_line',
-            productData : {},
+            productData : null,
             routes: {
                 delete: '{{ route('content.delete.section.product_line') }}',
             },
             loading: false,
         }" @passed_product_data.window="
-            productData = $event.detail.data;
-            if (productData && productData.modalID !== modal_id) { return }
-            console.log(productData);
+            if (!$event.detail.data) { console.error('No data passed.') }
+            if (!event.detail.modalID) { console.error('No modal ID passed. \n modal_id: ' + modal_id); }
+            if ($event.detail.modalID !== modal_id) { return }
+            productData = $event.detail.data.product_data;
         " @modal_closed_fallback.window="
             if($event.detail.modalID !== modal_id ) { return }
-            productData = {};
+            productData = null;
         " @submit.prevent="
             loading = true;
             $dispatch('force_disable_modal_closing', { modalID: modal_id });
@@ -195,14 +209,20 @@
         @csrf
 
         <div class="flex flex-col flex-wrap items-start justify-center gap-4">
+            <template x-if="productData">
+                <div>
+                    <template x-if="productData.id">
+                        <input type="hidden" name="product_line_id" :value="productData.id" />
+                    </template>
 
-            <template x-if="productData.id">
-                <input type="hidden" name="product_line_id" :value="productData.id" />
+                    <p>
+                        Are you sure you want to delete the product line:
+                        <strong x-text="productData.name"></strong>?
+                    </p>
+                </div>
             </template>
-
-            <p>Are you sure you want to delete the product line: <strong x-text="productData.name"></strong>?</p>
-
         </div>
+
 
         <section class="flex items-center justify-end gap-2 mt-4">
             <button type="button" @click="closeModal()" :disabled="loading"
