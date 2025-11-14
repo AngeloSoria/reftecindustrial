@@ -71,23 +71,12 @@
             titleHeaderText = $event.detail.modal_header_text || titleHeaderText;
             open = true;
             if($event.detail.special_data) {
-                $dispatch("passed_product_data", { data: $event.detail.special_data });
+                $dispatch("passed_product_data", {
+                    modalID: modal_id,
+                    data: $event.detail.special_data
+                });
             }
         }'
-
-    @set_modal_header_text.window ='
-        const passed_modal_id = $event.detail.modalID
-
-        if(!passed_modal_id) {
-            console.error("No modal id passed.");
-            return;
-        }
-
-        if(passed_modal_id === modal_id && $event.detail.text) {
-            titleHeaderText = $event.detail.text;
-            console.log("Modal header text set to:", titleHeaderText);
-        }
-    '
 
     @force_disable_modal_closing.window ='
         const passed_modal_id = $event.detail.modalID
