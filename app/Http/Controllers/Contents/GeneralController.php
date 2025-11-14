@@ -229,7 +229,39 @@ class GeneralController extends Controller
         }
     }
 
+    public function getAllAboutUsGallery()
+    {
+        try {
+            return response()->json([
+                'success' => false,
+                'message' => 'Not yet implemented.',
+            ], 200);
+            // $response = Cache::remember('section_about_us_gallery', env('CACHE_EXPIRATION', 3600), function () {
+            //     $record = General::where('section', 'about_us_gallery')->orderBy('order', 'asc')->get(['id', 'image_path']);
 
+            //     return [
+            //         'success' => true,
+            //         'data' => $record->map(function ($item) {
+            //             return [
+            //                 'id' => $item->id,
+            //                 'image' => $item->image_path
+            //                     ? asset('storage/' . $item->image_path)
+            //                     : asset('images/reftec_logo_transparent_16x9.png'),
+            //             ];
+            //         }),
+            //     ];
+            // });
+
+            // return response()->json($response);
+        } catch (Exception $e) {
+            Log::error('Error fetching About Us gallery: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load About Us gallery.',
+            ], 500);
+        }
+    }
 
     // UPDATE | POST
     public function setHeroSection(Request $request)
@@ -483,4 +515,5 @@ class GeneralController extends Controller
             ]);
         }
     }
+
 }

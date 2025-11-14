@@ -36,6 +36,7 @@ Route::prefix('content')
         Route::get('section/hero', 'getHeroSection')->name('get.section.hero');
         Route::get('section/history', 'getHistory')->name('get.section.history');
         Route::get('section/product_lines/visible', 'getAllVisibileProductLines')->name('get.section.product_lines.visible');
+        Route::get('section/about_us/gallery', 'getAllAboutUsGallery')->name('get.section.about_us.gallery');
     });
 
 /*

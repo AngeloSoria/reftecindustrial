@@ -20,18 +20,42 @@
         images in the gallery.
     </p>
 
-    <ul id="sortable-container_about_gallery" x-data="{ isMobile: window.innerWidth < 768 }"
+    {{-- TODO: Complete this api-sided gallery rendering. --}}
+    <ul
+        id="sortable-container_about_gallery"
+        x-data="{
+            isMobile: window.innerWidth < 768,
+            loading: true,
+            galleryImages: [],
+            async init() {
+                // fetch gallery images from API and populate the list
+                const response = await fetch('{{ route('content.get.section.about_us.gallery') }}');
+                const data = await response.json();
+                console.log(data);
+                if(data.success) {
+                    this.galleryImages = data.gallery_images;
+                } else {
+                    console.error('Failed to load gallery images.');
+                }
+                this.loading = false;
+                // TODO: Continue here...
+            },
+        }"
         class="p-2 bg-accent-darkslategray-300 rounded gap-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+
+        {{-- <template x-for="">
+
+        </template> --}}
+
         @for ($i = 0; $i < 3; $i++)
             <li
+                class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
                 data-id="sortable_item_{{ $i }}"
                 title="Drag to change order."
                 x-data="{ isHovered: false }"
                 @mouseover="isHovered = true"
                 @mouseleave="isHovered = false"
-                class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]">
-
-                <span class="absolute top-1 left-1 text-xs">Item {{ $i }}</span>
+                >
 
                 <img src="{{ asset('images/bulan.jpg') }}" class="w-full h-full aspect-video object-contain" />
 
@@ -61,6 +85,7 @@
                 </div>
             </li>
         @endfor
+
     </ul>
 
 </div>
