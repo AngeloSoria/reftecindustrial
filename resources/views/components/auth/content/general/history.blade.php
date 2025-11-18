@@ -49,11 +49,11 @@
         </section>
 
         <section class="py-4 flex flex-wrap items-start justify-start">
-            <button @click="$dispatch('openmodal', {'modalID':'update_history_section_image'})"
-                class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-orange-400 bg-accent-orange-300">
+            <x-public.button button_type="primary"
+                @click="$dispatch('openmodal', {'modalID':'update_history_section_image'})">
                 @svg('fluentui-image-20-o', 'w-5 h-5')
                 Update Image
-            </button>
+            </x-public.button>
         </section>
 
     </div>
@@ -157,23 +157,63 @@
 
 <x-layouts.modal titleHeaderText="Update History Image" modalID="update_history_section_image" promptAlertBeforeClosing>
 
-    {{-- <form action="{{ route('content.add.section.test') }}" method="POST"> --}}
-        <form action="{{ route('content.update.section.history') }}" method="POST" enctype="multipart/form-data">
+    <section>
+        @php
+            $fileUploadId = 'file_upload_history';
+        @endphp
+        <form
+            x-data="{
+                modal_id: 'update_history_section_image',
+                loading: false,
+                formDisabled: true,
+                file_upload_id: @js($fileUploadId),
+            }"
+            @submit.prevent="
+                loading = true;
+                if(formDisabled) {
+                    toast('all required fields in the form must have value first.', 'warning');
+                    return;
+                }
+                $dispatch('force_disable_modal_closing', { modalID: modal_id });
+                $dispatch('form_in_submit_phase', { file_upload_id: file_upload_id });
+                $el.submit();
+            "
+            @modal_closed_fallback.window="
+                if($event.detail.modalID != modal_id) return;
+                $dispatch('reset_file_upload', { file_upload_id: file_upload_id });
+            "
+            @files_empty.window="
+                if($event.detail.file_upload_id != file_upload_id) return;
+                formDisabled = true;
+            "
+            @files_not_empty.window="
+                if($event.detail.file_upload_id != file_upload_id) return;
+                formDisabled = false;
+            "
+            action="{{ route('content.update.section.history') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <section class="flex flex-col gap-2">
                 <h4>Upload an image to update hero section backdrop image:</h4>
-                <x-layouts.file_upload_drag :hidden-data="['context' => 'content_image']"/>
+                <x-layouts.file_upload_drag
+                    file_upload_id="{{ $fileUploadId }}" 
+                    :hidden-data="['context' => 'content_image']" 
+                    acceptFile="image/*" />
             </section>
             <section class="mt-6 flex items-center justify-end gap-2">
-                <button type="button" @click="closeModal()"
+                <button type="button" @click="closeModal()" :disabled="loading"
                     class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-darkslategray-300 bg-accent-darkslategray-200">
                     Cancel
                 </button>
-                <button type="submit"
-                    class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-orange-400 bg-accent-orange-300">
-                    Submit
+                <button type="submit" :disabled="loading || formDisabled"
+                    class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-orange-400 bg-accent-orange-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <template x-if="loading">
+                        @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                    </template>
+                    <span x-text="loading ? 'Saving...' : 'Save'"></span>
                 </button>
             </section>
         </form>
+    </section>
+
 
 </x-layouts.modal>
