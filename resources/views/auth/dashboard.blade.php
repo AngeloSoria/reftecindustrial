@@ -13,9 +13,9 @@
     </section>
 
     <section class="flex md:flex-row flex-col flex-wrap gap-2 justify-center overflow-hidden grow">
-        <x-auth.widget.chart_visitors class="basis-full md:basis-[49%] grow" />
+        <x-auth.widget.chart_visitors class="border basis-full md:basis-[49%] grow" />
 
         {{-- TODO: Make this api-sided --}}
-        <x-auth.widget.chart_completed_car_trips class="basis-full md:basis-[49%] grow" />
+        <x-auth.widget.chart_completed_car_trips class="border basis-full md:basis-[49%] grow" />
     </section>
 </x-layouts.auth.app>

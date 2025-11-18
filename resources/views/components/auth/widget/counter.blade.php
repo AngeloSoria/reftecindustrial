@@ -39,7 +39,7 @@
     }
 @endphp
 
-<div id="{{ $id }}" class="bg-white px-4 py-5 rounded-xl shadow-md inline-block font-inter max-h-[170px] {{ $attributes->get('class') }}">
+<div id="{{ $id }}" class="bg-white px-4 py-5 rounded-xl border inline-block font-inter max-h-[170px] {{ $attributes->get('class') }}">
     <div class="bg-green-300/0 min-w-[150px] flex flex-col gap-1">
 
         {{-- icon --}}
