@@ -54,6 +54,7 @@
                 console.warn("Modal closing is currently disabled.");
                 return;
             }
+            if(!this.open) return;
             this.open = false;
             $dispatch("modal_closed_fallback", { modalID: this.modal_id });
         },
