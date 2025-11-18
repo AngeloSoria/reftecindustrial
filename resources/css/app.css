@@ -13,6 +13,19 @@ html {
     display: none !important;
 }
 
+@layer base {
+    /* Override default border color */
+    :root {
+        --default-border-color: #e5e7eb; /* gray-300 or your color */
+    }
+    /* Matches elements with ANY border width but NO border color class */
+    [class*="border"]:not([class*="border-"][class*="-"]) {
+        border-color: var(
+            --default-border-color
+        ); /* your default border color */
+    }
+}
+
 @theme {
     --breakpoint-xs: 475px;
 
@@ -99,6 +112,18 @@ html {
     --color-accent-darkslategray-800: #404040;
     --color-accent-darkslategray-900: #2c2c2c;
     --color-accent-darkslategray-950: #191919;
+
+    --color-pearl-50: #fbfcf8;
+    --color-pearl-100: #ecede9;
+    --color-pearl-200: #cfd0cc;
+    --color-pearl-300: #b2b3b0;
+    --color-pearl-400: #979795;
+    --color-pearl-500: #7c7c7a;
+    --color-pearl-600: #626261;
+    --color-pearl-700: #494a49;
+    --color-pearl-800: #323231;
+    --color-pearl-900: #1c1c1c;
+    --color-pearl-950: #111111;
 }
 
 @font-face {
