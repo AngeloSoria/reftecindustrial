@@ -3,13 +3,13 @@
     $buttonType = $attributes->get('button_type');
     switch ($buttonType) {
         case 'primary':
-            $classes = 'bg-accent-orange-300 text-white hover:bg-accent-orange-400';
+            $classes = 'bg-accent-orange-300 text-black hover:bg-accent-orange-400';
             break;
         case 'secondary':
             $classes = 'bg-brand-primary-950 text-white hover:bg-brand-primary-900';
             break;
         default:
-            $classes = 'bg-white';
+            $classes = 'bg-white hover:bg-gray-200 border';
             break;
     }
 
@@ -45,12 +45,14 @@
     <a
     role="button"
     href="{{ $href }}"
-    class="py-2 px-5 {{ $buttonScale }} rounded shadow-sm {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
+    class="py-2 px-4 {{ $buttonScale }} rounded shadow-sm {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
         {{ $slot }}
     </a>
 @else
     <button
-        class="py-2 px-4 {{ $buttonScale }} rounded {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}">
+        type="{{ $type }}"
+        class="flex justify-center items-center gap-2 py-2 px-4 {{ $buttonScale }} rounded {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}"
+        {{ $attributes }}>
         {{ $slot }}
     </button>
 @endif
