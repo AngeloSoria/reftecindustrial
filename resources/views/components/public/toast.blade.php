@@ -41,7 +41,7 @@
         }
     }"
     @toast.window="add($event.detail.message, $event.detail.type, $event.detail.duration, $event.detail.refreshOnComplete)"
-    class="fixed bottom-5 right-5 z-[150] flex flex-col gap-2">
+    class="fixed bottom-5 right-5 z-[1000] flex flex-col gap-2">
     <template x-for="toast in toasts" :key="toast.id">
         <div x-transition:enter="transform ease-out duration-300 transition"
             x-transition:enter-start="translate-x-20 opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
