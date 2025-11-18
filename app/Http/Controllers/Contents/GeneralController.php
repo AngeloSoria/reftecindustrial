@@ -21,6 +21,8 @@ class GeneralController extends Controller
     {
         try {
 
+            dd($request);
+
             // Normalize checkbox input before validation
             $request->merge([
                 'visibility' => $request->has('visibility') ? 1 : 0,
@@ -75,13 +77,66 @@ class GeneralController extends Controller
         }
     }
 
+    public function addAboutUsGalleryImage(Request $request)
+    {
+        try {
+            // dd($request);
+
+            // upload
+            $uploadController = new UploadController();
+            $uploadResponse = $uploadController->upload($request); // Call directly
+
+            // Get the data as array if it's a JsonResponse
+            $data = $uploadResponse->getData(true);
+
+            if (!$data || !$data['success']) {
+                throw new Exception($data['message']);
+            }
+
+            // TODO: You paused here.
+            dd($data);
+
+            // Check if exist in database.
+            $isExisting = General::where('section', 'about_us')->first(['extra_data', 'order']);
+
+            dd($isExisting);
+
+            // Save to database.
+            // General::create([
+            //     'name' => $request->product_line_name,
+            //     'upload_id' => $data['files'][0]['file_id'],
+            //     'visibility' => $visible
+            // ]);
+
+            // Clear cache for product lines section after updating
+            // Cache::forget('section_product_lines');
+            // Cache::forget('section_product_lines_visible');
+
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'products'
+            ]);
+
+            return redirect(url()->previous())->with('toast', [
+                'type' => 'success',
+                'message' => 'New product line has been added.'
+            ]);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('toast', [
+                'type' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
     public function test(Request $request)
     {
         try {
             // Log::info($request->product_line_name);
             // Use input() with a null coalescing fallback to avoid undefined or missing values.
-            throw new Exception($request->input('product_line_name') ?? 'product_line_name not provided');
-            // return response()->json($request);
+            // throw new Exception($request->input('product_line_name') ?? 'product_line_name not provided');
+            dd($request->all());
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('toast', [
@@ -232,24 +287,25 @@ class GeneralController extends Controller
     public function getAllAboutUsGallery()
     {
         try {
-            return response()->json([
-                'success' => false,
-                'message' => 'Not yet implemented.',
-            ], 200);
-            // $response = Cache::remember('section_about_us_gallery', env('CACHE_EXPIRATION', 3600), function () {
-            //     $record = General::where('section', 'about_us_gallery')->orderBy('order', 'asc')->get(['id', 'image_path']);
 
-            //     return [
-            //         'success' => true,
-            //         'data' => $record->map(function ($item) {
-            //             return [
-            //                 'id' => $item->id,
-            //                 'image' => $item->image_path
-            //                     ? asset('storage/' . $item->image_path)
-            //                     : asset('images/reftec_logo_transparent_16x9.png'),
-            //             ];
-            //         }),
-            //     ];
+            // $response = Cache::remember('section_about_us_gallery', env('CACHE_EXPIRATION', 3600), function () {
+            $record = General::where('section', 'about_us_gallery')->orderBy('order', 'asc')->get(['id', 'extra_data']);
+
+            return [
+                'success' => true,
+                'data' => $record->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'images' => $item->extra_data
+                            ? collect(json_decode($item->extra_data, true))->map(function ($imagePath) {
+                                return $imagePath
+                                    ? asset('storage/' . $imagePath)
+                                    : asset('images/reftec_logo_transparent_16x9.png');
+                            })
+                            : [asset('images/reftec_logo_transparent_16x9.png')],
+                    ];
+                }),
+            ];
             // });
 
             // return response()->json($response);
@@ -515,5 +571,4 @@ class GeneralController extends Controller
             ]);
         }
     }
-
 }
