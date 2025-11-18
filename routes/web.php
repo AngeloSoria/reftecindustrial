@@ -102,6 +102,8 @@ Route::middleware('auth')->group(function () {
             Route::post('section/product_line/delete', 'deleteProductLine')->name('delete.section.product_line');
             Route::get('section/product_lines', 'getAllProductLines')->name('get.section.product_lines');
 
+            Route::post('section/about_us/gallery/add', 'addAboutUsGalleryImage')->name('add.section.about_us.gallery');
+
             Route::post('section/test', 'test')->name('add.section.test');
         });
 });
