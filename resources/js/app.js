@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initTotalVisitsCounter(); // Counter widget
     initAcquisitionsChart(); // Sample
     initQuill(); // Init Quill
-    initSortableAboutUsGallery() // Gallery SortableJS
+    const aboutUsGallerySortable = initSortableAboutUsGallery(); // Gallery SortableJS
+
+    window.aboutUsGallerySortable = aboutUsGallerySortable; // Expose to global scope for testing
 });
 
