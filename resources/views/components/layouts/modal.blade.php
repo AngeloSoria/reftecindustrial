@@ -2,7 +2,7 @@
     'titleHeaderText' => null,
     'enableCloseOnOutsideClick' => true,
     'enableCloseOnEscKeyPressed' => true,
-    'modalMaxWidth' => 'xl', // md, xl, ... full
+    'modalMaxWidth' => 'md', // md, xl, ... full
     'modalID' => uniqid('modal_'),
     'modalPosition' => 'center-center',
 ])
