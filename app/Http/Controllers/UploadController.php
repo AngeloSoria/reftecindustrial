@@ -46,29 +46,40 @@ class UploadController extends Controller
 
             $uploaded = [];
 
-            // 3. Process uploads
             foreach ($files as $file) {
                 if (!$file) continue;
 
                 $filename = time() . '_' . Str::random(6) . '_' . $file->getClientOriginalName();
                 $filetype = $file->getClientMimeType();
-                $path = $file->storeAs('uploads', $filename, $disk);
+
+                if ($isPrivate) {
+                    // keep private files in storage (or private disk)
+                    $path = $file->storeAs('uploads', $filename, 'private');
+                    $url = null;
+                } else {
+                    // store public files directly in public/uploads
+                    $destination = public_path('uploads');
+                    $file->move($destination, $filename);
+                    $path = 'uploads/' . $filename;
+                    $url = '/' . $path;
+                }
 
                 $instance = Upload::create([
                     'filename'    => $filename,
-                    'type' => $filetype,
+                    'type'        => $filetype,
                     'path'        => $path,
                     'uploaded_by' => Auth::id(),
                     'is_private'  => $isPrivate,
                 ]);
 
                 $uploaded[] = [
-                    'file_id' => $instance->id,
+                    'file_id'  => $instance->id,
                     'filename' => $filename,
-                    'path' => $path,
-                    'url' => $isPrivate ? null : asset('storage/' . $path),
+                    'path'     => $path,
+                    'url'      => $url,
                 ];
             }
+
 
             session()->flash('toast', [
                 'type' => 'success',
