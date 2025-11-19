@@ -15,13 +15,28 @@ use App\Http\Controllers\UploadController;
 
 class GeneralController extends Controller
 {
+    public function test(Request $request)
+    {
+        try {
+            // Log::info($request->product_line_name);
+            // Use input() with a null coalescing fallback to avoid undefined or missing values.
+            // throw new Exception($request->input('product_line_name') ?? 'product_line_name not provided');
+            dd($request->all());
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('toast', [
+                'type' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
 
     // CREATE | POST
     public function addProductLine(Request $request)
     {
         try {
 
-            dd($request);
+            // dd($request);
 
             // Normalize checkbox input before validation
             $request->merge([
@@ -80,65 +95,124 @@ class GeneralController extends Controller
     public function addAboutUsGalleryImage(Request $request)
     {
         try {
-            // dd($request);
 
-            // upload
-            $uploadController = new UploadController();
-            $uploadResponse = $uploadController->upload($request); // Call directly
+            // VALIDATION
+            $column_name = 'about_us_gallery';
 
-            // Get the data as array if it's a JsonResponse
-            $data = $uploadResponse->getData(true);
+            // find in database.
+            $about_us_data = General::where('section', $column_name)->first(['extra_data']);
 
-            if (!$data || !$data['success']) {
-                throw new Exception($data['message']);
+            if ($about_us_data) {
+                // decode json
+                $decode_extra_data = json_decode($about_us_data['extra_data'], true);
+                // Count the current uploaded gallery.
+
+                if (count($decode_extra_data) >= 3) {
+                    throw new Exception('Max gallery image count has been used.');
+                } else {
+                    $remaining = 3 - count($decode_extra_data);
+
+                    // add new gallery image
+                    // upload
+                    $uploadController = new UploadController();
+                    $uploadResponse = $uploadController->upload($request); // Call directly
+                    $uploadedFiles = [];
+
+                    // Get the data as array if it's a JsonResponse
+                    $data = $uploadResponse->getData(true);
+
+                    try {
+                        if (!$data || !$data['success']) {
+                            throw new Exception($data['message']);
+                        } else {
+                            // insert
+
+                            if (count($decode_extra_data) + count($data['files']) > 3) {
+                                throw new Exception("Uploaded file exceeded the max count for gallery.");
+                            }
+
+                            foreach ($data['files'] as $file) {
+                                if (count($decode_extra_data) >= 3) {
+                                    break; // stop adding if max reached
+                                }
+
+                                $decode_extra_data[] = $file['file_id'];
+                            }
+
+                            $uploadedFiles = $decode_extra_data;
+
+                            // dd($decode_extra_data);
+
+                            // encode
+                            $encode_extra_data = json_encode($decode_extra_data);
+
+                            // Save to database
+                            General::where(['section' => $column_name])->update(['extra_data' => $encode_extra_data]);
+
+                            // Clear cache for about us section after updating
+                            Cache::forget('section_about_us_gallery');
+
+                            session()->flash('content', [
+                                'tab' => 'general',
+                                'section' => 'about'
+                            ]);
+
+                            return redirect(url()->previous())->with('toast', [
+                                'type' => 'success',
+                                'message' => 'New gallery image/s has been added.'
+                            ]);
+                        }
+                    } catch (Exception $e) {
+                        // delete uploaded files when upload failed
+                        foreach ($uploadedFiles as $file_id) {
+                            $uploadController->deleteUploadedFile($file_id);
+                        }
+
+                        throw $e; // rethrow to be caught by main catch block
+                    }
+                }
+            } else {
+                // upload
+                $uploadController = new UploadController();
+                $uploadResponse = $uploadController->upload($request); // Call directly
+
+                // Get the data as array if it's a JsonResponse
+                $data = $uploadResponse->getData(true);
+
+                // dd($data);
+
+                if (!$data || !$data['success']) {
+                    throw new Exception($data['message']);
+                } else {
+                    $gallery_data = array_column($data['files'], 'file_id');
+
+                    // dd($gallery_data);
+
+                    General::updateOrCreate(
+                        ['section' => 'about_us_gallery'],
+                        ['extra_data' => json_encode($gallery_data)]
+                    );
+
+                    // Clear cache for about us section after updating
+                    Cache::forget('section_about_us_gallery');
+
+                    session()->flash('content', [
+                        'tab' => 'general',
+                        'section' => 'about'
+                    ]);
+
+                    return redirect(url()->previous())->with('toast', [
+                        'type' => 'success',
+                        'message' => 'New gallery image/s has been added.'
+                    ]);
+                }
             }
-
-            // TODO: You paused here.
-            dd($data);
-
-            // Check if exist in database.
-            $isExisting = General::where('section', 'about_us')->first(['extra_data', 'order']);
-
-            dd($isExisting);
-
-            // Save to database.
-            // General::create([
-            //     'name' => $request->product_line_name,
-            //     'upload_id' => $data['files'][0]['file_id'],
-            //     'visibility' => $visible
-            // ]);
-
-            // Clear cache for product lines section after updating
-            // Cache::forget('section_product_lines');
-            // Cache::forget('section_product_lines_visible');
-
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
             session()->flash('content', [
                 'tab' => 'general',
-                'section' => 'products'
+                'section' => 'about'
             ]);
-
-            return redirect(url()->previous())->with('toast', [
-                'type' => 'success',
-                'message' => 'New product line has been added.'
-            ]);
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
-            return redirect()->back()->with('toast', [
-                'type' => 'error',
-                'message' => $e->getMessage()
-            ]);
-        }
-    }
-
-    public function test(Request $request)
-    {
-        try {
-            // Log::info($request->product_line_name);
-            // Use input() with a null coalescing fallback to avoid undefined or missing values.
-            // throw new Exception($request->input('product_line_name') ?? 'product_line_name not provided');
-            dd($request->all());
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
             return redirect()->back()->with('toast', [
                 'type' => 'error',
                 'message' => $e->getMessage()
@@ -157,7 +231,7 @@ class GeneralController extends Controller
                     'success' => true,
                     'data' => [
                         'image' => $record && $record->image_path
-                            ? asset('storage/' . $record->image_path)
+                            ? asset($record->image_path)
                             : asset('images/reftec_logo_transparent_16x9.png'), // Default
                     ],
                 ];
@@ -183,9 +257,9 @@ class GeneralController extends Controller
                 return [
                     'success' => true,
                     'data' => [
-                        'description' => $record->content,
+                        'description' => $record->content ?? "",
                         'image' => $record && $record->image_path
-                            ? asset('storage/' . $record->image_path)
+                            ? asset($record->image_path)
                             : asset('images/reftec_logo_transparent_16x9.png'),
                     ],
                 ];
@@ -288,24 +362,35 @@ class GeneralController extends Controller
     {
         try {
 
-            // $response = Cache::remember('section_about_us_gallery', env('CACHE_EXPIRATION', 3600), function () {
-            $record = General::where('section', 'about_us_gallery')->orderBy('order', 'asc')->get(['id', 'extra_data']);
+            // return response()->json('test');
 
-            return [
+            // $response = Cache::remember('section_about_us_gallery', env('CACHE_EXPIRATION', 3600), function () {
+            $column_name = 'about_us_gallery';
+            $record = General::where('section', $column_name)->first(['id', 'extra_data']);
+
+            if (!$record) {
+                return response()->json([
+                    'message' => "No record found in the about us gallery."
+                ]);
+            }
+
+            $extra_data = $record['extra_data'];
+            $decode_extra_data = json_decode($extra_data);
+            $image_paths = [];
+
+            // get the image path base on upload id.
+            $uploadController = new UploadController();
+            foreach ($decode_extra_data as $file_id) {
+                $uploadResponse = $uploadController->getUploadedFile($file_id);
+                $data = $uploadResponse->getData(true);
+                $image_paths[] = $data['data']['path'] ?? null;
+            }
+
+            return response()->json([
                 'success' => true,
-                'data' => $record->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'images' => $item->extra_data
-                            ? collect(json_decode($item->extra_data, true))->map(function ($imagePath) {
-                                return $imagePath
-                                    ? asset('storage/' . $imagePath)
-                                    : asset('images/reftec_logo_transparent_16x9.png');
-                            })
-                            : [asset('images/reftec_logo_transparent_16x9.png')],
-                    ];
-                }),
-            ];
+                'data' => $image_paths
+            ]);
+
             // });
 
             // return response()->json($response);
