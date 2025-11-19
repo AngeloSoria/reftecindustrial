@@ -6,11 +6,8 @@
             // fetch gallery images from API and populate the list
             const response = await fetch('{{ route('content.get.section.about_us.gallery') }}');
             const data = await response.json();
-            console.log(data);
             if(data.success) {
                 this.galleryImages = data.data;
-            } else {
-                console.error('Failed to load gallery images.');
             }
             this.loading = false;
         },
@@ -44,49 +41,54 @@
         :class="galleryImages && galleryImages.length <= 0 ? 'p-6 flex justify-start items-center' : 'p-2  grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2'"
         class="bg-gray-200 border rounded">
 
-        <template x-if="galleryImages.length <= 0">
+
+
+        <template x-if="loading">
+            <div class="opacity-[50%] italic flex justify-center items-center gap-4">
+                @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                Loading gallery...
+            </d>
+        </template>
+
+        <template x-if="galleryImages.length <= 0 && !loading">
             <div class="opacity-[50%] italic">No images uploaded...</d>
         </template>
 
-        <template x-if="galleryImages && galleryImages.length > 0">
 
-            <span>
-                <template x-for="image in galleryImages">
-                    <li class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
-                        data-id="sortable_item_test" title="Drag to change order." x-data="{ isHovered: false }"
-                        @mouseover="isHovered = true" @mouseleave="isHovered = false">
-                        <p x-text="image"></p>
+        <template x-for="(image_path, index) in galleryImages" :key="index">
+            <li class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
+                data-id="sortable_item_test" title="Drag to change order." x-data="{ isHovered: false }"
+                @mouseover="isHovered = true" @mouseleave="isHovered = false">
 
-                        <img src="{{ asset('images/bulan.jpg') }}" class="w-full h-full aspect-video object-contain" />
+                <img :src="'/' + image_path" class="w-full h-full aspect-video object-contain" />
 
-                        <!-- Controls: Visible on hover (desktop) + always visible on mobile -->
-                        <div x-show="isHovered || isMobile" x-transition
-                            class="flex items-center justify-end gap-2 absolute bottom-0 left-0 w-full p-2">
+                <!-- Controls: Visible on hover (desktop) + always visible on mobile -->
+                <div x-show="isHovered || isMobile" x-transition
+                    class="flex items-center justify-end gap-2 absolute bottom-0 left-0 w-full p-2">
 
-                            <button @click="$dispatch(
+                    <button @click="$dispatch(
                                     'openmodal',
                                     {
                                         modalID: 'modal_about_us_gallery',
                                         modal_header_text: 'Edit Gallery Image',
                                         special_data: {
-                                            gallery_id: image,
+                                            gallery_index: index,
+                                            gallery_id: image_path,
                                         },
                                     }
                                 )" title="Edit Image"
-                                class="p-2 rounded-full cursor-pointer shadow-sm hover:bg-gray-200 bg-white text-black/90 hover:text-black">
-                                @svg('fluentui-edit-24-o', 'w-4 h-4')
-                            </button>
+                        class="p-2 rounded-full cursor-pointer shadow-sm hover:bg-gray-200 bg-white text-black/90 hover:text-black">
+                        @svg('fluentui-edit-24-o', 'w-4 h-4')
+                    </button>
 
-                            <button title="Hold and Drag to Reorder"
-                                class="drag-handle flex items-center justify-start gap-1 p-2 rounded-full cursor-pointer shadow-sm hover:bg-gray-200 bg-white text-black/90 hover:text-black">
-                                @svg('fluentui-drag-24-o', 'w-4 h-4')
-                            </button>
-                        </div>
-                    </li>
-                </template>
-            </span>
-
+                    <button title="Hold and Drag to Reorder"
+                        class="drag-handle flex items-center justify-start gap-1 p-2 rounded-full cursor-pointer shadow-sm hover:bg-gray-200 bg-white text-black/90 hover:text-black">
+                        @svg('fluentui-drag-24-o', 'w-4 h-4')
+                    </button>
+                </div>
+            </li>
         </template>
+
 
     </ul>
 
@@ -129,8 +131,7 @@
             add: '{{ route('content.add.section.about_us.gallery') }}',
             edit: ''
         },
-    }"
-    @submit.prevent="
+    }" @submit.prevent="
         loading = true;
         if(formDisabled) {
             toast('all required fields in the form must have value first.', 'warning');
@@ -139,8 +140,7 @@
         $dispatch('force_disable_modal_closing', { modalID: modal_id });
         $dispatch('form_in_submit_phase', { file_upload_id: file_upload_id });
         $el.submit();
-    "
-    @passed_product_data.window="
+    " @passed_product_data.window="
         if (!$event.detail.data) { console.error('No data passed.') }
         if (!event.detail.modalID) { console.error('No modal ID passed. \n modal_id: ' + modal_id); }
         if ($event.detail.modalID !== modal_id) { return }
@@ -155,17 +155,18 @@
     " @files_not_empty.window="
         if($event.detail.file_upload_id != file_upload_id) return;
         formDisabled = false;
-    "
-    method="POST"
-    enctype="multipart/form-data"
-    :action="galleryData && Object.keys(galleryData).length > 0 ? routes.edit : routes.add"
-    >
+    " method="POST" enctype="multipart/form-data"
+        :action="galleryData && Object.keys(galleryData).length > 0 ? routes.edit : routes.add">
         @csrf
         <template x-if="galleryData">
-            <p x-text="galleryData.gallery_id"></p>
+            <div>
+                <p x-text="galleryData.gallery_index"></p>
+                <p x-text="galleryData.gallery_id"></p>
+            </div>
         </template>
 
-        <x-layouts.file_upload_drag file_upload_id="{{ $fileUploadId }}" acceptFile="image/*" multiple maxUploadCount="3" />
+        <x-layouts.file_upload_drag file_upload_id="{{ $fileUploadId }}" acceptFile="image/*" multiple
+            maxUploadCount="3" />
 
         <section class="mt-4 flex items-center justify-end gap-2">
             <button type="button" @click="closeModal()" :disabled="loading"
