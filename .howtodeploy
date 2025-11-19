@@ -1,0 +1,26 @@
+<!--
+
+HOW TO DEPLOY TO PROD?
+    Duplicate the project file first (for backup purposes if something went wrong in the prod deployment)
+
+    Select the copy of the project as the deployment target
+        Set up .env file to production:
+            App config
+                ...APP_ENV=production
+            Database config
+                ...Hosting DB Setups
+
+        Clear cache:
+            Paste in terminal and run:
+                php artisan view:clear
+                php artisan cache:clear
+                php artisan config:clear
+                php artisan route:clear
+
+        Run in terminal:
+            composer install --optimize-autoloader --no-dev
+            npm run build
+
+        Compress the project file into a ZIP file (copy version)
+
+-->
