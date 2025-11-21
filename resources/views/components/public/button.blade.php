@@ -39,6 +39,7 @@
     'href' => null,
     'type' => 'button',
     'size' => 'md',
+    'disabled' => false,
 ])
 
 @if($href)
@@ -51,7 +52,8 @@
 @else
     <button
         type="{{ $type }}"
-        class="flex justify-center items-center gap-2 py-2 px-4 {{ $buttonScale }} rounded {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}"
+        class="flex justify-center items-center gap-2 py-2 px-4 {{ $buttonScale }} rounded {{ $attributes->get('class') ?? 'transition-colors cursor-pointer' }} {{ $classes }}
+        disabled:opacity-50 disabled:cursor-not-allowed"
         {{ $attributes }}>
         {{ $slot }}
     </button>
