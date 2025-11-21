@@ -190,8 +190,6 @@ class GeneralController extends Controller
                     } else {
                         $gallery_data = array_column($data['files'], 'file_id');
 
-                        // dd($gallery_data);
-
                         General::updateOrCreate(
                             ['section' => 'about_us_gallery'],
                             ['extra_data' => json_encode($gallery_data)]
@@ -405,22 +403,29 @@ class GeneralController extends Controller
                 );
             }
 
-            $image_paths = [];
-            Logger();
+            $gallery_image_data = [];
 
             // get the image path base on upload id.
             $uploadController = new UploadController();
             foreach ($decode_extra_data as $file_id) {
                 $uploadResponse = $uploadController->getUploadedFile($file_id);
                 $data = $uploadResponse->getData(true);
-                $image_paths[] = $data['data']['path'] ?? null;
+
+                if(!$data['success']) {
+                    throw new Exception($data['message']);
+                }
+
+                $gallery_image_data[] = [
+                    "file_id" => $data['data']['id'],
+                    "path" => $data['data']['path']
+                ] ?? null;
             }
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'remaining' => 3 - count($image_paths),
-                    'gallery' => $image_paths
+                    'remaining' => 3 - count($gallery_image_data),
+                    'gallery' => $gallery_image_data
                 ]
             ]);
 
@@ -432,7 +437,7 @@ class GeneralController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to load About Us gallery.',
+                'message' => 'Failed to load About Us gallery: ' . $e->getMessage(),
             ], 500);
         }
     }

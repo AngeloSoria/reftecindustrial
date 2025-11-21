@@ -14,13 +14,21 @@ export function initSortableAboutUsGallery() {
                 if (evt.oldIndex === evt.newIndex) return;
 
                 const order = sortable.toArray();
-                console.log("New order:", order);
+                // console.log("New order:", order);
+
+                // 🔥 Dispatch Alpine event
+                window.dispatchEvent(new CustomEvent("about_us_gallery_sorted", {
+                    detail: {
+                        order,
+                        oldIndex: evt.oldIndex,
+                        newIndex: evt.newIndex
+                    }
+                }));
             },
         });
 
         // Save original order
         initialOrder = sortable.toArray();
-        console.log("Initial order:", initialOrder);
     }
 
     // return functions it can be triggered from outside

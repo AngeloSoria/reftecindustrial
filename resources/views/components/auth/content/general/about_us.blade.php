@@ -1,4 +1,5 @@
-<div x-data="{
+<div 
+    x-data="{
         controlButtonsVisible: false,
         loading: true,
         galleryImages: [],
@@ -15,7 +16,10 @@
             }
             this.loading = false;
         },
-    }">
+    }"
+    @about_us_gallery_sorted.window="
+        console.log($event.detail);
+    ">
     <h2 class="gap-2">
         Gallery
         <span x-text="!loading ? '(' + galleryImages.length + '/3' + ')' : ''"></span>
@@ -63,12 +67,12 @@
         </template>
 
 
-        <template x-for="(image_path, index) in galleryImages" :key="index">
+        <template x-for="(image_data, index) in galleryImages" :key="index">
             <li class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
-                data-id="sortable_item_test" title="Drag to change order." x-data="{ isHovered: false }"
+                x-bind:data-id="image_data.file_id" title="Drag to change order." x-data="{ isHovered: false }"
                 @mouseover="isHovered = true" @mouseleave="isHovered = false">
 
-                <img :src="image_path" class="w-full h-full aspect-video object-contain" />
+                <img :src="image_data.path" class="w-full h-full aspect-video object-contain" />
 
                 <!-- Controls: Visible on hover (desktop) + always visible on mobile -->
                 <div x-show="isHovered || isMobile" x-transition
