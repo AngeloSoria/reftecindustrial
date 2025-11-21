@@ -184,6 +184,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         openPicker() {
+            if(this.inSubmissionPhase) return;
             if (this.isAtLimit) {
                 this.notifyLimit();
                 return;
