@@ -1,12 +1,8 @@
-<x-layouts.auth.app viewName="Test" class="font-inter px-2">
+<x-layouts.auth.app viewName="Test" class="font-inter p-4">
 
-    <button
-        x-data
-        x-on:click="$dispatch('openmodal', ['product-details', { mode: 'get', id: 4 }]); console.log(123);"
-        class="px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600">
-        Add Product
-    </button>
-
-    <livewire:test-flux/>
+    <form method="POST" action="{{ route('content.add.section.test') }}">
+        @csrf
+        <x-public.button button_type="primary" type="submit">Toast 1</x-public.button>
+    </form>
 
 </x-layouts.auth.app>
