@@ -2,29 +2,37 @@
         controlButtonsVisible: false,
         loading: true,
         galleryImages: [],
+        remainingImage: 0,
         async init() {
             // fetch gallery images from API and populate the list
             const response = await fetch('{{ route('content.get.section.about_us.gallery') }}');
             const data = await response.json();
+            console.log(data);
             if(data.success) {
-                this.galleryImages = data.data;
+                this.galleryImages = data.data.gallery ?? [];
+                this.remainingImage = data.data.remaining;
+                $dispatch('send_remaining_image_of_gallery', {remaining: this.remainingImage});
             }
             this.loading = false;
         },
     }">
-    <h2>Gallery</h2>
+    <h2 class="gap-2">
+        Gallery
+        <span x-text="!loading ? '(' + galleryImages.length + '/3' + ')' : ''"></span>
+    </h2>
 
     <section class="py-2 flex">
-        <x-public.button button_type="primary" @click="
-            $dispatch('openmodal', {
-                modalID: 'modal_about_us_gallery',
-                modal_header_text: 'Add Gallery Image',
-            });
-            controlButtonsVisible = !controlButtonsVisible;
+        <x-public.button button_type="primary" x-bind:disabled="remainingImage <= 0"
+            x-bind:title="remainingImage <= 0 ? 'Maximum image exceeded' : 'Upload image'" @click="
+                $dispatch('openmodal', {
+                    modalID: 'modal_about_us_gallery',
+                    modal_header_text: 'Add Gallery Image',
+                });
+                controlButtonsVisible = !controlButtonsVisible;
             ">
             <span class="flex items-center gap-2">
                 @svg('fluentui-add-circle-20-o', 'w-5 h-5')
-                Add Image
+                <span x-text="!loading ? 'Add Image' : 'Loading...'"></span>
             </span>
         </x-public.button>
     </section>
@@ -47,7 +55,7 @@
             <div class="opacity-[50%] italic flex justify-center items-center gap-4">
                 @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
                 Loading gallery...
-            </d>
+                </d>
         </template>
 
         <template x-if="galleryImages.length <= 0 && !loading">
@@ -60,7 +68,7 @@
                 data-id="sortable_item_test" title="Drag to change order." x-data="{ isHovered: false }"
                 @mouseover="isHovered = true" @mouseleave="isHovered = false">
 
-                <img :src="'/' + image_path" class="w-full h-full aspect-video object-contain" />
+                <img :src="image_path" class="w-full h-full aspect-video object-contain" />
 
                 <!-- Controls: Visible on hover (desktop) + always visible on mobile -->
                 <div x-show="isHovered || isMobile" x-transition
@@ -72,8 +80,8 @@
                                         modalID: 'modal_about_us_gallery',
                                         modal_header_text: 'Edit Gallery Image',
                                         special_data: {
-                                            gallery_index: index,
-                                            gallery_id: image_path,
+                                            image_index: index,
+                                            image_path: image_path,
                                         },
                                     }
                                 )" title="Edit Image"
@@ -126,19 +134,25 @@
         file_upload_id: @js($fileUploadId),
         galleryData: {},
         formDisabled: true,
+        remainingImage: 0,
         loading: false,
+        actionContext: null,
         routes: {
             add: '{{ route('content.add.section.about_us.gallery') }}',
-            edit: ''
+            delete: '{{ route('content.delete.section.about_us.gallery') }}',
+            edit: '{{ route('content.edit.section.about_us.gallery') }}',
         },
-    }" @submit.prevent="
+    }" @send_remaining_image_of_gallery.window="
+        remainingImage = $event.detail.remaining;
+    " @submit.prevent="
         loading = true;
-        if(formDisabled) {
+        if(formDisabled && actionContext != routes.delete) {
             toast('all required fields in the form must have value first.', 'warning');
             return;
         }
         $dispatch('force_disable_modal_closing', { modalID: modal_id });
         $dispatch('form_in_submit_phase', { file_upload_id: file_upload_id });
+        {{-- console.log('Action: ' + actionContext); --}}
         $el.submit();
     " @passed_product_data.window="
         if (!$event.detail.data) { console.error('No data passed.') }
@@ -155,32 +169,66 @@
     " @files_not_empty.window="
         if($event.detail.file_upload_id != file_upload_id) return;
         formDisabled = false;
-    " method="POST" enctype="multipart/form-data"
-        :action="galleryData && Object.keys(galleryData).length > 0 ? routes.edit : routes.add">
+    " method="POST" enctype="multipart/form-data" x-bind:action="actionContext">
         @csrf
-        <template x-if="galleryData">
+
+        <template x-if="galleryData && Object.keys(galleryData).length > 0">
             <div>
-                <p x-text="galleryData.gallery_index"></p>
-                <p x-text="galleryData.gallery_id"></p>
+                <input type="hidden" name="gallery_image_index" x-model="galleryData.image_index" />
+                <section class="p-4 flex items-center justify-center hover:bg-gray-300 transition-colors">
+                    <img :src="galleryData.image_path" class="aspect-video object-contain" />
+                </section>
             </div>
         </template>
 
-        <x-layouts.file_upload_drag file_upload_id="{{ $fileUploadId }}" acceptFile="image/*" multiple
-            maxUploadCount="3" />
+        <template x-if="galleryData && Object.keys(galleryData).length > 0">
+            <section class="max-w-md">
+                <x-layouts.file_upload_drag file_upload_id="{{ $fileUploadId }}" acceptFile="image/*" />
+            </section>
+        </template>
 
-        <section class="mt-4 flex items-center justify-end gap-2">
-            <button type="button" @click="closeModal()" :disabled="loading"
-                class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-darkslategray-300 bg-accent-darkslategray-200">
-                Cancel
-            </button>
-            <button type="submit" :disabled="loading || formDisabled"
-                class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-orange-400 bg-accent-orange-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                <template x-if="loading">
-                    @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+        <template x-if="galleryData && Object.keys(galleryData).length <= 0">
+            <section class="max-w-md">
+                <x-layouts.file_upload_drag file_upload_id="{{ $fileUploadId }}" acceptFile="image/*" multiple
+                    maxUploadCount="3" />
+            </section>
+        </template>
+
+
+
+        <section class="mt-4 flex items-center justify-end gap-2 w-full">
+            <section class="grow flex gap-2 border">
+                <template x-if="galleryData && Object.keys(galleryData).length > 0">
+                    <button type="submit" :disabled="loading" @click="actionContext = routes.delete"
+                        class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-white hover:bg-red-400 bg-red-500 disabled:cursor-not-allowed disabled:opacity-50">
+                        <template x-if="loading && actionContext == routes.delete">
+                            @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                        </template>
+                        <span x-text="loading && actionContext == routes.delete ? 'Deleting...' : 'Delete'"></span>
+                    </button>
                 </template>
-                <span x-text="loading ? 'Saving...' : 'Save'"></span>
-            </button>
+            </section>
+
+            <section class="grow flex gap-2 items-start justify-end">
+                <button type="button" @click="closeModal()" :disabled="loading"
+                    class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-darkslategray-300 bg-accent-darkslategray-200">
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-orange-400 bg-accent-orange-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :disabled="loading && actionContext != routes.delete || formDisabled"
+                    @click="actionContext = galleryData && Object.keys(galleryData).length > 0 ? routes.edit : routes.add"
+                    >
+                    <template x-if="loading && actionContext != routes.delete">
+                        @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                    </template>
+                    <span x-text="loading && actionContext != routes.delete ? 'Saving...' : 'Save'"></span>
+                </button>
+            </section>
         </section>
+
 
     </form>
 </x-layouts.modal>
