@@ -46,7 +46,7 @@
         <template x-for="product in product_lines" :key="product.name">
             <div class="border bg-white rounded overflow-hidden hover:shadow-sm transition-shadow">
                 <div class="p-3 relative hover:bg-gray-100 transition-colors">
-                    <img :src="'/' + product.image_path"
+                    <img :src="product.image_path"
                         class="min-h-[150px] max-h-[150px] w-full h-full object-contain" :alt="product.name" />
                     <span x-text="product.visibility == 1 ? 'visible' : 'hidden'"
                         :class="product.visibility == 1 ? 'bg-accent-lightseagreen-50 text-white' : 'bg-brand-secondary-300 text-white'"
@@ -208,7 +208,7 @@
             {{-- Image --}}
             <template x-if="productData && productData.image_path">
                 <div class="w-full flex items-center justify-center p-4 hover:bg-gray-300 transition-colors">
-                    <img :src="'/' + productData.image_path" alt="Product Image"
+                    <img :src="productData.image_path" alt="Product Image"
                         class="max-w-64 aspect-auto rounded-sm" />
                 </div>
             </template>
