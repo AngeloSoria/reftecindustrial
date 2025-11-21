@@ -15,12 +15,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
-@if(session('toast'))
+@if(session('toasts'))
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            toast(@json(session('toast.message')), @json(session('toast.type')));
+            @foreach(session('toasts') as $toast)
+                toast(@json($toast['message']), @json($toast['type']), @json($toast['duration']));
+            @endforeach
         });
     </script>
 @endif
+
 
 <x-public.toast />
