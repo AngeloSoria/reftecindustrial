@@ -72,7 +72,7 @@
                 <template x-for="line in productLines" :key="line.name">
                     <section  class="w-full relative h-24 overflow-hidden">
                         {{-- Image --}}
-                        <img :src="'/storage/' + line.image_path" :alt="line.name" class="w-full m-auto" />
+                        <img :src="line.image_path" :alt="line.name" class="w-full m-auto" />
 
                         {{-- Product Name --}}
                         <div class="z-2 w-[90%] absolute bottom-0 left-1/2 -translate-x-1/2 p-2 text-white text-center">
