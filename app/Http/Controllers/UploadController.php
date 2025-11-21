@@ -42,7 +42,6 @@ class UploadController extends Controller
             }
 
             $isPrivate = $request->boolean('is_private');
-            $disk = $isPrivate ? 'private' : 'public';
 
             $uploaded = [];
 
@@ -60,8 +59,8 @@ class UploadController extends Controller
                     // store public files directly in public/uploads
                     $destination = public_path('uploads');
                     $file->move($destination, $filename);
-                    $path = 'uploads/' . $filename;
-                    $url = '/' . $path;
+                    $path = '/uploads/' . $filename;
+                    $url = $path;
                 }
 
                 $instance = Upload::create([
@@ -80,13 +79,9 @@ class UploadController extends Controller
                 ];
             }
 
-
-            session()->flash('toast', [
-                'type' => 'success',
-                'message' => count($uploaded) > 1
-                    ? 'Files uploaded successfully.'
-                    : 'File uploaded successfully.',
-            ]);
+            // toast(count($uploaded) > 1
+            //     ? 'Files uploaded successfully.'
+            //     : 'File uploaded successfully.', "success");
 
             // 4. Build response
             return response()->json([
@@ -100,10 +95,7 @@ class UploadController extends Controller
         } catch (Exception $e) {
             Log::error('Upload failed: ' . $e->getMessage());
 
-            session()->flash('toast', [
-                'type' => 'error',
-                'message' => $e->getMessage(),
-            ]);
+            // toast("Upload failed: " . $e->getMessage(), "error");
 
             return response()->json([
                 'success' => false,
@@ -138,6 +130,30 @@ class UploadController extends Controller
             ], 500);
         }
     }
+    public function getUploadedFileFromPath($file_path)
+    {
+        try {
+            $record = Upload::where(['path' => $file_path])->firstOrFail();
+
+            return response()->json([
+                'type' => 'success',
+                'success' => true,
+                'data' => $record
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found.',
+                'type' => 'error'
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'type' => 'error',
+                'message' => 'Failed to get uploaded file: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 
     public function getAllUploadedFiles(Request $request)
     {
@@ -159,28 +175,21 @@ class UploadController extends Controller
             // Delete the database record
             $record->delete();
 
-            session()->flash('toast', [
-                'type' => 'success',
-                'message' => 'File deleted successfully.',
-            ]);
+            // toast("File deleted successfully.", "success");
 
-            return redirect()->back();
-        } catch (ModelNotFoundException $e) {
-            session()->flash('toast', [
-                'type' => 'error',
-                'message' => 'File not found.',
+            return response()->json([
+                'success' => true,
+                'message' => 'File deleted successfully.'
             ]);
-
-            return redirect()->back();
         } catch (Exception $e) {
             Log::error('Failed to delete uploaded file: ' . $e->getMessage());
 
-            session()->flash('toast', [
-                'type' => 'error',
-                'message' => 'Failed to delete file: ' . $e->getMessage(),
-            ]);
+            // toast('Failed to delete file: ' . $e->getMessage(), "error");
 
-            return redirect()->back();
+            return response()->json([
+                'success' => false,
+                'message' => 'File deleting error:' . $e->getMessage()
+            ]);
         }
     }
 
@@ -195,7 +204,8 @@ class UploadController extends Controller
             // Delete the database record
             $record->delete();
 
-            Log::info('File deleted successfully: ' . $file_path);
+            // toast("File deleted successfully.", "success");
+
             return response()->json([
                 'success' => true,
                 'message' => 'File deleted successfully: ' . $file_path,
@@ -203,6 +213,9 @@ class UploadController extends Controller
             ], 200);
         } catch (ModelNotFoundException $e) {
             Log::warning('File not found for deletion: ' . $file_path);
+
+            toast('File not found for deletion: ' . $file_path, "error");
+
             return response()->json([
                 'success' => false,
                 'message' => 'File not found for deletion: ' . $file_path,
@@ -210,6 +223,9 @@ class UploadController extends Controller
             ], 404);
         } catch (Exception $e) {
             Log::error('Failed to delete uploaded file: ' . $e->getMessage());
+
+            // toast('Failed to delete uploaded file: ' . $e->getMessage(), "error");
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete uploaded file: ' . $e->getMessage(),
