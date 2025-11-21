@@ -1,7 +1,7 @@
 <div x-data="{
         toasts: [],
         add(message, type = 'info', duration = 3, refreshOnComplete = false) {
-            const id = Date.now();
+            const id = crypto.randomUUID();
             const totalTime = duration * 1000;
             const intervalStep = 100;
             const decrement = (intervalStep / totalTime) * 100;
