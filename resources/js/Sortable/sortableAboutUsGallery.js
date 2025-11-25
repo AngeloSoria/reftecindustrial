@@ -9,41 +9,86 @@ export function initSortableAboutUsGallery() {
         sortable = Sortable.create(el, {
             animation: 150,
             handle: ".drag-handle",
+            draggable: "li", // ✨ Only make <li> elements draggable
             dataIdAttr: "data-id",
+            filter: 'template',
+            preventOnFilter: false,
             onEnd: (evt) => {
                 if (evt.oldIndex === evt.newIndex) return;
 
                 const order = sortable.toArray();
-                // console.log("New order:", order);
-
-                // 🔥 Dispatch Alpine event
                 window.dispatchEvent(new CustomEvent("about_us_gallery_sorted", {
-                    detail: {
-                        order,
-                        oldIndex: evt.oldIndex,
-                        newIndex: evt.newIndex
-                    }
+                    detail: { order, oldIndex: evt.oldIndex, newIndex: evt.newIndex }
                 }));
             },
         });
 
-        // Save original order
-        initialOrder = sortable.toArray();
+        // custom id
+        sortable.id = "sortable_AboutUsGallery";
+
+        // Replace the queueMicrotask section with:
+        setTimeout(() => {
+            initialOrder = [...el.querySelectorAll('li[data-id]')].map(li => li.dataset.id);
+            console.log("Initial order saved:", initialOrder);
+        }, 100); // Give Alpine more time to render
+
+        // save initialOrder
+        window.addEventListener('sortable_set_initialOrder', (e) => {
+            if (!e.detail?.sortableObject) return;
+            if (e.detail.sortableObject.id !== sortable.id) return;
+            if (!e.detail.initialOrder) return;
+
+            // from Proxy Array into normal Array
+            initialOrder = Array.from(e.detail.initialOrder);
+            console.log(initialOrder);
+        });
     }
 
-    // return functions it can be triggered from outside
-    return {
-        resetOrder() {
-            if (sortable) {
-                sortable.sort(initialOrder);
-            }
-        },
+    function resetOrder() {
+        if (!sortable || initialOrder.length === 0) return;
 
-        saveNewOrder() {
-            if (sortable) {
-                initialOrder = sortable.toArray(); // update baseline
-                console.log("Saved new baseline:", initialOrder);
+        // Get only <li> elements (not templates)
+        const liChildren = [...el.querySelectorAll('li[data-id]')];
+
+        // Create a map for quick lookup
+        const elementMap = new Map();
+        liChildren.forEach(li => {
+            elementMap.set(li.dataset.id, li);
+        });
+
+        // Temporarily disable sortable
+        sortable.option("disabled", true);
+        const prevAnimation = sortable.option("animation");
+        sortable.option("animation", 0);
+
+        // Remove all <li> elements first
+        liChildren.forEach(li => li.remove());
+
+        // Re-insert in the correct order by appending to the container
+        // This ensures they appear in the order of the initialOrder array
+        initialOrder.forEach(id => {
+            const element = elementMap.get(id);
+            if (element) {
+                el.appendChild(element); // ✨ Simply append - they'll be added in order
             }
-        }
-    };
+        });
+
+        // Restore sortable settings
+        sortable.option("animation", prevAnimation);
+        sortable.option("disabled", false);
+
+        console.log("Reset done. Current order:", sortable.toArray());
+    }
+
+    // Listen for external event to reset order
+    document.addEventListener('sortable_resetOrder', (e) => {
+        if (!e.detail?.sortableObject) return;
+        if (e.detail.sortableObject.id !== sortable.id) return;
+        resetOrder();
+    });
+
+    // Expose sortable object
+    window.dispatchEvent(new CustomEvent("sortable_object_gallery", {
+        detail: { sortableObject: sortable }
+    }));
 }
