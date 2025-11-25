@@ -630,8 +630,8 @@ class GeneralController extends Controller
 
     public function editAboutUsGallery(Request $request)
     {
+        $currentExtraData = null;
         try {
-            // dd($request);
             $request->validate([
                 'file' => 'required|file|mimes:jpg,png,jpeg,bmp,gif|max:' . env('APP_MAX_UPLOAD_SIZE', 10240), // Image only
                 'gallery_image_index' => 'required|integer'
@@ -646,6 +646,9 @@ class GeneralController extends Controller
                 throw new Exception("No data found when trying to edit.");
             }
 
+            // save for later
+            $currentExtraData = $data['extra_data'];
+
             // Decode extra_data
             $decoded_data = json_decode($data['extra_data']);
 
@@ -658,6 +661,34 @@ class GeneralController extends Controller
 
             // get the data from upload model
             $uploadController = new UploadController();
+
+           // upload new file
+            $uploadFileInfo = $uploadController->upload($request)->getData(true);
+
+            // validate if existing
+            if (!$uploadFileInfo['success']) {
+                throw new Exception("Something went wrong when trying to upload a file.");
+            }
+
+            // get the file id
+            $new_file_id = $uploadFileInfo['files'][0]['file_id'];
+
+            if (!$new_file_id) {
+                throw new Exception("Something went wrong when trying to read the new file id.");
+            }
+
+            // replace old id into new (replace)
+            $decoded_data[$galleryImageIndex] = $new_file_id;
+
+            // encode data to be saved in db
+            $encoded_data = json_encode($decoded_data);
+
+            // save to database
+            General::updateOrCreate(['section' => 'about_us_gallery'], [
+                'extra_data' => $encoded_data
+            ]);
+            
+            // FILE DELETION
             $retrieveFileInfo = $uploadController->getUploadedFile($upload_id)->getData(true);
 
             if (!$retrieveFileInfo['success']) {
@@ -671,26 +702,15 @@ class GeneralController extends Controller
                 throw new Exception("Something went wrong when trying to delete a file.");
             }
 
-            // upload new file
-            $uploadFileInfo = $uploadController->upload($request)->getData(true);
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'about'
+            ]);
 
-            if (!$uploadFileInfo['success']) {
-                throw new Exception("Something went wrong when trying to upload a file.");
-            }
+            toast("Gallery image has been updated.", "success");
 
-            dd($uploadFileInfo);
+            return back();
 
-            // get the file id
-            $new_file_id = $uploadFileInfo['files'][0]['file_id'];
-
-            if (!$new_file_id) {
-                throw new Exception("Something went wrong when trying to read the new file id.");
-            }
-
-            // update the file id of decoded data's index
-            $decoded_data[$galleryImageIndex] = $new_file_id;
-
-            dd($decoded_data, $upload_id, $retrieveFileInfo, $new_file_id);
         } catch (Exception $e) {
             Logger()->info($e->getMessage());
 
