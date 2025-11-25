@@ -76,13 +76,17 @@ export async function initVisitorsChart() {
             const response = await fetch('/visitors/countries-this-month');
             const data = await response.json();
 
+            if (!data['success']) {
+                return;
+            }
+
             // 🟨 Store full and truncated names
-            const labels = data.map(item => item.country);
+            const labels = data.data.map(item => item.country);
             const truncatedLabels = labels.map(
                 name => name.length > 15 ? name.substring(0, 15) + '…' : name
             );
 
-            const values = data.map(item => item.total);
+            const values = data.data.map(item => item.total);
 
             const colors = [
                 '#3B82F6', '#10B981', '#F59E0B',
