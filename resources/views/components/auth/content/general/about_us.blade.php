@@ -1,24 +1,46 @@
-<div 
-    x-data="{
+<div x-data="{
+        sortableGalleryObject: null,
         controlButtonsVisible: false,
         loading: true,
         galleryImages: [],
         remainingImage: 0,
+        initialOrder: [],
         async init() {
             // fetch gallery images from API and populate the list
             const response = await fetch('{{ route('content.get.section.about_us.gallery') }}');
             const data = await response.json();
-            console.log(data);
+
             if(data.success) {
                 this.galleryImages = data.data.gallery ?? [];
                 this.remainingImage = data.data.remaining;
+                this.galleryImages.forEach((e, i) => {
+                    this.initialOrder.push(String(e.file_id));
+                });
                 $dispatch('send_remaining_image_of_gallery', {remaining: this.remainingImage});
+                $dispatch('sortable_set_initialOrder', { 
+                    sortableObject: this.sortableGalleryObject,
+                    initialOrder: this.initialOrder
+                });
             }
             this.loading = false;
         },
-    }"
-    @about_us_gallery_sorted.window="
+        sortableResetOrder() {
+            if(!this.sortableGalleryObject) {
+                console.warn('sortable gallery object is null when calling this function.');
+                return;
+            }
+            console.log('foo');
+            $dispatch('sortable_resetOrder', {
+                sortableObject: this.sortableGalleryObject ,
+                initialOrder: this.initialOrder
+            });
+        }
+    }" @about_us_gallery_sorted.window="
+        controlButtonsVisible = true;
         console.log($event.detail);
+    " @sortable_object_gallery.window="
+        console.log('Sortable object:', $event.detail);
+        sortableGalleryObject = $event.detail.sortableObject;
     ">
     <h2 class="gap-2">
         Gallery
@@ -67,10 +89,14 @@
         </template>
 
 
-        <template x-for="(image_data, index) in galleryImages" :key="index">
-            <li class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
-                x-bind:data-id="image_data.file_id" title="Drag to change order." x-data="{ isHovered: false }"
-                @mouseover="isHovered = true" @mouseleave="isHovered = false">
+        <template x-for="(image_data, index) in galleryImages" :key="image_data + '_' + index">
+            <li 
+                class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
+                x-data="{ isHovered: false }"
+                x-bind:data-id="image_data.file_id" 
+                title="Drag to change order." 
+                @mouseover="isHovered = true" 
+                @mouseleave="isHovered = false">
 
                 <img :src="image_data.path" class="w-full h-full aspect-video object-contain" />
 
@@ -85,7 +111,7 @@
                                         modal_header_text: 'Edit Gallery Image',
                                         special_data: {
                                             image_index: index,
-                                            image_path: image_path,
+                                            image_path: image_data.path,
                                         },
                                     }
                                 )" title="Edit Image"
@@ -101,16 +127,20 @@
             </li>
         </template>
 
-
     </ul>
 
     <section x-transition x-show="controlButtonsVisible" x-data class="mt-2 py-2 flex justify-end items-center">
-        <form method="POST" action="{{ route('content.add.section.test') }}">
+        <form 
+            method="POST" 
+            action="{{ route('content.add.section.test') }}"
+            x-data
+            @submit.prevent=""
+            >
             @csrf
             <input id="about_us_gallery_input_order" type="hidden" name="about_us_gallery_order" value="[]" />
 
             <section class="flex items-center gap-2">
-                <x-public.button type="button">
+                <x-public.button type="button" @click="sortableResetOrder()">
                     <span class="flex items-center justify-center gap-2">
                         Cancel
                     </span>
@@ -156,7 +186,6 @@
         }
         $dispatch('force_disable_modal_closing', { modalID: modal_id });
         $dispatch('form_in_submit_phase', { file_upload_id: file_upload_id });
-        {{-- console.log('Action: ' + actionContext); --}}
         $el.submit();
     " @passed_product_data.window="
         if (!$event.detail.data) { console.error('No data passed.') }
@@ -219,12 +248,10 @@
                     Cancel
                 </button>
 
-                <button
-                    type="submit"
+                <button type="submit"
                     class="px-5 py-2 rounded cursor-pointer flex items-center justify-center gap-2 text-gray-950 hover:bg-accent-orange-400 bg-accent-orange-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     :disabled="loading && actionContext != routes.delete || formDisabled"
-                    @click="actionContext = galleryData && Object.keys(galleryData).length > 0 ? routes.edit : routes.add"
-                    >
+                    @click="actionContext = galleryData && Object.keys(galleryData).length > 0 ? routes.edit : routes.add">
                     <template x-if="loading && actionContext != routes.delete">
                         @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
                     </template>
