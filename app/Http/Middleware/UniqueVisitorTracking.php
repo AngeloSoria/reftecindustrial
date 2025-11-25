@@ -20,6 +20,11 @@ class UniqueVisitorTracking
             return $next($request);
         }
 
+        // Do not track visits in local dev environment
+        if (app()->environment('local')) {
+            return $next($request);
+        }
+
         // Option 1: Track once per session
         if (!session()->has('visitor_tracked')) {
             (new Visitor())->handle($request, $next);
