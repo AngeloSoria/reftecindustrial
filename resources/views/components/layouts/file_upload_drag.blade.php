@@ -117,6 +117,7 @@ document.addEventListener('alpine:init', () => {
                     return; // exit listener
                 }
 
+                
                 // Check if detail has length (array/string) and is empty
                 if ((detail.length !== undefined) && detail.length <= 0) {
                     console.warn('detail exists but is empty.');
@@ -125,10 +126,10 @@ document.addEventListener('alpine:init', () => {
 
                 // Check if file_upload_id exists
                 if (!detail.file_upload_id) {
-                    console.warn('file_upload_id does not exist in detail.');
+                    console.warn('fileUploadID does not exist in detail.');
                     return;
                 }
-
+                
                 // Check if file_upload_id matches this component's id
                 if (detail.file_upload_id !== this.file_upload_id) {
                     // console.warn('file_upload_id does not match.');
@@ -307,8 +308,9 @@ document.addEventListener('alpine:init', () => {
             if(this.inSubmissionPhase) return;
             this.files.forEach(f => f.preview && URL.revokeObjectURL(f.preview));
             this.files = [];
-            this.$refs.input.value = '';
-            // console.log("File selected has been refreshed.");
+            if(this.$refs.input) {
+                this.$refs.input.value = '';
+            }
         },
 
     }));
