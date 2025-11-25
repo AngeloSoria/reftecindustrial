@@ -17,17 +17,38 @@
     {{-- Collage --}}
     {{-- TODO: Make this server-sided. --}}
     <section class="relative h-[200px]">
-        <div class="grid grid-cols-3 h-full">
-            @php
-                $fake_data = [
-                    asset('images/layout_light_16x9.png'),
-                    asset('images/layout_light_16x9.png'),
-                    asset('images/layout_light_16x9.png'),
-                ];
-            @endphp
-            @for($index = 0; $index < 3; $index++)
-                <div class="bg-cover bg-no-repeat bg-center" style="background-image: url({{ $fake_data[$index] }});"></div>
-            @endfor
+        <div x-data="{
+                galleryData: [],
+                isFetchCompleted: false,
+                async init() {
+                    // pre-insert placeholder images
+                    for (let i = 0; i < 3; i++) {
+                        this.galleryData.push('{{ asset('images/layout_light_16x9.png') }}');
+                    }
+
+                    // fetch gallery from server
+                    const response = await fetch('{{ route('content.get.section.about_us.gallery') }}');
+                    const data = await response.json();
+
+                    if(!data.success) {
+                        console.error(!data.message ? 'Fetching error on gallery images.' : data.message);
+                        return;
+                    };
+
+                    // reset
+                    this.galleryData = [];
+                    // re-insert new data that came from the server.
+                    data.data.gallery.forEach((e, index) => {
+                        this.galleryData.push(e.path);
+                    });
+                },
+            }" 
+            class="grid grid-cols-3 h-full border-4 border-red-500">
+            <template x-for="image_path in galleryData" :key="image_path + crypto.randomUUID()">
+                <div class="border-2 h-full relative overflow-hidden">
+                    <img :src="image_path" class="w-full h-full absolute top-0 left-0 aspect-video"/>
+                </div>
+            </template>
         </div>
 
         {{-- gradient fade --}}
@@ -49,7 +70,8 @@
                 <div class="bg-transparent border-3 border-accent-orange-300 px-8 py-14 ">
                     {{-- TODO: Make the text here server-sided. --}}
                     <p class="font-inter text-xl font-medium">
-                        Founded in 2005 as a sole proprietorship, <span class="font-black text-brand-secondary-300">REFTEC
+                        Founded in 2005 as a sole proprietorship, <span
+                            class="font-black text-brand-secondary-300">REFTEC
                             Industrial
                             Supply and Services Inc.</span> is a 100%
                         Filipino-owned company. In 2011, it was officially registered as a corporation with the
