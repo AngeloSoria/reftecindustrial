@@ -29,7 +29,6 @@ export function initSortableAboutUsGallery() {
         // Replace the queueMicrotask section with:
         setTimeout(() => {
             initialOrder = [...el.querySelectorAll('li[data-id]')].map(li => li.dataset.id);
-            console.log("Initial order saved:", initialOrder);
         }, 100); // Give Alpine more time to render
 
         // save initialOrder
@@ -40,7 +39,6 @@ export function initSortableAboutUsGallery() {
 
             // from Proxy Array into normal Array
             initialOrder = Array.from(e.detail.initialOrder);
-            console.log(initialOrder);
         });
     }
 
@@ -77,7 +75,12 @@ export function initSortableAboutUsGallery() {
         sortable.option("animation", prevAnimation);
         sortable.option("disabled", false);
 
-        console.log("Reset done. Current order:", sortable.toArray());
+        // console.log("Reset done. Current order:", sortable.toArray());
+
+        const order = sortable.toArray();
+        window.dispatchEvent(new CustomEvent("about_us_gallery_sorted", {
+            detail: { order }
+        }));
     }
 
     // Listen for external event to reset order
