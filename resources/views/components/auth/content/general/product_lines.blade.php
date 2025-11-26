@@ -97,8 +97,7 @@
     </section>
 
     {{-- Paginator --}}
-    <template x-if="product_lines.length > 0">
-        {{-- Paginator will go here --}}
+    {{-- <template x-if="product_lines.length > 0">
         <section class="w-full flex items-center justify-end mt-4">
             <nav class="flex items-center justify-center gap-2 py-2" aria-label="Pagination">
                 <button
@@ -124,7 +123,7 @@
                 </button>
             </nav>
         </section>
-    </template>
+    </template> --}}
 
 </section>
 
