@@ -1,10 +1,12 @@
 <div x-data="{
         sortableGalleryObject: null,
         controlButtonsVisible: false,
-        loading: true,
-        galleryImages: [],
         remainingImage: 0,
+        loading: true,
+        submitLoading: false,
+        galleryImages: [],
         initialOrder: [],
+        currentOrder: [],
         async init() {
             // fetch gallery images from API and populate the list
             const response = await fetch('{{ route('content.get.section.about_us.gallery') }}');
@@ -29,19 +31,28 @@
                 console.warn('sortable gallery object is null when calling this function.');
                 return;
             }
-            console.log('foo');
             $dispatch('sortable_resetOrder', {
                 sortableObject: this.sortableGalleryObject ,
                 initialOrder: this.initialOrder
             });
         }
-    }" @about_us_gallery_sorted.window="
-        controlButtonsVisible = true;
-        console.log($event.detail);
-    " @sortable_object_gallery.window="
-        console.log('Sortable object:', $event.detail);
-        sortableGalleryObject = $event.detail.sortableObject;
-    ">
+    }" @about_us_gallery_sorted.window="    
+        const order = $event.detail.order;
+        if(!order) return;
+        
+        if(JSON.stringify(order) !== JSON.stringify(initialOrder)) {
+            currentOrder = order;
+            controlButtonsVisible = true;
+        } else {        
+            currentOrder = initialOrder;
+            controlButtonsVisible = false;
+        }
+
+        {{-- console.log(`order: ${order}`);
+        console.log(`initial: ${initialOrder}`);
+        console.log(`matching?: ${JSON.stringify(order) === JSON.stringify(initialOrder)}`);
+        console.log(`current order: ${currentOrder}`); --}}
+    " @sortable_object_gallery.window="sortableGalleryObject = $event.detail.sortableObject;">
     <h2 class="gap-2">
         Gallery
         <span x-text="!loading ? '(' + galleryImages.length + '/3' + ')' : ''"></span>
@@ -54,7 +65,6 @@
                     modalID: 'modal_about_us_gallery',
                     modal_header_text: 'Add Gallery Image',
                 });
-                controlButtonsVisible = !controlButtonsVisible;
             ">
             <span class="flex items-center gap-2">
                 @svg('fluentui-add-circle-20-o', 'w-5 h-5')
@@ -81,7 +91,7 @@
             <div class="opacity-[50%] italic flex justify-center items-center gap-4">
                 @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
                 Loading gallery...
-                </d>
+            </div>
         </template>
 
         <template x-if="galleryImages.length <= 0 && !loading">
@@ -90,13 +100,9 @@
 
 
         <template x-for="(image_data, index) in galleryImages" :key="image_data + '_' + index">
-            <li 
-                class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
-                x-data="{ isHovered: false }"
-                x-bind:data-id="image_data.file_id" 
-                title="Drag to change order." 
-                @mouseover="isHovered = true" 
-                @mouseleave="isHovered = false">
+            <li class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
+                x-data="{ isHovered: false }" x-bind:data-id="image_data.file_id" title="Drag to change order."
+                @mouseover="isHovered = true" @mouseleave="isHovered = false">
 
                 <img :src="image_data.path" class="w-full h-full aspect-video object-contain" />
 
@@ -130,25 +136,38 @@
     </ul>
 
     <section x-transition x-show="controlButtonsVisible" x-data class="mt-2 py-2 flex justify-end items-center">
-        <form 
-            method="POST" 
-            action="{{ route('content.add.section.test') }}"
-            x-data
-            @submit.prevent=""
-            >
+        <form method="POST" action="{{ route('content.update.section.about_us.gallery.order') }}" x-data
+            @submit.prevent="
+                if(!initialOrder || !currentOrder) return;
+
+                // Do not submit if current is identical to initial.
+                if(JSON.stringify(initialOrder) === JSON.stringify(currentOrder)) {
+                    return
+                };
+                
+                submitLoading = true;
+                $el.submit();
+            ">
             @csrf
-            <input id="about_us_gallery_input_order" type="hidden" name="about_us_gallery_order" value="[]" />
+            <input id="about_us_gallery_input_order" type="hidden" name="about_us_gallery_order" x-model="currentOrder" />
 
             <section class="flex items-center gap-2">
-                <x-public.button type="button" @click="sortableResetOrder()">
+                <x-public.button type="button" @click="sortableResetOrder()" x-bind:disabled="submitLoading">
                     <span class="flex items-center justify-center gap-2">
                         Cancel
                     </span>
                 </x-public.button>
-                <x-public.button button_type="primary" type="submit">
+                <x-public.button button_type="primary" type="submit" x-bind:disabled="submitLoading">
                     <span class="flex items-center justify-center gap-2">
-                        @svg('fluentui-save-20', 'w-5 h-5')
-                        Save Changes
+
+                        <template x-if="submitLoading">
+                            @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                        </template>
+                        <template x-if="!submitLoading">
+                            @svg('fluentui-save-20', 'w-5 h-5')
+                        </template>
+
+                        <span x-text="submitLoading ? 'Saving Changes...' : 'Save Changes'"></span>
                     </span>
                 </x-public.button>
             </section>
