@@ -382,8 +382,8 @@ class GeneralController extends Controller
                     'success' => true,
                     'message' => "No record found in the about us gallery.",
                     'data' => [
-                            'remaining' => 3,
-                            'gallery' => null
+                        'remaining' => 3,
+                        'gallery' => null
                     ],
                 ]);
             }
@@ -411,7 +411,7 @@ class GeneralController extends Controller
                 $uploadResponse = $uploadController->getUploadedFile($file_id);
                 $data = $uploadResponse->getData(true);
 
-                if(!$data['success']) {
+                if (!$data['success']) {
                     throw new Exception($data['message']);
                 }
 
@@ -630,7 +630,6 @@ class GeneralController extends Controller
 
     public function editAboutUsGallery(Request $request)
     {
-        $currentExtraData = null;
         try {
             $request->validate([
                 'file' => 'required|file|mimes:jpg,png,jpeg,bmp,gif|max:' . env('APP_MAX_UPLOAD_SIZE', 10240), // Image only
@@ -646,9 +645,6 @@ class GeneralController extends Controller
                 throw new Exception("No data found when trying to edit.");
             }
 
-            // save for later
-            $currentExtraData = $data['extra_data'];
-
             // Decode extra_data
             $decoded_data = json_decode($data['extra_data']);
 
@@ -662,10 +658,10 @@ class GeneralController extends Controller
             // get the data from upload model
             $uploadController = new UploadController();
 
-           // upload new file
+            // upload new file
             $uploadFileInfo = $uploadController->upload($request)->getData(true);
 
-            // validate if existing
+            // validate if existing   
             if (!$uploadFileInfo['success']) {
                 throw new Exception("Something went wrong when trying to upload a file.");
             }
@@ -687,7 +683,7 @@ class GeneralController extends Controller
             General::updateOrCreate(['section' => 'about_us_gallery'], [
                 'extra_data' => $encoded_data
             ]);
-            
+
             // FILE DELETION
             $retrieveFileInfo = $uploadController->getUploadedFile($upload_id)->getData(true);
 
@@ -710,9 +706,75 @@ class GeneralController extends Controller
             toast("Gallery image has been updated.", "success");
 
             return back();
-
         } catch (Exception $e) {
             Logger()->info($e->getMessage());
+
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'about'
+            ]);
+
+            toast($e->getMessage(), "error");
+
+            return back();
+        }
+    }
+
+    public function updateOrderAboutUsGallery(Request $request)
+    {
+        try {
+
+            // validate
+            $request->validate([
+                'about_us_gallery_order' => [
+                    'required',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        $uploadController = new UploadController();
+                        $ids = explode(',', $value);
+
+                        foreach ($ids as $id) {
+                            $result = $uploadController->getUploadedFile($id)->getData(true);
+                            if (!$result['success']) {
+                                $fail($result['message']);
+                            }
+                        }
+                    },
+                ]
+            ]);
+
+            // convert to array.
+            $requestData = explode(',', $request->about_us_gallery_order);
+
+            if(empty($requestData)) {
+                throw new Exception("Passed order data is empty.");
+            }
+
+            $toNumbers = [];
+            foreach($requestData as $id) {
+                $toNumbers[] = (int) $id;
+            }
+
+            // encode to json
+            $encoded_data = json_encode($toNumbers);
+
+            // dd($request, $requestData, $encoded_data, $toNumbers);
+
+            // save to database
+            General::updateOrCreate(['section' => 'about_us_gallery'], [
+                'extra_data' => $encoded_data
+            ]);
+
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'about'
+            ]);
+
+            toast("Gallery order updated successfully.", "success");
+            
+            return back();
+        } catch (Exception $e) {
+            Logger()->error($e->getMessage());
 
             session()->flash('content', [
                 'tab' => 'general',
