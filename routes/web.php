@@ -105,6 +105,7 @@ Route::middleware('auth')->group(function () {
             Route::post('section/about_us/gallery/add', 'addAboutUsGalleryImage')->name('add.section.about_us.gallery');
             Route::post('section/about_us/gallery/delete', 'deleteAboutUsGallery')->name('delete.section.about_us.gallery');
             Route::post('section/about_us/gallery/edit', 'editAboutUsGallery')->name('edit.section.about_us.gallery');
+            Route::post('section/about_us/gallery/update_order', 'updateOrderAboutUsGallery')->name('update.section.about_us.gallery.order');
 
             Route::post('section/test', 'test')->name('add.section.test');
         });
