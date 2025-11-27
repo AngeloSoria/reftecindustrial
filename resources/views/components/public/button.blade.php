@@ -8,8 +8,11 @@
         case 'secondary':
             $classes = 'bg-brand-primary-950 text-white hover:bg-brand-primary-900';
             break;
-        default:
+        case 'default':
             $classes = 'bg-white hover:bg-gray-200 border';
+            break;
+        default:
+            $classes = 'border';
             break;
     }
 
