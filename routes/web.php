@@ -83,7 +83,7 @@ Route::middleware('auth')->group(function () {
             Route::get('devices', 'getDevices')->name('devices');
             Route::get('countries-this-month', 'getVisitsByCountryThisMonth')->name('countries-this-month');
             Route::get('widget-data', 'getDataForWidgetCounter')->name('widget-data');
-        });
+        })->middleware('throttle:25,1');
 
     /*
     |--------------------------------------------------------------------------
