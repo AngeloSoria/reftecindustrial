@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{LoginController, LogoutController};
 use App\Http\Controllers\{VisitorController, UploadController};
 use App\Http\Controllers\Contents\GeneralController;
+use App\Http\Controllers\Contents\ProjectController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -31,12 +33,17 @@ Route::controller(LoginController::class)->group(function () {
 */
 Route::prefix('content')
     ->name('content.')
-    ->controller(GeneralController::class)
     ->group(function () {
-        Route::get('section/hero', 'getHeroSection')->name('get.section.hero');
-        Route::get('section/history', 'getHistory')->name('get.section.history');
-        Route::get('section/product_lines/visible', 'getAllVisibileProductLines')->name('get.section.product_lines.visible');
-        Route::get('section/about_us/gallery', 'getAllAboutUsGallery')->name('get.section.about_us.gallery');
+        Route::controller(GeneralController::class)->group(function () {
+            Route::get('section/hero', 'getHeroSection')->name('get.section.hero');
+            Route::get('section/history', 'getHistory')->name('get.section.history');
+            Route::get('section/product_lines/visible', 'getAllVisibileProductLines')->name('get.section.product_lines.visible');
+            Route::get('section/about_us/gallery', 'getAllAboutUsGallery')->name('get.section.about_us.gallery');
+        });
+
+        Route::controller(ProjectController::class)->group(function() {
+            Route::get('section/projects', 'getProjects')->name('get.section.projects');
+        });
     });
 
 /*
@@ -92,21 +99,27 @@ Route::middleware('auth')->group(function () {
     */
     Route::prefix('content')
         ->name('content.')
-        ->controller(GeneralController::class)
         ->group(function () {
-            Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
-            Route::post('section/history', 'setHistory')->name('update.section.history');
+            
+            Route::controller(GeneralController::class)->group(function () {
+                Route::post('section/test', 'test')->name('add.section.test');
 
-            Route::post('section/product_line/add', 'addProductLine')->name('add.section.product_line');
-            Route::post('section/product_line/edit', 'setProductLine')->name('edit.section.product_line');
-            Route::post('section/product_line/delete', 'deleteProductLine')->name('delete.section.product_line');
-            Route::get('section/product_lines', 'getAllProductLines')->name('get.section.product_lines');
+                Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
+                Route::post('section/history', 'setHistory')->name('update.section.history');
 
-            Route::post('section/about_us/gallery/add', 'addAboutUsGalleryImage')->name('add.section.about_us.gallery');
-            Route::post('section/about_us/gallery/delete', 'deleteAboutUsGallery')->name('delete.section.about_us.gallery');
-            Route::post('section/about_us/gallery/edit', 'editAboutUsGallery')->name('edit.section.about_us.gallery');
-            Route::post('section/about_us/gallery/update_order', 'updateOrderAboutUsGallery')->name('update.section.about_us.gallery.order');
+                Route::post('section/product_line/add', 'addProductLine')->name('add.section.product_line');
+                Route::post('section/product_line/edit', 'setProductLine')->name('edit.section.product_line');
+                Route::post('section/product_line/delete', 'deleteProductLine')->name('delete.section.product_line');
+                Route::get('section/product_lines', 'getAllProductLines')->name('get.section.product_lines');
 
-            Route::post('section/test', 'test')->name('add.section.test');
+                Route::post('section/about_us/gallery/add', 'addAboutUsGalleryImage')->name('add.section.about_us.gallery');
+                Route::post('section/about_us/gallery/delete', 'deleteAboutUsGallery')->name('delete.section.about_us.gallery');
+                Route::post('section/about_us/gallery/edit', 'editAboutUsGallery')->name('edit.section.about_us.gallery');
+                Route::post('section/about_us/gallery/update_order', 'updateOrderAboutUsGallery')->name('update.section.about_us.gallery.order');
+            });
+
+            Route::controller(ProjectController::class)->group(function() {
+                Route::post('section/project/add', 'addProject')->name('add.section.project');
+            });
         });
 });
