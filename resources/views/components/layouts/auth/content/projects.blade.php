@@ -69,7 +69,7 @@
                 </span>
 
                 <div x-transition x-show="isOpened"
-                    class="min-w-sm max-w-md absolute bottom-0 right-0 translate-y-[100%] bg-white/25 backdrop-blur-sm p-2 rounded shadow-sm">
+                    class="min-w-sm max-w-md absolute bottom-0 right-0 translate-y-[100%] bg-white p-2 rounded shadow-sm">
                     <ul class="space-y-1 *:hover:bg-gray-200 *:p-2 *:text-sm *:rounded-sm *:cursor-pointer">
                         <li @click="console.log('in test mode')" title="Export data as csv file"
                             class="flex justify-start items-center gap-2">
