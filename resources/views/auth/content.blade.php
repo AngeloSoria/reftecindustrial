@@ -1,4 +1,4 @@
-<x-layouts.auth.app viewName="Content" class="font-inter px-2">
+<x-layouts.auth.app viewName="Content" class="font-inter px-2 shadow-md">
     <div class="bg-white rounded-xl min-h-[400px] my-2 mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <!-- Tabs Navigation -->
         <div class="border-b border-gray-200">
@@ -57,6 +57,8 @@
             openTab("{{ session('content') ? session('content')['tab'] : 'general' }}");
         });
     </script>
+
+    <x-public.modal.image_preview escKeyToClose clickOutsideToClose />
 </x-layouts.auth.app>
 
 
