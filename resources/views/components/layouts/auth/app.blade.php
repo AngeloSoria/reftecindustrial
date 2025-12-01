@@ -6,7 +6,7 @@
 <html lang="en">
 <x-partials.head />
 
- <body>
+ <body class="bg-accent-darkslategray-50">
     <x-auth.navbar :viewName="$viewName"/>
 
     <main class="{{ $attributes->get('class') }} max-w-7xl mx-auto">
