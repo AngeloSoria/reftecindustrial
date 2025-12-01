@@ -11,12 +11,11 @@
     'ratioType' => null, // increase | decrease | neutral | null
 
 ])
-
 @php
     $textColor;
     $changeIcon;
     $ratioIcon;
-    switch($ratioType) {
+    switch ($ratioType) {
         case 'increase':
             $textColor = 'text-accent-lightseagreen-50';
             $changeIcon = 'fluentui-chevron-double-up-16';
@@ -38,33 +37,39 @@
             $ratioIcon = 'fluentui-error-circle-20';
     }
 @endphp
+<div 
+    id="{{ $id }}" 
+    class="bg-white px-4 py-5 grid items-center rounded-xl border font-inter max-h-[170px] {{ $attributes->get('class') }}">
 
-<div id="{{ $id }}" class="bg-white px-4 py-5 rounded-xl border inline-block font-inter max-h-[170px] {{ $attributes->get('class') }}">
-    <div class="bg-green-300/0 min-w-[150px] flex flex-col gap-1">
-
+    <div class="bg-green-300/0 flex items-center justify-start gap-4">
         {{-- icon --}}
-        <div class="{{ $iconColor }} rounded-full p-2 w-fit">
-            @svg($icon, 'w-6 h-6 text-white')
+        <div class="{{ 'bg-' . $iconColor . '/25' }} rounded-full p-3 w-fit">
+            @svg($icon, 'w-6 h-6 text-' . $iconColor)
         </div>
 
-        {{-- counter --}}
-        <div class="flex items-center gap-3">
-            <p class="counter-value text-2xl font-bold">{{ $counter }}</p>
-            <div class="{{ $textColor }} flex items-center gap-1">
-                {{-- up/low icon value --}}
-                {{-- @svg($changeIcon, 'w-4 h-4') --}}
-                <span class="change-value hidden">{{ $change }}</span>
+        <section class="flex flex-col items-start justify-start">
+
+                {{-- counter --}}
+                <div class="flex items-center gap-3">
+                <p class="counter-value text-2xl font-bold">{{ $counter }}</p>
+                    <div class="{{ $textColor }} flex items-center gap-1">
+                        {{-- up/low icon value --}}
+                        {{-- @svg($changeIcon, 'w-4 h-4') --}}
+                        <span class="change-value hidden">{{ $change }}</span>
+                    </div>
+                </div>
+
+            {{-- label --}}
+            <p class="text-sm font-medium text-accent-darkslategray-600">{{ $label }}</p>
+            
+            {{-- ratio --}}
+            <div class="{{ $textColor }} flex items-center text-sm gap-2 font-medium">
+                {{-- increase/decrease icon value --}}
+                {{-- @svg($ratioIcon, 'w-6 h-6') --}}
+                <p class="ratio-value">{{ $ratio }}&percnt;</p>
             </div>
-        </div>
+        </section>
 
-        {{-- label --}}
-        <p class="text-sm font-medium text-accent-darkslategray-600">{{ $label }}</p>
-
-        {{-- ratio --}}
-        <div class="{{ $textColor }} flex items-center text-sm gap-2 font-medium">
-            {{-- increase/decrease icon value --}}
-            {{-- @svg($ratioIcon, 'w-6 h-6') --}}
-            <p class="ratio-value">{{ $ratio }}&percnt;</p>
-        </div>
     </div>
+    
 </div>
