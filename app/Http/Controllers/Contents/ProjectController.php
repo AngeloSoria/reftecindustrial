@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 
 use App\Models\Contents\Project;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\FileBag;
 
 class ProjectController extends Controller
 {
@@ -48,16 +50,22 @@ class ProjectController extends Controller
             $uploadController = new UploadController();
             $uploadIds = [];
             try {
-                $uploadInfo = $uploadController->upload($request)->getData(true);
+                if (!empty($request->file('files')) && count($request->file('files')) > 0) {
+                    try {
+                        $uploadInfo = $uploadController->upload($request)->getData(true);
+                        if (!$uploadInfo['success']) {
+                            throw new Exception($uploadInfo['message']);
+                        }
 
-                if (!$uploadInfo['success']) {
-                    throw new Exception($uploadInfo['message']);
-                }
-
-                // dd($uploadInfo);
-
-                foreach ($uploadInfo['files'] as $fileInfo) {
-                    $uploadIds[] = $fileInfo['path'];
+                        foreach ($uploadInfo['files'] as $fileInfo) {
+                            $uploadIds[] = $fileInfo['path'];
+                        }
+                    } catch (Exception $e) {
+                        foreach($uploadIds as $upload_id) {
+                            $uploadController->deleteUploadedFile($upload_id);
+                        }
+                        throw new Exception($e->getMessage());
+                    }
                 }
 
                 // Save to DB
@@ -70,6 +78,7 @@ class ProjectController extends Controller
                     'is_visible' => $PROJECT['is_visible'],
                     'is_featured' => $PROJECT['is_featured'],
                 ]);
+
             } catch (UniqueConstraintViolationException $e) {
                 foreach ($uploadIds as $uploadId) {
                     $uploadController->deleteUploadedFile($uploadId);
@@ -102,6 +111,7 @@ class ProjectController extends Controller
         try {
 
             $projects = Project::select([
+                'id',
                 'images',
                 'job_order',
                 'title',
@@ -124,6 +134,108 @@ class ProjectController extends Controller
                 'message' => $e->getMessage(),
                 'type' => 'error'
             ]);
+        }
+    }
+
+    public function updateProject(Request $request)
+    {
+        try {
+            // Validate main request
+            $request->validate([
+                'project_id' => ['required', 'integer', 'exists:contents_projects,id'],
+                'job_order' => ['required', 'string'],
+                'project_name' => ['required', 'string'],
+                'description' => ['nullable', 'string'],
+                'status' => ['required', 'string', Rule::in(['pending', 'on_going', 'completed'])],
+                'visibility' => ['nullable', 'string'],
+                'highlighted' => ['nullable', 'string'],
+            ]);
+
+            // Get project data from DB
+            $project = Project::findOrFail($request->project_id);
+
+            // Prepare the data array for update
+            $projectData = [
+                'job_order'    => $request->job_order,
+                'title'        => $request->project_name,
+                'description'  => $request->description,
+                'status'       => $request->status,
+                'is_visible'   => !empty($request->visibility) ? 1 : 0,
+                'is_featured'  => !empty($request->highlighted) ? 1 : 0,
+                'images'       => json_decode($request->project_images), // will merge later if files uploaded
+            ];
+
+            // dd($request->project_images, json_decode($request->project_images));
+
+            $uploadedFilesIds = [];
+
+            // Handle uploaded files if any
+            $allFiles = $request->files->all('files');
+            if (count($allFiles) > 0) {
+                // Calculate how many more files can be uploaded
+                $uploadLimit = 6 - count($project->images);
+                $trimmedFiles = array_slice($allFiles, 0, $uploadLimit);
+
+                // Create a new Request for the UploadController only
+                $uploadRequest = new Request(
+                    $request->all(),                 // input data
+                    $request->query(),               // query parameters
+                    $request->attributes->all(),     // attributes
+                    $request->cookies->all(),        // cookies
+                    $trimmedFiles,                   // files
+                    $request->server->all(),         // server parameters
+                    $request->getContent()           // raw content
+                );
+
+                // Wrap trimmed files in a FileBag
+                $uploadRequest->files = new FileBag([
+                    'files' => $trimmedFiles
+                ]);
+
+                // Upload the trimmed files
+                $uploadController = new UploadController();
+                $uploadResponse = $uploadController->upload($uploadRequest)->getData(true);
+
+                if (!$uploadResponse['success']) {
+                    throw new Exception($uploadResponse['message']);
+                }
+
+                
+                // Track uploaded file IDs for rollback in case of error
+                foreach ($uploadResponse['files'] as $file) {
+                    $uploadedFilesIds[] = $file['file_id'];
+                }
+
+                // dd($uploadedFilesIds, $uploadResponse);
+
+                // Merge new file paths with existing project images
+                $existingImages = $projectData['images'] ?? [];
+                // dd($existingImages);
+                foreach ($uploadResponse['files'] as $file) {
+                    $existingImages[] = $file['path'];
+                }
+                $projectData['images'] = $existingImages;
+            }
+
+            // Save the project data
+            $project->update($projectData);
+
+            session()->flash('content', ['tab' => 'projects']);
+            toast("A project has been updated.", 'success');
+            return back();
+        } catch (Exception $e) {
+            // Rollback uploaded files if any
+            if (!empty($uploadedFilesIds)) {
+                $uploadController = $uploadController ?? new UploadController();
+                foreach ($uploadedFilesIds as $fileId) {
+                    $uploadController->deleteUploadedFile($fileId);
+                }
+            }
+
+            Logger()->error($e->getMessage());
+            session()->flash('content', ['tab' => 'projects']);
+            toast($e->getMessage(), 'error');
+            return back();
         }
     }
 }
