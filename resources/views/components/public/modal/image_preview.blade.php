@@ -8,7 +8,7 @@
 
 
 <section
-    class="fixed inset-0 z-200 w-full h-screen flex items-center justify-center"
+    class="fixed inset-0 z-[301] w-full h-screen flex items-center justify-center"
     id="{{ $id }}"
     x-data="{ open: false, previewInfo: {}, }"
     @image_preview_event.window="
