@@ -100,7 +100,7 @@
         x-cloak
 
         @if($enableCloseOnOutsideClick)
-            @click.away.window="closeModal()"
+            @click.outside="closeModal()"
         @endif
         @if($enableCloseOnEscKeyPressed)
             @keydown.escape.window="closeModal()"
