@@ -166,7 +166,8 @@
                 this.formDisabled = !nameFilled;
             },
 
-        }" @passed_product_data.window="
+        }" 
+        @passed_product_data.window="
             if (!$event.detail.data) { console.error('No data passed.') }
             if (!event.detail.modalID) { console.error('No modal ID passed. \n modal_id: ' + modal_id); }
             if ($event.detail.modalID !== modal_id) { return }
