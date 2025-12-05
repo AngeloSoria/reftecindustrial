@@ -61,7 +61,7 @@ class ProjectController extends Controller
                             $uploadIds[] = $fileInfo['path'];
                         }
                     } catch (Exception $e) {
-                        foreach($uploadIds as $upload_id) {
+                        foreach ($uploadIds as $upload_id) {
                             $uploadController->deleteUploadedFile($upload_id);
                         }
                         throw new Exception($e->getMessage());
@@ -78,7 +78,6 @@ class ProjectController extends Controller
                     'is_visible' => $PROJECT['is_visible'],
                     'is_featured' => $PROJECT['is_featured'],
                 ]);
-
             } catch (UniqueConstraintViolationException $e) {
                 foreach ($uploadIds as $uploadId) {
                     $uploadController->deleteUploadedFile($uploadId);
@@ -160,12 +159,10 @@ class ProjectController extends Controller
                 'title'        => $request->project_name,
                 'description'  => $request->description,
                 'status'       => $request->status,
-                'is_visible'   => !empty($request->visibility) ? 1 : 0,
-                'is_featured'  => !empty($request->highlighted) ? 1 : 0,
+                'is_visible'   => empty($request->visibility) || $request->visibility != "on" ? 0 : 1,
+                'is_featured'  => empty($request->highlighted) || $request->highlighted != "on" ? 0 : 1,
                 'images'       => json_decode($request->project_images), // will merge later if files uploaded
             ];
-
-            // dd($request->project_images, json_decode($request->project_images));
 
             $uploadedFilesIds = [];
 
@@ -200,13 +197,11 @@ class ProjectController extends Controller
                     throw new Exception($uploadResponse['message']);
                 }
 
-                
+
                 // Track uploaded file IDs for rollback in case of error
                 foreach ($uploadResponse['files'] as $file) {
                     $uploadedFilesIds[] = $file['file_id'];
                 }
-
-                // dd($uploadedFilesIds, $uploadResponse);
 
                 // Merge new file paths with existing project images
                 $existingImages = $projectData['images'] ?? [];
@@ -232,6 +227,29 @@ class ProjectController extends Controller
                 }
             }
 
+            Logger()->error($e->getMessage());
+            session()->flash('content', ['tab' => 'projects']);
+            toast($e->getMessage(), 'error');
+            return back();
+        }
+    }
+
+    public function deleteProject(Request $request)
+    {
+        try {
+            $request->validate([
+                'project_id' => 'required|string|exists:contents_projects,id'
+            ]);
+
+            
+            $model = Project::findOrFail($request->project_id);
+
+            $model->deleteOrFail();
+
+            session()->flash('content', ['tab' => 'projects']);
+            toast("A project has been deleted.", 'success');
+            return back();
+        } catch (Exception $e) {
             Logger()->error($e->getMessage());
             session()->flash('content', ['tab' => 'projects']);
             toast($e->getMessage(), 'error');
