@@ -1,9 +1,4 @@
 <div>
-    <h3 class="text-lg font-medium text-gray-900">Projects</h3>
-    <p class="mt-2 text-sm text-gray-500">This is the projects content section. Display project-related information
-        here.</p>
-    <!-- Add more content as needed -->
-
     <section x-data="{
         checkboxActive: false,
         dataLoading: true,
@@ -189,7 +184,7 @@
                                                 if (count === 1) return 'grid-cols-1 grid-rows-1';
 
                                                 // 2 items → 2x1
-                                                if (count === 2) return 'grid-cols-1 grid-rows-2';
+                                                if (count === 2) return 'grid-cols-2 grid-rows-1';
 
                                                 // 3 or 4 items → 2x2
                                                 if (count === 3 || count === 4) return 'grid-cols-2 grid-rows-2';
@@ -197,9 +192,9 @@
                                                 // 5 or 6 items → 2x3 (max)
                                                 return 'grid-cols-2 grid-rows-3';
                                             }
-                                        }" 
-                                        :class="gridClass" class="grid gap-1 max-w-[125px]">
-                                            <template x-for="(image_path, index) in project.images" :key="image_path + '_' + index">
+                                        }" :class="gridClass" class="grid gap-1 max-w-[125px]">
+                                            <template x-for="(image_path, index) in project.images"
+                                                :key="image_path + '_' + index">
                                                 <img @click="$dispatch('image_preview_event', { previewInfo: { image: $el.src }});"
                                                     x-bind:src="image_path"
                                                     class="aspect-video rounded cursor-pointer brightness-75 hover:brightness-100 transition-all" />
@@ -214,13 +209,13 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="w-max overflow-x-auto max-w-3xs whitespace-normal break-words">
+                                    <div class="w-max overflow-x-auto max-w-[125px] whitespace-normal break-words">
                                         <p class="block antialiased font-sans text-sm leading-normal text-gray-900 font-normal"
                                             x-text="project.title"></p>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="w-max overflow-x-auto max-w-3xs whitespace-normal break-words">
+                                    <div class="w-max overflow-x-auto max-w-[200px] whitespace-normal break-words">
                                         <p class="block antialiased font-sans text-sm leading-normal text-gray-900 font-normal"
                                             x-text="project.description"></p>
                                     </div>
@@ -279,7 +274,13 @@
                                             class="cursor-pointer bg-blue-500 hover:bg-blue-600 active:bg-blue-400 transition-colors">
                                             @svg('fluentui-edit-24', 'w-4 h-4 text-white')
                                         </x-public.button>
-                                        <x-public.button title="Delete data"
+                                        <x-public.button @click="$dispatch('openmodal', {
+                                                modalID: 'modal_delete_project',
+                                                modal_header_text: 'Delete Project?',
+                                                special_data: {
+                                                    product_data: project,
+                                                }
+                                            })" title="Delete data"
                                             class="cursor-pointer bg-red-500 hover:bg-red-600 active:bg-red-400 transition-colors">
                                             @svg('fluentui-delete-24', 'w-4 h-4 text-white')
                                         </x-public.button>
@@ -333,8 +334,9 @@
     <form @php
         $fileUploadId = 'file_upload_project';
     @endphp id="form_project" x-data="projectForm()"
-        @submit.prevent="handleSubmit" @modal_closed_fallback.window="handleModalClose($event)"
-        @passed_product_data.window="loadProjectData($event); console.log(projectData);"
+        @submit.prevent="handleSubmit" 
+        @modal_closed_fallback.window="handleModalClose($event)"
+        @passed_product_data.window="loadProjectData($event);"
         @files_empty.window="handleFileUploadModalState($event, true)"
         @files_not_empty.window="handleFileUploadModalState($event, false)"
         x-bind:action="isUpdate() ? routes.update : routes.add" method="POST" enctype="multipart/form-data">
@@ -392,8 +394,9 @@
                     <div class="grid grid-cols-2 gap-2 items-start">
                         <div class="flex flex-col gap-4">
                             <p class="text-sm font-medium">Visible to public</p>
-                            <input name="visibility" type="checkbox" @change="checkChanges()"
-                                x-bind:checked="projectData.is_visible == 1" class="cursor-pointer w-5 h-5 border-2" />
+                            <input name="visibility" type="checkbox" @change="checkChanges();" {{--
+                                x-model="projectData.is_visible" --}} :checked="Boolean(projectData.is_visible)"
+                                class="cursor-pointer w-5 h-5 border-2" />
                         </div>
 
                         <div class="flex flex-col gap-4">
@@ -403,25 +406,24 @@
                                     @svg('fluentui-question-circle-24', 'w-4 h-4 text-gray-700')
                                 </span>
                             </p>
-                            <input name="highlighted" type="checkbox" @change="checkChanges()"
-                                x-bind:checked="projectData.is_featured == 1" class="cursor-pointer w-5 h-5 border-2" />
+                            <input name="highlighted" type="checkbox" @change="checkChanges()" {{--
+                                x-model="projectData.is_featured" --}} :checked="Boolean(projectData.is_featured)"
+                                class="cursor-pointer w-5 h-5 border-2" />
                         </div>
                     </div>
                 </div>
             </section>
 
             {{-- RIGHT SIDE IMAGE SECTION --}}
-            <section
-            x-data="{
+            <section x-data="{
                 showUploadFile: true,
-            }"
-            class="flex flex-col gap-2">
+            }" class="flex flex-col gap-2">
                 <p class="text-sm font-medium">
                     Images
                     <span class="text-red-500 font-bold">*</span>
                 </p>
 
-                
+
 
                 <template x-if="projectData.images">
                     <div x-data="{
@@ -467,7 +469,7 @@
                 Cancel
             </button>
 
-            <button type="submit" :disabled="loading || formDisabled"
+            <button type="submit" :disabled="loading"
                 class="px-5 py-2 flex items-center justify-center gap-2 rounded bg-accent-orange-300 hover:bg-accent-orange-400 disabled:opacity-50 disabled:cursor-not-allowed">
 
                 <template x-if="loading">
@@ -480,95 +482,165 @@
 
     </form>
 
+    <script>
+        function projectForm() {
+            return {
+                loading: false,
+                formDisabled: true,
+                modal_id: "modal_project",
+                file_upload_id: @js($fileUploadId),
+
+                projectData: {},
+                fakeProjectData: {},
+
+                routes: {
+                    add: "{{ route('content.add.section.project') }}",
+                    update: "{{ route('content.update.section.project') }}",
+                },
+
+
+                /* ---------------------------
+                Utility Functions
+                ----------------------------*/
+
+                isUpdate() {
+                    return this.projectData && this.projectData.id;
+                },
+
+                deepClone(obj) {
+                    return JSON.parse(JSON.stringify(obj));
+                },
+
+                objectsMatch(a, b) {
+                    return JSON.stringify(a) === JSON.stringify(b);
+                },
+
+                checkChanges() {
+                    this.formDisabled = this.objectsMatch(this.projectData, this.fakeProjectData);
+                },
+
+                removeImage(path) {
+                    this.projectData.images = this.projectData.images.filter(img => img !== path);
+                    this.checkChanges();
+                },
+
+
+                /* ---------------------------
+                FileUpload Event Handling
+                ----------------------------*/
+                handleFileUploadModalState(e, state) {
+                    if (e.detail.file_upload_id != this.file_upload_id) return;
+                    this.formDisabled = state;
+                    if (state) this.checkChanges();
+                },
+
+
+                /* ---------------------------
+                Modal Event Handling
+                ----------------------------*/
+
+                handleModalClose(e) {
+                    if (e.detail.modalID !== this.modal_id) return;
+                    this.projectData = {};
+                    this.fakeProjectData = {};
+                    this.formDisabled = true;
+                },
+
+                loadProjectData(e) {
+                    if (!e.detail.data) return;
+                    if (e.detail.modalID !== this.modal_id) return;
+
+                    this.projectData = this.deepClone(e.detail.data.product_data);
+                    this.fakeProjectData = this.deepClone(e.detail.data.product_data);
+
+                    this.checkChanges();
+                },
+
+                /* ---------------------------
+                Submit
+                ----------------------------*/
+
+                handleSubmit() {
+                    // if (this.formDisabled) {
+                    //     toast("No changes to save.", "warning");
+                    //     return;
+                    // }
+
+                    this.loading = true;
+                    this.$el.submit();
+                },
+            };
+        }
+    </script>
+
 </x-layouts.modal>
 
-<script>
-    function projectForm() {
-        return {
-            loading: false,
-            formDisabled: true,
-            modal_id: "modal_project",
-            file_upload_id: @js($fileUploadId),
+<x-layouts.modal modalID="modal_delete_project" modalMaxWidth="md">
+    <section 
+        x-data="deleteProjectForm()"
+        @modal_closed_fallback.window="handleModalClose($event)"
+        >
+        <section>
+            <h2>Project Info:</h2>
 
-            projectData: {},
-            fakeProjectData: {},
+            <section class="p-2 bg-gray-200 rounded">
+                <div class="flex gap-2">
+                    <p class="font-bold">Job Order:</p>
+                    <span x-text="projectData.job_order"></span>
+                </div>
+                <div class="flex gap-2">
+                    <p class="font-bold">Title:</p>
+                    <span x-text="projectData.title"></span>
+                </div>
+                <div class="flex gap-2">
+                    <p class="font-bold">Status:</p>
+                    <span x-text="projectData.status"></span>
+                </div>
+            </section>
 
-            routes: {
-                add: "{{ route('content.add.section.project') }}",
-                update: "{{ route('content.update.section.project') }}",
-            },
+        </section>
+        <section>
+            <form @passed_product_data.window="loadProjectData($event);" @submit.prevent="formSubmit()" method="POST"
+                action="{{ route('content.delete.section.project') }}">
+                @csrf
+                <input type="hidden" name="project_id" x-bind:value="projectData.id" />
+                <div class="mt-4 flex justify-end items-start gap-2">
+                    <x-public.button type="button" button_type="default" @click="closeModal()">Cancel</x-public.button>
+                    <x-public.button type="submit" x-bind:disabled="loading"
+                        class="cursor-pointer text-white bg-red-500 hover:bg-red-400 active:bg-red-600 transition-colors disabled:opacity-50 flext items-center justify-center gap-2">
+                        <template x-if="loading">
+                            @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                        </template>
+                        <span x-text="loading ? 'Deleting...' : 'Delete'"></span>
+                    </x-public.button>
+                </div>
+            </form>
+        </section>
+        <script>
+            function deleteProjectForm() {
+                return {
+                    projectData: {},
+                    loading: false,
+                    formDisabled: true,
 
+                    formSubmit() {
+                        this.loading = true;
+                        this.$el.submit();
+                    },
 
-            /* ---------------------------
-              Utility Functions
-            ----------------------------*/
+                    handleModalClose(e) {
+                        if (e.detail.modalID !== this.modal_id) return;
+                        this.projectData = {};
+                        this.formDisabled = true;
+                    },
 
-            isUpdate() {
-                return this.projectData && this.projectData.id;
-            },
-
-            deepClone(obj) {
-                return JSON.parse(JSON.stringify(obj));
-            },
-
-            objectsMatch(a, b) {
-                return JSON.stringify(a) === JSON.stringify(b);
-            },
-
-            checkChanges() {
-                this.formDisabled = this.objectsMatch(this.projectData, this.fakeProjectData);
-            },
-
-            removeImage(path) {
-                this.projectData.images = this.projectData.images.filter(img => img !== path);
-                this.checkChanges();
-            },
-
-
-            /* ---------------------------
-              FileUpload Event Handling
-            ----------------------------*/
-            handleFileUploadModalState(e, state) {
-                if (e.detail.file_upload_id != this.file_upload_id) return;
-                this.formDisabled = state;
-                if (state) this.checkChanges();
-            },
-
-
-            /* ---------------------------
-              Modal Event Handling
-            ----------------------------*/
-
-            handleModalClose(e) {
-                if (e.detail.modalID !== this.modal_id) return;
-                this.projectData = {};
-                this.fakeProjectData = {};
-                this.formDisabled = true;
-            },
-
-            loadProjectData(e) {
-                if (!e.detail.data) return;
-                if (e.detail.modalID !== this.modal_id) return;
-
-                this.projectData = this.deepClone(e.detail.data.product_data);
-                this.fakeProjectData = this.deepClone(e.detail.data.product_data);
-
-                this.checkChanges();
-            },
-
-            /* ---------------------------
-              Submit
-            ----------------------------*/
-
-            handleSubmit() {
-                if (this.formDisabled) {
-                    toast("No changes to save.", "warning");
-                    return;
+                    loadProjectData(e) {
+                        if (!e.detail.data) return;
+                        if (e.detail.modalID !== this.modal_id) return;
+                        this.projectData = e.detail.data.product_data;
+                    },
                 }
-
-                this.loading = true;
-                this.$el.submit();
-            },
-        };
-    }
-</script>
+            }
+        </script>
+    </section>
+</x-layouts.modal>
