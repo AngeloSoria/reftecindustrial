@@ -121,6 +121,7 @@ Route::middleware('auth')->group(function () {
             Route::controller(ProjectController::class)->group(function() {
                 Route::post('section/project/add', 'addProject')->name('add.section.project');
                 Route::post('section/project/update', 'updateProject')->name('update.section.project');
+                Route::post('section/project/delete', 'deleteProject')->name('delete.section.project');
             });
         });
 });
