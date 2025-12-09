@@ -1,7 +1,10 @@
 import './bootstrap';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+
+
 import Alpine from 'alpinejs'
+import focus from '@alpinejs/focus'
 
 // Charts
 import { initAcquisitionsChart } from './Charts/acquisitionsCharts';
@@ -14,6 +17,7 @@ import { initQuill } from './quillManager';
 // Sortable
 import { initSortableAboutUsGallery } from './Sortable/sortableAboutUsGallery'
 
+Alpine.plugin(focus)
 window.Alpine = Alpine
 Alpine.start()
 
@@ -30,4 +34,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.aboutUsGallerySortable = aboutUsGallerySortable; // Expose to global scope for testing
 });
-
