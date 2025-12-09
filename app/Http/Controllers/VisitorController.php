@@ -96,7 +96,7 @@ class VisitorController extends Controller
         try {
             $visitsThisMonth = self::getTotalVisitsThisMonthValue(true);
             $visitsFromLastMonth = self::getTotalVisitsLastMonthValue(true);
-            $visitsChangeFromLastMonth = $visitsThisMonth - $visitsFromLastMonth;
+            $visitsChangeFromLastMonth = abs($visitsThisMonth - $visitsFromLastMonth);
 
             if ($visitsFromLastMonth > 0) {
                 $visitChangeRatio = round(($visitsChangeFromLastMonth / $visitsFromLastMonth) * 100, 2);
