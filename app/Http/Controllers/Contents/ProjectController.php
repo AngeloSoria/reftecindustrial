@@ -256,4 +256,33 @@ class ProjectController extends Controller
             return back();
         }
     }
+
+    public function deleteSelectedProjects(Request $request)
+    {
+        try {
+            $request->validate([
+                'projects' => 'required|string'
+            ]);
+            
+            
+            $decoded_project = json_decode($request->projects, true);
+            if (empty($decoded_project)) {
+                throw new Exception('No existing project value passed.');
+            }
+
+            Project::destroy(array_keys($decoded_project));
+
+
+            // dd($request->projects, json_decode($request->projects));
+
+            session()->flash('content', ['tab' => 'projects']);
+            toast("Selected projects has been deleted.", 'success');
+            return back();
+        } catch (Exception $e) {
+            Logger()->error($e->getMessage());
+            session()->flash('content', ['tab' => 'projects']);
+            toast($e->getMessage(), 'error');
+            return back();
+        }
+    }
 }
