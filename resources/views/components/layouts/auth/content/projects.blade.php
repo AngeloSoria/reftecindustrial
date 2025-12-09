@@ -1,9 +1,22 @@
 <div>
     <section x-data="{
         checkboxActive: false,
+        isAllRowsSelected: false,
         dataLoading: true,
         projectData: null,
+        activeDataFromCheckbox: {},
         async init() {
+            $watch('activeDataFromCheckbox', (e) => {
+                this.checkboxActive = Object.keys(e).length > 0;
+            });
+
+            $watch('isAllRowsSelected', (value) => {
+                document.querySelectorAll('.input_checkbox_item').forEach(el => {
+                    el.checked = value;
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            });
+        
             const response = await fetch('{{ route('content.get.section.projects') }}');
             const data = await response.json();
             console.log(data);
@@ -14,7 +27,7 @@
         },
         async changeSourceData(route) {
             if(!route) {
-                console.warn('No route passed when calling changeSourceData');
+                // console.warn('No route passed when calling changeSourceData');
                 return;
             }
             const response = await fetch(route);
@@ -24,9 +37,22 @@
                 this.projectData = data.data;
                 this.dataLoading = false;
             }
+
+            // reset checkboxes
+            this.isAllRowsSelected = false;
+            this.activeDataFromCheckbox = {};
+            document.querySelector('#input_checkbox_selectAll').checked = false;
         },
+        checkboxDataSelected(projectData, isChecked) {
+            if (projectData === undefined) { return; }
+            if (isChecked) {
+                this.activeDataFromCheckbox[projectData.id] = projectData;
+            } else {
+                delete this.activeDataFromCheckbox[projectData.id];
+            }
+        }
     }">
-        <div class="p-2 flex items-end justify-end gap-2 flex-wrap mt-4">
+        <div class="p-2 flex items-center justify-end gap-3 flex-wrap mt-4">
             <x-public.button @click="$dispatch('openmodal', {
                 modalID: 'modal_project',
                 modal_header_text: 'Add Project'
@@ -38,16 +64,24 @@
             </x-public.button>
 
             <div x-transition x-show="checkboxActive" class="flex items-start justify-center">
-                <x-public.button size="sm" x-data @click="console.log(123)"
-                    class="bg-red-500 hover:bg-red-400 transition-colors cursor-pointer">
+                <x-public.button x-data @click="
+                        if (Object.keys(activeDataFromCheckbox).length < 0) { return }
+                        $dispatch('openmodal', {
+                            modalID: 'modal_delete_projects',
+                            modal_header_text: 'Delete this projects?',
+                            special_data: {
+                                project_data: activeDataFromCheckbox
+                            }
+                        });
+                    " size="sm" class="bg-red-500 hover:bg-red-400 transition-colors cursor-pointer">
                     <span class="flex items-center justify-center gap-2">
                         @svg('fluentui-delete-28-o', 'w-5 h-5')
-                        Delete Selected
+                        Delete Selected <span x-text="'(' + Object.keys(activeDataFromCheckbox).length + ')'"></span>
                     </span>
                 </x-public.button>
             </div>
 
-            <div class="cursor-pointer relative p-2 rounded bg-white shadow-sm border border-transparent hover:border-accent-darkslategray-200/50 transition-colors"
+            <div class="cursor-pointer relative p-1 rounded bg-white shadow-card border border-transparent hover:border-accent-darkslategray-200/50 transition-colors"
                 x-data="{
                     isOpened: false,
                     toggle(e) {
@@ -64,7 +98,7 @@
                 </span>
 
                 <div x-transition x-show="isOpened"
-                    class="min-w-sm max-w-md absolute bottom-0 right-0 translate-y-[100%] bg-white p-2 rounded shadow-sm">
+                    class="min-w-sm max-w-md absolute bottom-0 right-0 translate-y-[100%] bg-white p-2 rounded shadow-card z-[10]">
                     <ul class="space-y-1 *:hover:bg-gray-200 *:p-2 *:text-sm *:rounded-sm *:cursor-pointer">
                         <li @click="console.log('in test mode')" title="Export data as csv file"
                             class="flex justify-start items-center gap-2">
@@ -86,19 +120,36 @@
             </div>
         </div>
 
+        {{-- Filter --}}
+        <div class="flex items-start justify-start px-2 mt-2 mb-3">
+            <section class="flex flex-col gap-1">
+                <p class="text-xxs font-sans font-medium text-black/50">STATUS</p>
+                <select class="p-2 rounded-sm shadow-card md:min-w-[200px]">
+                    <option value="all" selected>All</option>
+                    <option value="on_going">On Going</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </section>
+        </div>
+
         {{-- Table --}}
-        <div class="p-6 overflow-auto px-0 outline rounded outline-accent-darkslategray-400/15">
+        <div class="overflow-auto rounded max-h-[600px] overflow-y-auto">
             <table class="w-full min-w-max table-auto text-left rounded-t-md">
                 <thead>
                     <tr
                         class="bg-brand-primary-200/75 shadow-sm [&>*:first-child]:rounded-tl-sm [&>*:last-child]:rounded-tr-sm [&>*]:border-y [&>*]:border-gray-200 [&>*]:cursor-pointer [&>*]:p-2 [&>*]:transition-colors [&>*]:hover:bg-gray-200">
                         <th class="rounded-tl-md">
-                            <input type="checkbox" id="input_checkbox_selectAll" x-data="{
+                            <span>#</span>
+                        </th>
+                        <th>
+                            <input x-data="{
                                     titleContent: 'Select All'
-                                }" @click="
-                                    titleContent = $el.checked ? 'Deselect All' : 'Select All';
-                                    checkboxActive = $el.checked;
-                                " x-bind:title="titleContent"
+                                }" @change="
+                                    titleContent = $event.target.checked ? 'Deselect All' : 'Select All';
+                                    isAllRowsSelected = $event.target.checked;
+                                " x-bind:disabled="dataLoading" type="checkbox" id="input_checkbox_selectAll"
+                                x-bind:title="titleContent"
                                 class="m-auto cursor-pointer w-5 h-5 text-accent-orange-300 accent-orange-400 rounded-sm border-2 border-accent-darkslategray-700" />
                         </th>
 
@@ -165,10 +216,19 @@
 
                     <template x-if="!dataLoading && projectData">
                         <template x-for="(project, index) in projectData.data" :key="project.job_order + '_' + index">
-                            <tr
-                                class="odd:bg-accent-darkslategray-100 even:bg-accent-darkslategray-50 *:p-2 *:border-b *:border-gray-50">
+                            <tr x-data="{
+                                    isRowActive: false,
+                                }"
+                                x-bind:class="isRowActive ? 'bg-accent-orange-400/35 outline outline-accent-orange-500' : 'odd:bg-accent-darkslategray-100 even:bg-accent-darkslategray-50'"
+                                class="*:p-2">
                                 <td>
-                                    <input type="checkbox"
+                                    <span x-text="projectData.from + index"></span>
+                                </td>
+                                <td>
+                                    <input x-bind:value="project.id" x-bind:checked="isAllRowsSelected" @change="
+                                            checkboxDataSelected(project, $event.target.checked);
+                                            isRowActive = $event.target.checked;
+                                        " x-bind:value="project.id" type="checkbox"
                                         class="input_checkbox_item cursor-pointer w-5 h-5 text-accent-orange-300 accent-orange-400 rounded-sm border-2 border-accent-darkslategray-700" />
                                 </td>
                                 <td>
@@ -222,19 +282,19 @@
                                 </td>
                                 <td>
                                     <template x-if="project.status == 'pending'">
-                                        <div class="scale-[80%] relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-orange-400/20 text-orange-600 py-1 px-2 text-xs rounded-md"
+                                        <div class="scale-[80%] max-w-fit mx-auto relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-orange-400/20 text-orange-600 py-1 px-2 text-xs rounded-md"
                                             style="opacity: 1;">
                                             <span class="text-center">Pending</span>
                                         </div>
                                     </template>
                                     <template x-if="project.status == 'on_going'">
-                                        <div class="scale-[80%] relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-yellow-400/20 text-yellow-600 py-1 px-2 text-xs rounded-md"
+                                        <div class="scale-[80%] max-w-fit mx-auto relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-yellow-400/20 text-yellow-600 py-1 px-2 text-xs rounded-md"
                                             style="opacity: 1;">
                                             <span class="text-center">On Going</span>
                                         </div>
                                     </template>
                                     <template x-if="project.status == 'completed'">
-                                        <div class="scale-[80%] relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-green-400/20 text-green-600 py-1 px-2 text-xs rounded-md"
+                                        <div class="scale-[80%] max-w-fit mx-auto relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-green-400/20 text-green-600 py-1 px-2 text-xs rounded-md"
                                             style="opacity: 1;">
                                             <span class="text-center">Completed</span>
                                         </div>
@@ -264,26 +324,26 @@
                                 </td>
                                 <td>
                                     <div class="flex gap-2 items-center justify-center">
-                                        <x-public.button @click="$dispatch('openmodal', {
+                                        <button @click="$dispatch('openmodal', {
                                                 modalID: 'modal_project',
                                                 modal_header_text: 'Edit Project',
                                                 special_data: {
                                                     product_data: project,
                                                 }
                                             })" title="Edit data"
-                                            class="cursor-pointer bg-blue-500 hover:bg-blue-600 active:bg-blue-400 transition-colors">
+                                            class="cursor-pointer px-4 py-2 rounded-sm bg-blue-500 hover:bg-blue-600 active:bg-blue-400 transition-colors">
                                             @svg('fluentui-edit-24', 'w-4 h-4 text-white')
-                                        </x-public.button>
-                                        <x-public.button @click="$dispatch('openmodal', {
+                                        </button>
+                                        <button @click="$dispatch('openmodal', {
                                                 modalID: 'modal_delete_project',
                                                 modal_header_text: 'Delete Project?',
                                                 special_data: {
                                                     product_data: project,
                                                 }
                                             })" title="Delete data"
-                                            class="cursor-pointer bg-red-500 hover:bg-red-600 active:bg-red-400 transition-colors">
+                                            class="cursor-pointer px-4 py-2 rounded-sm bg-red-500 hover:bg-red-600 active:bg-red-400 transition-colors">
                                             @svg('fluentui-delete-24', 'w-4 h-4 text-white')
-                                        </x-public.button>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -297,6 +357,7 @@
         <div class="mt-4 flex items-center justify-end gap-2">
             <div class="flex items-center justify-center gap-1 flex-wrap">
                 <x-public.button x-bind:class="dataLoading ? 'disabled' : ''"
+                    @click="changeSourceData(projectData.prev_page_url)"
                     class="cursor-pointer shadow-sm bg-white hover:bg-accent-darkslategray-200 transition-colors">
                     <span class="flex items-center justify-center gap-2">
                         @svg('fluentui-caret-left-24', 'w-6 h-6')
@@ -308,14 +369,15 @@
                     <div class="flex justify-center items-center gap-2 flex-wrap">
                         <template x-for="i in Array.from({ length: projectData.last_page }, (_, index) => index + 1)">
                             <x-public.button @click="changeSourceData(projectData.links[i].url)"
-                                class="cursor-pointer shadow-sm bg-white hover:bg-accent-darkslategray-200 transition-colors">
+                                x-bind:class="projectData.links[i].active ? 'bg-brand-primary-600 hover:bg-brand-primary-700 text-white' : 'bg-white hover:bg-accent-darkslategray-200'"
+                                class="cursor-pointer shadow-sm transition-colors">
                                 <span class="flex items-center justify-center" x-text="i"></span>
                             </x-public.button>
                         </template>
                     </div>
                 </template>
 
-                <x-public.button
+                <x-public.button @click="changeSourceData(projectData.next_page_url)"
                     class="cursor-pointer shadow-sm bg-white hover:bg-accent-darkslategray-200 transition-colors">
                     <span class="flex items-center justify-center gap-2">
                         @svg('fluentui-caret-right-24', 'w-6 h-6')
@@ -334,8 +396,7 @@
     <form @php
         $fileUploadId = 'file_upload_project';
     @endphp id="form_project" x-data="projectForm()"
-        @submit.prevent="handleSubmit" 
-        @modal_closed_fallback.window="handleModalClose($event)"
+        @submit.prevent="handleSubmit" @modal_closed_fallback.window="handleModalClose($event)"
         @passed_product_data.window="loadProjectData($event);"
         @files_empty.window="handleFileUploadModalState($event, true)"
         @files_not_empty.window="handleFileUploadModalState($event, false)"
@@ -576,10 +637,7 @@
 </x-layouts.modal>
 
 <x-layouts.modal modalID="modal_delete_project" modalMaxWidth="md">
-    <section 
-        x-data="deleteProjectForm()"
-        @modal_closed_fallback.window="handleModalClose($event)"
-        >
+    <section x-data="deleteProjectForm()" @modal_closed_fallback.window="handleModalClose($event)">
         <section>
             <h2>Project Info:</h2>
 
@@ -638,6 +696,101 @@
                         if (!e.detail.data) return;
                         if (e.detail.modalID !== this.modal_id) return;
                         this.projectData = e.detail.data.product_data;
+                    },
+                }
+            }
+        </script>
+    </section>
+</x-layouts.modal>
+
+<x-layouts.modal modalID="modal_delete_projects" modalMaxWidth="2xl">
+    <section x-data="deleteProjectsForm()" @modal_closed_fallback.window="handleModalClose($event)">
+        <section>
+            <h2>
+                <span x-text="Object.keys(projectData).length"></span>
+                Projects Info:
+            </h2>
+
+            <section class="p-2 bg-gray-200 rounded grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto">
+                <template x-if="projectData && Object.keys(projectData).length > 0">
+                    <template x-for="(project, index) in projectData" :key="project + '_' + index">
+                        <section class="bg-gray-100 rounded-sm shadow-card p-3 w-full h-full flex flex-col gap-2">
+                            <div class="flex gap-2">
+                                <p class="font-sans font-medium text-sm">Job Order:</p>
+                                <span x-text="project.job_order"></span>
+                            </div>
+                            <div class="flex gap-2">
+                                <p class="font-sans font-medium text-sm">Status:</p>
+                                <template x-if="project.status == 'pending'">
+                                    <div class="scale-[80%] max-w-fit relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-orange-400/20 text-orange-600 py-1 px-2 text-xs rounded-md"
+                                        style="opacity: 1;">
+                                        <span class="text-center">Pending</span>
+                                    </div>
+                                </template>
+                                <template x-if="project.status == 'on_going'">
+                                    <div class="scale-[80%] max-w-fit relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-yellow-400/20 text-yellow-600 py-1 px-2 text-xs rounded-md"
+                                        style="opacity: 1;">
+                                        <span class="text-center">On Going</span>
+                                    </div>
+                                </template>
+                                <template x-if="project.status == 'completed'">
+                                    <div class="scale-[80%] max-w-fit relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-green-400/20 text-green-600 py-1 px-2 text-xs rounded-md"
+                                        style="opacity: 1;">
+                                        <span class="text-center">Completed</span>
+                                    </div>
+                                </template>
+                                {{-- <span x-text="project.status"></span> --}}
+                            </div>
+                            <div class="flex gap-2">
+                                <p class="font-sans font-medium text-sm">Title:</p>
+                                <span x-text="project.title" class="text-sm"></span>
+                            </div>
+                        </section>
+                    </template>
+                </template>
+            </section>
+
+        </section>
+        <section>
+            <form method="POST" action="{{ route('content.delete.section.projects.selected') }}"
+                @passed_product_data.window="loadProjectData($event);" @submit.prevent="formSubmit()">
+                @csrf
+                <input type="hidden" name="projects" x-bind:value="JSON.stringify(projectData)" />
+                <div class="mt-4 flex justify-end items-start gap-2">
+                    <x-public.button type="button" button_type="default" @click="closeModal()">Cancel</x-public.button>
+                    <x-public.button type="submit" x-bind:disabled="loading"
+                        class="cursor-pointer text-white bg-red-500 hover:bg-red-400 active:bg-red-600 transition-colors disabled:opacity-50 flext items-center justify-center gap-2">
+                        <template x-if="loading">
+                            @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                        </template>
+                        <span x-text="loading ? 'Deleting...' : 'Delete'"></span>
+                    </x-public.button>
+                </div>
+            </form>
+        </section>
+        <script>
+            function deleteProjectsForm() {
+                return {
+                    projectData: {},
+                    loading: false,
+                    formDisabled: true,
+
+                    formSubmit() {
+                        this.loading = true;
+                        this.$el.submit();
+                    },
+
+                    handleModalClose(e) {
+                        if (e.detail.modalID !== this.modal_id) return;
+                        this.projectData = {};
+                        this.formDisabled = true;
+                    },
+
+                    loadProjectData(e) {
+                        if (!e.detail.data) return;
+                        if (e.detail.modalID !== this.modal_id) return;
+                        this.projectData = e.detail.data.project_data;
+                        console.log(this.projectData);
                     },
                 }
             }
