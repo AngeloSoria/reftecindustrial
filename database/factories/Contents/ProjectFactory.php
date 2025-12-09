@@ -38,7 +38,7 @@ class ProjectFactory extends Factory
 
         return [
             "images" => $imagePaths,
-            "job_order" => random_int(1000, 9000),
+            "job_order" => random_int(1000, 9999) . '-' . random_int(1000, 9999),
             "title" => fake()->sentence(4),
             "description" => fake()->sentence(20),
             "status" => $status[random_int(0, 2)],
