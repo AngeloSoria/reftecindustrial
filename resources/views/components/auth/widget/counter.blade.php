@@ -3,6 +3,7 @@
 
     'icon' => 'fluentui-person-16-o',
     'iconColor' => 'bg-brand-secondary-300',
+    'bgIconColor' => 'bg-brand-secondary-300/25',
     'label' => '<<PUT LABEL HERE>>',
 
     'counter' => 'loading...',
@@ -39,11 +40,11 @@
 @endphp
 <div 
     id="{{ $id }}" 
-    class="bg-white px-4 py-5 grid items-center rounded-xl border font-inter max-h-[170px] {{ $attributes->get('class') }}">
+    class="bg-white px-5 py-5 grid items-center rounded-xl shadow-card font-inter max-h-[120px] {{ $attributes->get('class') }}">
 
     <div class="bg-green-300/0 flex items-center justify-start gap-4">
         {{-- icon --}}
-        <div class="{{ 'bg-' . $iconColor . '/25' }} rounded-full p-3 w-fit">
+        <div class="{{ $bgIconColor }} rounded-full p-3 w-fit">
             @svg($icon, 'w-6 h-6 text-' . $iconColor)
         </div>
 
@@ -60,13 +61,13 @@
                 </div>
 
             {{-- label --}}
-            <p class="text-sm font-medium text-accent-darkslategray-600">{{ $label }}</p>
+            <p class="text-sm font-medium font-sans text-accent-darkslategray-400/90">{{ $label }}</p>
             
             {{-- ratio --}}
             <div class="{{ $textColor }} flex items-center text-sm gap-2 font-medium">
                 {{-- increase/decrease icon value --}}
                 {{-- @svg($ratioIcon, 'w-6 h-6') --}}
-                <p class="ratio-value">{{ $ratio }}&percnt;</p>
+                {{-- <p class="ratio-value">{{ $ratio }}&percnt;</p> --}}
             </div>
         </section>
 
