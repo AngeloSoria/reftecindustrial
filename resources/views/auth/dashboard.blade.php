@@ -6,26 +6,29 @@
             id="widget_counter_total_visits"
             icon="fluentui-person-16-o" 
             iconColor="brand-secondary-300"
+            bgIconColor="bg-brand-secondary-300/10"
             label="Total Site Visits ({{ now()->format('F') }})" />
 
         <x-auth.widget.counter 
             class="grow basis-full sm:basis-[48%] lg:basis-[32%]" 
             icon="fluentui-vehicle-car-16-o"
-            iconColor="accent-orange-300" 
+            iconColor="accent-orange-300"
+            bgIconColor="bg-accent-orange-300/10"
             label="Total Car Trips (Month)" />
 
         <x-auth.widget.counter
             class="grow basis-full sm:basis-[48%] lg:basis-[32%]" 
             icon="fluentui-camera-dome-16-o"
-            iconColor="red-500" 
+            iconColor="blue-500"
+            bgIconColor="bg-blue-500/10"
             label="Total Camera (Active)" />
 
     </section>
 
     <section class="flex md:flex-row flex-col flex-wrap gap-2 justify-center overflow-hidden grow">
-        <x-auth.widget.chart_visitors class="border basis-full md:basis-[49%] grow" />
+        <x-auth.widget.chart_visitors class="shadow-card basis-full md:basis-[49%] grow" />
 
         {{-- TODO: Make this api-sided --}}
-        <x-auth.widget.chart_completed_car_trips class="border basis-full md:basis-[49%] grow" />
+        <x-auth.widget.chart_completed_car_trips class="shadow-card basis-full md:basis-[49%] grow" />
     </section>
 </x-layouts.auth.app>
