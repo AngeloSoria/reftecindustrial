@@ -135,6 +135,69 @@ class ProjectController extends Controller
             ]);
         }
     }
+    public function getProjectsV2(Request $request)
+    {
+        try {
+            // -----------------------------
+            // Base query
+            // -----------------------------
+            $query = Project::select([
+                'id',
+                'images',
+                'job_order',
+                'title',
+                'description',
+                'status',
+                'is_visible',
+                'is_featured'
+            ]);
+
+            // -----------------------------
+            // Dynamic filters map
+            // -----------------------------
+            $filtersMap = [
+                'status'     => 'status',
+                'visibility' => 'is_visible',
+                'featured'   => 'is_featured',
+                // Add new filters here in the future:
+                // 'category' => 'category_id',
+            ];
+
+            foreach ($filtersMap as $requestKey => $dbColumn) {
+                if ($request->filled($requestKey)) {
+                    $query->where($dbColumn, $request->input($requestKey));
+                }
+            }
+
+            // -----------------------------
+            // Optional search
+            // -----------------------------
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('job_order', 'LIKE', "%{$search}%")
+                        ->orWhere('title', 'LIKE', "%{$search}%")
+                        ->orWhere('description', 'LIKE', "%{$search}%");
+                });
+            }
+
+            // -----------------------------
+            // Pagination (15 per page)
+            // -----------------------------
+            $projects = $query->latest()->paginate(15);
+
+            // Return paginator JSON (standard Laravel format)
+            return response()->json([
+                'success' => true,  
+                'data' => $projects
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     public function updateProject(Request $request)
     {
@@ -241,7 +304,7 @@ class ProjectController extends Controller
                 'project_id' => 'required|string|exists:contents_projects,id'
             ]);
 
-            
+
             $model = Project::findOrFail($request->project_id);
 
             $model->deleteOrFail();
@@ -263,8 +326,8 @@ class ProjectController extends Controller
             $request->validate([
                 'projects' => 'required|string'
             ]);
-            
-            
+
+
             $decoded_project = json_decode($request->projects, true);
             if (empty($decoded_project)) {
                 throw new Exception('No existing project value passed.');
