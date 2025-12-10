@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Barryvdh\Debugbar\Facades\Debugbar;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if (!app()->environment('local')) {
+            return;
+        }
+
+        foreach (app()->getLoadedProviders() as $provider => $loaded) {
+            Debugbar::startMeasure($provider, "Booting $provider");
+            // You’re not re-registering it — just measuring
+            Debugbar::stopMeasure($provider);
+        }
     }
 }
