@@ -43,6 +43,7 @@ Route::prefix('content')
 
         Route::controller(ProjectController::class)->group(function() {
             Route::get('section/projects', 'getProjects')->name('get.section.projects');
+            Route::get('section/projects/filtered', 'getProjectsV2')->name('get.section.projects.filtered');
         });
     });
 
