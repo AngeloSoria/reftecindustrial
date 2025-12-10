@@ -1,0 +1,41 @@
+<?php
+
+namespace Database\Factories\Contents;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
+ */
+class ProductFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        $IMAGES = [
+            'images/landscape/johannes-plenio-RwHv7LgeC7s-unsplash.jpg',
+            'images/landscape/leonard-cotte-c1Jp-fo53U8-unsplash.jpg',
+            'images/landscape/matthew-smith-Rfflri94rs8-unsplash.jpg',
+            'images/landscape/qingbao-meng-01_igFr7hd4-unsplash.jpg',
+            'images/landscape/quaritsch-photography-lIYBssO6ahY-unsplash.jpg',
+            'images/landscape/sergey-shmidt-koy6FlCCy5s-unsplash.jpg',
+        ];
+
+        $imageCount = random_int(1, 6);
+        $shuffled = $IMAGES;
+        shuffle($shuffled);
+        $imagePaths = array_slice($shuffled, 0, $imageCount); // populate random images uniquely from defined IMAGES.
+
+
+        return [
+            "images" => $imagePaths,
+            "title" => fake()->sentence(4),
+            "description" => fake()->sentence(20),
+            "is_visible" => random_int(0, 1),
+        ];
+    }
+}
