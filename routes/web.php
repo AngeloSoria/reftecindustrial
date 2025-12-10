@@ -5,7 +5,7 @@ use App\Http\Controllers\Auth\{LoginController, LogoutController};
 use App\Http\Controllers\{VisitorController, UploadController};
 use App\Http\Controllers\Contents\GeneralController;
 use App\Http\Controllers\Contents\ProjectController;
-
+use App\Http\Controllers\Contents\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +44,11 @@ Route::prefix('content')
         Route::controller(ProjectController::class)->group(function() {
             Route::get('section/projects', 'getProjects')->name('get.section.projects');
             Route::get('section/projects/filtered', 'getProjectsV2')->name('get.section.projects.filtered');
+        });
+
+        Route::controller(ProductController::class)->group(function() {
+            Route::get('section/products', 'getProducts')->name('get.section.products');
+            Route::get('section/products/filtered', 'getProductsFiltered')->name('get.section.products.filtered');
         });
     });
 
@@ -124,6 +129,13 @@ Route::middleware('auth')->group(function () {
                 Route::post('section/project/update', 'updateProject')->name('update.section.project');
                 Route::post('section/project/delete', 'deleteProject')->name('delete.section.project');
                 Route::post('section/project/delete/selected', 'deleteSelectedProjects')->name('delete.section.projects.selected');
+            });
+            
+            Route::controller(ProjectController::class)->group(function() {
+                Route::post('section/product/add', 'addProduct')->name('add.section.product');
+                Route::post('section/product/update', 'updateProduct')->name('update.section.product');
+                Route::post('section/product/delete', 'deleteProduct')->name('delete.section.product');
+                Route::post('section/product/delete/selected', 'deleteSelectedProduct')->name('delete.section.products.selected');
             });
         });
 });
