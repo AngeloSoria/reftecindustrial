@@ -18,7 +18,7 @@
             });
 
             $watch('isAllRowsSelected', (value) => {
-                document.querySelectorAll('.input_checkbox_item').forEach(el => {
+                document.querySelectorAll('.input_checkbox_item-project').forEach(el => {
                     el.checked = value;
                     el.dispatchEvent(new Event('change', { bubbles: true }));
                 });
@@ -319,7 +319,7 @@
                                             checkboxDataSelected(project, $event.target.checked);
                                             isRowActive = $event.target.checked;
                                         " x-bind:value="project.id" type="checkbox"
-                                        class="input_checkbox_item cursor-pointer w-5 h-5 text-accent-orange-300 accent-orange-400 rounded-sm border-2 border-accent-darkslategray-700" />
+                                        class="input_checkbox_item-project cursor-pointer w-5 h-5 text-accent-orange-300 accent-orange-400 rounded-sm border-2 border-accent-darkslategray-700" />
                                 </td>
                                 <td>
                                     <div class="flex items-center gap-3">
