@@ -33,7 +33,8 @@ html {
 
     --backdrop-blur-xss: 2px;
 
-    --shadow-card: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    --shadow-card: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+        rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
 
     --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
@@ -126,6 +127,18 @@ html {
     --color-pearl-800: #323231;
     --color-pearl-900: #1c1c1c;
     --color-pearl-950: #111111;
+
+    --color-royalblue-50: #f6f7ff;
+    --color-royalblue-100: #eeefff;
+    --color-royalblue-200: #dcdefe;
+    --color-royalblue-300: #cacefe;
+    --color-royalblue-400: #b8bffd;
+    --color-royalblue-500: #a5affc;
+    --color-royalblue-600: #91a0fb;
+    --color-royalblue-700: #7b91fa;
+    --color-royalblue-800: #6283f8;
+    --color-royalblue-900: #4275f7;
+    --color-royalblue-950: #2b6ef6;
 }
 
 @font-face {
