@@ -203,11 +203,9 @@
             <table class="w-full min-w-max table-auto text-left rounded-t-md">
                 <thead>
                     <tr
-                        class="bg-brand-primary-200/75 shadow-sm [&>*:first-child]:rounded-tl-sm [&>*:last-child]:rounded-tr-sm [&>*]:border-y [&>*]:border-gray-200 [&>*]:cursor-pointer [&>*]:p-2 [&>*]:transition-colors [&>*]:hover:bg-gray-200">
+                        class="bg-royalblue-400/50 shadow-sm [&>*:first-child]:rounded-tl-sm [&>*:last-child]:rounded-tr-sm [&>*]:border-x [&>*]:border-gray-200 [&>*]:p-4">
+                        
                         <th class="rounded-tl-md">
-                            <span>#</span>
-                        </th>
-                        <th>
                             <input x-data="{
                                     titleContent: 'Select All'
                                 }" @change="
@@ -216,6 +214,10 @@
                                 " x-bind:disabled="dataLoading" type="checkbox" id="input_checkbox_selectAll"
                                 x-bind:title="titleContent"
                                 class="m-auto cursor-pointer w-5 h-5 text-accent-orange-300 accent-orange-400 rounded-sm border-2 border-accent-darkslategray-700" />
+                        </th>
+
+                        <th>
+                            <span>#</span>
                         </th>
 
                         <th>
@@ -244,7 +246,7 @@
                         </th>
                         <th>
                             <p
-                                class="antialiased font-sans text-sm text-gray-900 flex items-center justify-between gap-2 font-normal leading-none">
+                                class="antialiased font-sans text-sm text-center text-gray-900 gap-2 font-normal leading-none">
                                 Actions
                             </p>
                         </th>
@@ -266,17 +268,17 @@
                             <tr x-data="{
                                     isRowActive: false,
                                 }"
-                                x-bind:class="isRowActive ? 'bg-accent-orange-400/35 outline outline-accent-orange-500' : 'odd:bg-accent-darkslategray-100 even:bg-accent-darkslategray-50'"
-                                class="*:p-2">
-                                <td>
-                                    <span x-text="productData.from + index"></span>
-                                </td>
+                                x-bind:class="isRowActive ? 'bg-accent-orange-400/35' : '*:bg-accent-darkslategray-50'"
+                                class="*:p-2 *:border-b *:border-gray-300/50 transition-colors">
                                 <td>
                                     <input x-bind:value="product.id" x-bind:checked="isAllRowsSelected" @change="
                                             checkboxDataSelected(product, $event.target.checked);
                                             isRowActive = $event.target.checked;
                                         " x-bind:value="product.id" type="checkbox"
-                                        class="input_checkbox_item-product cursor-pointer w-5 h-5 text-accent-orange-300 accent-orange-400 rounded-sm border-2 border-accent-darkslategray-700" />
+                                        class="input_checkbox_item-product cursor-pointer w-5 h-5 mx-auto text-accent-orange-300 accent-orange-400 rounded-sm border-2 border-accent-darkslategray-700" />
+                                </td>
+                                <td>
+                                    <span x-text="productData.from + index"></span>
                                 </td>
                                 <td>
                                     <div class="flex items-center gap-3">
@@ -310,13 +312,13 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="w-max overflow-x-auto max-w-[125px] whitespace-normal break-words">
+                                    <div class="w-max overflow-x-auto max-w-[200px] whitespace-normal break-words">
                                         <p class="block antialiased font-sans text-sm leading-normal text-gray-900 font-normal"
                                             x-text="product.title"></p>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="w-max overflow-x-auto max-w-[200px] whitespace-normal break-words">
+                                    <div class="w-max overflow-x-auto max-w-[300px] whitespace-normal break-words">
                                         <p class="block antialiased font-sans text-sm leading-normal text-gray-900 font-normal"
                                             x-text="product.description"></p>
                                     </div>
@@ -325,10 +327,14 @@
                                     <div
                                         class="flex items-start justify-center antialiased font-sans text-sm leading-normal text-gray-900 font-normal">
                                         <template x-if="product.is_visible == 1">
-                                            @svg('fluentui-checkmark-circle-24', 'w-5 h-5 text-green-500')
+                                            <span title="Visible to public">
+                                                @svg('fluentui-eye-24-o', 'w-5 h-5 text-gray-500')
+                                            </span>
                                         </template>
                                         <template x-if="product.is_visible == 0">
-                                            @svg('zondicon-close-solid', 'w-5 h-5 text-red-500')
+                                            <span title="Hidden to public">
+                                                @svg('fluentui-eye-off-24-o', 'w-5 h-5 text-gray-500')
+                                            </span>
                                         </template>
                                     </div>
                                 </td>
@@ -341,8 +347,8 @@
                                                     product_data: product,
                                                 }
                                             })" title="Edit data"
-                                            class="cursor-pointer px-4 py-2 rounded-sm bg-blue-500 hover:bg-blue-600 active:bg-blue-400 transition-colors">
-                                            @svg('fluentui-edit-24', 'w-4 h-4 text-white')
+                                            class="cursor-pointer p-2 rounded-sm bg-blue-500 hover:bg-blue-600 active:bg-blue-400 transition-colors">
+                                            @svg('fluentui-edit-24-o', 'w-4 h-4 text-white')
                                         </button>
                                         <button @click="$dispatch('openmodal', {
                                                 modalID: 'modal_delete_product',
@@ -351,8 +357,8 @@
                                                     product_data: product,
                                                 }
                                             })" title="Delete data"
-                                            class="cursor-pointer px-4 py-2 rounded-sm bg-red-500 hover:bg-red-600 active:bg-red-400 transition-colors">
-                                            @svg('fluentui-delete-24', 'w-4 h-4 text-white')
+                                            class="cursor-pointer p-2 rounded-sm bg-red-500/15 hover:bg-red-500/20 active:bg-red-500/10 transition-colors">
+                                            @svg('fluentui-delete-24', 'w-4 h-4 text-red-500')
                                         </button>
                                     </div>
                                 </td>
@@ -412,391 +418,15 @@
             </div>
         </template>
 
+        
+        <x-auth.content.product.modal_add_edit_product />
+        <x-auth.content.product.modal_delete_product />
+        <x-auth.content.product.modal_delete_selected_products />
 
     </section>
 
 
 </div>
 
-<x-layouts.modal modalID="modal_product" modalMaxWidth="4xl">
-    <form @php
-        $fileUploadId = 'file_upload_product';
-    @endphp id="form_product" x-data="productForm()"
-        @submit.prevent="handleSubmit" @modal_closed_fallback.window="handleModalClose($event)"
-        @passed_product_data.window="loadProductData($event);"
-        @files_empty.window="handleFileUploadModalState($event, true)"
-        @files_not_empty.window="handleFileUploadModalState($event, false)"
-        x-bind:action="isUpdate() ? routes.update : routes.add" method="POST" enctype="multipart/form-data">
-        @csrf
-
-        <section class="grid grid-cols-1 md:grid-cols-[1fr_0.5fr] gap-4">
-
-            {{-- LEFT SIDE --}}
-            <section>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-2 items-start justify-start">
-                        <p class="text-sm font-medium">
-                            Product Title
-                            <span class="text-red-500 font-bold">*</span>
-                        </p>
-                        <input x-model="productData.title" @input="checkChanges()"
-                            class="w-full px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none focus:bg-gray-200 transition-colors"
-                            name="product_name" required />
-                    </div>
-                    <div class="flex flex-col gap-4">
-                        <p class="text-sm font-medium">Visible to public</p>
-                        <input name="visibility" type="checkbox" @change="checkChanges();" {{--
-                            x-model="productData.is_visible" --}} :checked="Boolean(productData.is_visible)"
-                            class="cursor-pointer w-5 h-5 border-2" />
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <div class="flex flex-col gap-2 items-start justify-start">
-                        <p class="text-sm font-medium">Description</p>
-                        <textarea x-model="productData.description" @input="checkChanges()" name="description"
-                            class="w-full min-h-34 max-h-40 px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none focus:bg-gray-200 transition-colors"></textarea>
-                    </div>
-                </div>
-            </section>
-
-            {{-- RIGHT SIDE IMAGE SECTION --}}
-            <section x-data="{
-                showUploadFile: true,
-            }" class="flex flex-col gap-2">
-                <p class="text-sm font-medium">
-                    Images
-                    <span class="text-red-500 font-bold">*</span>
-                </p>
 
 
-
-                <template x-if="productData.images">
-                    <div x-data="{
-                        init() {
-                            showUploadFile = true;
-                            if(Object.keys(productData.images).length > 6) {
-                                showUploadFile = false;
-                            }
-                        }
-                    }">
-                        <input type="hidden" name="product_id" x-bind:value="productData.id" />
-                        <input type="hidden" name="product_images" x-bind:value="JSON.stringify(productData.images)" />
-
-                        <div class="grid grid-cols-3 grid-rows-2 gap-2">
-                            <template x-for="i in 6" :key="i">
-                                <section class="aspect-video rounded relative bg-gray-200 shadow-sm overflow-hidden">
-
-                                    <div x-show="productData.images[i - 1]" class="absolute top-0 right-0 p-1">
-                                        <button type="button" @click="removeImage(productData.images[i-1])"
-                                            class="cursor-pointer p-1 hover:bg-gray-700/40 rounded-full">
-                                            @svg('zondicon-close', 'w-3 h-3 text-white')
-                                        </button>
-                                    </div>
-
-                                    <img class="object-contain m-auto"
-                                        x-bind:src="productData.images[i-1] || '{{ asset('images/reftec_logo_transparent_16x9.png') }}'">
-                                </section>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-                <div class="w-full flex flex-col gap-1" x-show="showUploadFile">
-                    <x-layouts.file_upload_drag acceptFile="image/*" file_upload_id="{{ $fileUploadId }}"
-                        maxUploadCount="6" multiple />
-                </div>
-            </section>
-
-        </section>
-
-        {{-- FOOTER BUTTONS --}}
-        <section class="flex items-center justify-end gap-2 mt-4">
-            <button type="button" :disabled="formDisabled" @click="closeModal()"
-                class="px-5 py-2 rounded bg-gray-300 hover:bg-gray-400">
-                Cancel
-            </button>
-
-            <button type="submit" :disabled="loading"
-                class="px-5 py-2 flex items-center justify-center gap-2 rounded bg-accent-orange-300 hover:bg-accent-orange-400 disabled:opacity-50 disabled:cursor-not-allowed">
-
-                <template x-if="loading">
-                    @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
-                </template>
-
-                <span x-text="loading ? 'Saving...' : 'Save'"></span>
-            </button>
-        </section>
-
-    </form>
-
-    <script>
-        function productForm() {
-            return {
-                loading: false,
-                formDisabled: true,
-                modal_id: "modal_product",
-                file_upload_id: @js($fileUploadId),
-
-                productData: {},
-                fakeproductData: {},
-
-                routes: {
-                    add: "{{ route('content.add.section.product') }}",
-                    update: "{{ route('content.update.section.product') }}",
-                },
-
-
-                /* ---------------------------
-                Utility Functions
-                ----------------------------*/
-
-                isUpdate() {
-                    return this.productData && this.productData.id;
-                },
-
-                deepClone(obj) {
-                    return JSON.parse(JSON.stringify(obj));
-                },
-
-                objectsMatch(a, b) {
-                    return JSON.stringify(a) === JSON.stringify(b);
-                },
-
-                checkChanges() {
-                    this.formDisabled = this.objectsMatch(this.productData, this.fakeproductData);
-                },
-
-                removeImage(path) {
-                    this.productData.images = this.productData.images.filter(img => img !== path);
-                    this.checkChanges();
-                },
-
-
-                /* ---------------------------
-                FileUpload Event Handling
-                ----------------------------*/
-                handleFileUploadModalState(e, state) {
-                    if (e.detail.file_upload_id != this.file_upload_id) return;
-                    this.formDisabled = state;
-                    if (state) this.checkChanges();
-                },
-
-
-                /* ---------------------------
-                Modal Event Handling
-                ----------------------------*/
-
-                handleModalClose(e) {
-                    if (e.detail.modalID !== this.modal_id) return;
-                    this.productData = {};
-                    this.fakeproductData = {};
-                    this.formDisabled = true;
-                },
-
-                loadProductData(e) {
-                    if (!e.detail.data) return;
-                    if (e.detail.modalID !== this.modal_id) return;
-
-                    this.productData = this.deepClone(e.detail.data.product_data);
-                    this.fakeproductData = this.deepClone(e.detail.data.product_data);
-
-                    this.checkChanges();
-                },
-
-                /* ---------------------------
-                Submit
-                ----------------------------*/
-
-                handleSubmit() {
-                    // if (this.formDisabled) {
-                    //     toast("No changes to save.", "warning");
-                    //     return;
-                    // }
-                    this.formDisabled = true;
-                    this.loading = true;
-                    // $dispatch('force_disable_modal_closing', { modalID: 'modal_product' });
-                    window.dispatchEvent(new CustomEvent("force_disable_modal_closing", {
-                        detail: { modalID: 'modal_product' }
-                    }));
-                    this.$el.submit();
-                },
-            };
-        }
-    </script>
-
-</x-layouts.modal>
-
-<x-layouts.modal modalID="modal_delete_product" modalMaxWidth="md">
-    <section x-data="deleteProductForm()" @modal_closed_fallback.window="handleModalClose($event)">
-        <section>
-            <h2>Product Info:</h2>
-
-            <section class="p-2 bg-gray-200 rounded">
-                <div class="flex gap-2">
-                    <p class="font-bold">Job Order:</p>
-                    <span x-text="productData.job_order"></span>
-                </div>
-                <div class="flex gap-2">
-                    <p class="font-bold">Title:</p>
-                    <span x-text="productData.title"></span>
-                </div>
-                <div class="flex gap-2">
-                    <p class="font-bold">Status:</p>
-                    <span x-text="productData.status"></span>
-                </div>
-            </section>
-
-        </section>
-        <section>
-            <form method="POST" @passed_product_data.window="loadProductData($event);" @submit.prevent="formSubmit()"
-                x-data action="{{ route('content.delete.section.product') }}">
-                @csrf
-                <input type="hidden" name="product_id" x-bind:value="productData.id" />
-                <div class="mt-4 flex justify-end items-start gap-2">
-                    <x-public.button type="button" button_type="default" x-bind:disabled="formDisabled"
-                        @click="closeModal()">
-                        Cancel
-                    </x-public.button>
-                    <x-public.button type="submit" x-bind:disabled="loading"
-                        class="cursor-pointer text-white bg-red-500 hover:bg-red-400 active:bg-red-600 transition-colors disabled:opacity-50 flext items-center justify-center gap-2">
-                        <template x-if="loading">
-                            @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
-                        </template>
-                        <span x-text="loading ? 'Deleting...' : 'Delete'"></span>
-                    </x-public.button>
-                </div>
-            </form>
-        </section>
-        <script>
-            function deleteProductForm() {
-                return {
-                    productData: {},
-                    loading: false,
-                    formDisabled: false,
-
-                    formSubmit() {
-                        this.loading = true;
-                        this.formDisabled = true;
-                        $dispatch('force_disable_modal_closing', { modalID: 'modal_delete_product' });
-                        this.$el.submit();
-                    },
-
-                    handleModalClose(e) {
-                        if (e.detail.modalID !== this.modal_id) return;
-                        this.productData = {};
-                        this.formDisabled = true;
-                    },
-
-                    loadProductData(e) {
-                        if (!e.detail.data) return;
-                        if (e.detail.modalID !== this.modal_id) return;
-                        this.productData = e.detail.data.product_data;
-                    },
-                }
-            }
-        </script>
-    </section>
-</x-layouts.modal>
-
-<x-layouts.modal modalID="modal_delete_products" modalMaxWidth="2xl">
-    <section x-data="deleteProductsForm()" @modal_closed_fallback.window="handleModalClose($event)">
-        <section>
-            <h2>
-                <span x-text="Object.keys(productData).length"></span>
-                Products Info:
-            </h2>
-
-            <section class="p-2 bg-gray-200 rounded grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto">
-                <template x-if="productData && Object.keys(productData).length > 0">
-                    <template x-for="(product, index) in productData" :key="product + '_' + index">
-                        <section class="bg-gray-100 rounded-sm shadow-card p-3 w-full h-full flex flex-col gap-2">
-                            <div class="flex gap-2">
-                                <p class="font-sans font-medium text-sm">Job Order:</p>
-                                <span x-text="product.job_order"></span>
-                            </div>
-                            <div class="flex gap-2">
-                                <p class="font-sans font-medium text-sm">Status:</p>
-                                <template x-if="product.status == 'pending'">
-                                    <div class="scale-[80%] max-w-fit relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-orange-400/20 text-orange-600 py-1 px-2 text-xs rounded-md"
-                                        style="opacity: 1;">
-                                        <span class="text-center">Pending</span>
-                                    </div>
-                                </template>
-                                <template x-if="product.status == 'on_going'">
-                                    <div class="scale-[80%] max-w-fit relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-yellow-400/20 text-yellow-600 py-1 px-2 text-xs rounded-md"
-                                        style="opacity: 1;">
-                                        <span class="text-center">On Going</span>
-                                    </div>
-                                </template>
-                                <template x-if="product.status == 'completed'">
-                                    <div class="scale-[80%] max-w-fit relative grid items-center font-sans font-bold uppercase whitespace-nowrap select-none bg-green-400/20 text-green-600 py-1 px-2 text-xs rounded-md"
-                                        style="opacity: 1;">
-                                        <span class="text-center">Completed</span>
-                                    </div>
-                                </template>
-                                {{-- <span x-text="product.status"></span> --}}
-                            </div>
-                            <div class="flex gap-2">
-                                <p class="font-sans font-medium text-sm">Title:</p>
-                                <span x-text="product.title" class="text-sm"></span>
-                            </div>
-                        </section>
-                    </template>
-                </template>
-            </section>
-
-        </section>
-        <section>
-            <form method="POST" action="{{ route('content.delete.section.products.selected') }}"
-                @passed_product_data.window="loadProductData($event);" @submit.prevent="formSubmit()">
-                @csrf
-                <input type="hidden" name="products" x-bind:value="JSON.stringify(productData)" />
-                <div class="mt-4 flex justify-end items-start gap-2">
-                    <x-public.button type="button" button_type="default" x-bind:disabled="formDisabled"
-                        @click="closeModal()">
-                        Cancel
-                    </x-public.button>
-                    <x-public.button type="submit" x-bind:disabled="loading"
-                        class="cursor-pointer text-white bg-red-500 hover:bg-red-400 active:bg-red-600 transition-colors disabled:opacity-50 flext items-center justify-center gap-2">
-                        <template x-if="loading">
-                            @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
-                        </template>
-                        <span x-text="loading ? 'Deleting...' : 'Delete'"></span>
-                    </x-public.button>
-                </div>
-            </form>
-        </section>
-        <script>
-            function deleteProductsForm() {
-                return {
-                    productData: {},
-                    loading: false,
-                    formDisabled: false,
-
-                    formSubmit() {
-                        this.formDisabled = false;
-                        this.loading = true;
-                        this.$el.submit();
-                        // $dispatch('force_disable_modal_closing', { modalID: 'modal_delete_products' });
-                        window.dispatchEvent(new CustomEvent("force_disable_modal_closing", {
-                            detail: { modalID: 'modal_delete_products' }
-                        }));
-                    },
-
-                    handleModalClose(e) {
-                        if (e.detail.modalID !== this.modal_id) return;
-                        this.productData = {};
-                        this.formDisabled = true;
-                    },
-
-                    loadProductData(e) {
-                        if (!e.detail.data) return;
-                        if (e.detail.modalID !== this.modal_id) return;
-                        this.productData = e.detail.data.product_data;
-                        console.log(this.productData);
-                    },
-                }
-            }
-        </script>
-    </section>
-</x-layouts.modal>
