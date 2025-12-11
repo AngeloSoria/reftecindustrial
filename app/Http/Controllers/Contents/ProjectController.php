@@ -46,6 +46,14 @@ class ProjectController extends Controller
                 'images' => "",
             ];
 
+            // Check highlighted projects limit
+            if ($PROJECT['is_featured'] == 1) {
+                $currentHighlightedCount = Project::where('is_featured', 1)->count();
+                if ($currentHighlightedCount >= 3) {
+                    throw new Exception("You have reached the maximum limit of highlighted projects (3). Please unhighlight another project before adding a new highlighted project.");
+                }
+            }
+
             // Final the upload of the images.
             $uploadController = new UploadController();
             $uploadIds = [];
@@ -108,7 +116,6 @@ class ProjectController extends Controller
     public function getProjects($filter = null)
     {
         try {
-
             $projects = Project::select([
                 'id',
                 'images',
@@ -122,9 +129,14 @@ class ProjectController extends Controller
                 ->latest()
                 ->paginate(15);
 
+            $highlightedCount = Project::where('is_featured', 1)->count();
+
             return response()->json([
                 'success' => true,
-                'data' => $projects
+                'data' => [
+                    'projects' => $projects,
+                    'highlightedCount' => $highlightedCount
+                ]
             ]);
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
@@ -188,7 +200,7 @@ class ProjectController extends Controller
 
             // Return paginator JSON (standard Laravel format)
             return response()->json([
-                'success' => true,  
+                'success' => true,
                 'data' => $projects
             ]);
         } catch (\Throwable $e) {
@@ -229,6 +241,14 @@ class ProjectController extends Controller
 
             $uploadedFilesIds = [];
 
+            // Check highlighted projects limit
+            if ($projectData['is_featured'] == 1 && $project->is_featured == 0) {
+                $currentHighlightedCount = Project::where('is_featured', 1)->count();
+                if ($currentHighlightedCount >= 3) {
+                    throw new Exception("You have reached the maximum limit of highlighted projects (3). Please unhighlight another project before highlighting this project.");
+                }
+            }
+
             // Handle uploaded files if any
             $allFiles = $request->files->all('files');
             if (count($allFiles) > 0) {
@@ -259,7 +279,6 @@ class ProjectController extends Controller
                 if (!$uploadResponse['success']) {
                     throw new Exception($uploadResponse['message']);
                 }
-
 
                 // Track uploaded file IDs for rollback in case of error
                 foreach ($uploadResponse['files'] as $file) {
