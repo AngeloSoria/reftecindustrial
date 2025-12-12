@@ -43,7 +43,7 @@ Route::prefix('content')
 
         Route::controller(ProjectController::class)->group(function() {
             Route::get('section/projects', 'getProjects')->name('get.section.projects');
-            Route::get('section/projects/filtered', 'getProjectsV2')->name('get.section.projects.filtered');
+            Route::get('section/projects/filtered', 'getProjectsPublic')->name('get.section.projects.filtered.public');
         });
 
         Route::controller(ProductController::class)->group(function() {
@@ -136,6 +136,12 @@ Route::middleware('auth')->group(function () {
                 Route::post('section/product/update', 'updateProduct')->name('update.section.product');
                 Route::post('section/product/delete', 'deleteProduct')->name('delete.section.product');
                 Route::post('section/product/delete/selected', 'deleteSelectedProduct')->name('delete.section.products.selected');
+                
+                Route::get('section/projects', 'getProjects')->name('get.section.projects');
+                Route::get('section/projects', 'getProjectsV2')->name('get.section.projects.filtered');
+
+                Route::get('section/products', 'getProducts')->name('get.section.products');
+                Route::get('section/products/filtered', 'getProductsFiltered')->name('get.section.products.filtered');
             });
         });
 });
