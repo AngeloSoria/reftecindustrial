@@ -147,32 +147,48 @@ class ProjectController extends Controller
             ]);
         }
     }
-    public function getProjectsV2(Request $request)
+    public function getProjectsV2(Request $request, $isPublic = false)
     {
         try {
-            // -----------------------------
-            // Base query
-            // -----------------------------
-            $query = Project::select([
+            // -----------------------------------
+            // Columns to select
+            // -----------------------------------
+            $baseColumns = [
                 'id',
                 'images',
                 'job_order',
                 'title',
                 'description',
                 'status',
+            ];
+            
+            $restrictedColumns = [
                 'is_visible',
-                'is_featured'
-            ]);
+                'is_featured',
+            ];
 
-            // -----------------------------
-            // Dynamic filters map
-            // -----------------------------
+            // If not public, include restricted columns
+            $columns = $baseColumns;
+            if ($request->user()) {
+                $columns = array_merge($columns, $restrictedColumns);
+            }
+
+            $query = Project::select($columns);
+
+            // -----------------------------------
+            // Public mode: hide non-visible projects
+            // -----------------------------------
+            if ($isPublic) {
+                $query->where('is_visible', true);
+            }
+
+            // -----------------------------------
+            // Dynamic filters
+            // -----------------------------------
             $filtersMap = [
                 'status'     => 'status',
                 'visibility' => 'is_visible',
                 'featured'   => 'is_featured',
-                // Add new filters here in the future:
-                // 'category' => 'category_id',
             ];
 
             foreach ($filtersMap as $requestKey => $dbColumn) {
@@ -181,11 +197,12 @@ class ProjectController extends Controller
                 }
             }
 
-            // -----------------------------
-            // Optional search
-            // -----------------------------
+            // -----------------------------------
+            // Search
+            // -----------------------------------
             if ($request->filled('search')) {
                 $search = $request->search;
+
                 $query->where(function ($q) use ($search) {
                     $q->where('job_order', 'LIKE', "%{$search}%")
                         ->orWhere('title', 'LIKE', "%{$search}%")
@@ -193,15 +210,14 @@ class ProjectController extends Controller
                 });
             }
 
-            // -----------------------------
-            // Pagination (15 per page)
-            // -----------------------------
+            // -----------------------------------
+            // Pagination
+            // -----------------------------------
             $projects = $query->latest()->paginate(15);
 
-            // Return paginator JSON (standard Laravel format)
             return response()->json([
                 'success' => true,
-                'data' => $projects
+                'data'    => $projects,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -209,6 +225,12 @@ class ProjectController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+
+    public function getProjectsPublic(Request $request)
+    {
+        return $this->getProjectsV2($request, true);
     }
 
     public function updateProject(Request $request)
@@ -238,6 +260,7 @@ class ProjectController extends Controller
                 'is_featured'  => empty($request->highlighted) || $request->highlighted != "on" ? 0 : 1,
                 'images'       => json_decode($request->project_images), // will merge later if files uploaded
             ];
+
 
             $uploadedFilesIds = [];
 
