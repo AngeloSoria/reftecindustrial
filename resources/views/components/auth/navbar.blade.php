@@ -109,18 +109,18 @@
                                 'active_name' => 'Content',
                                 'icon' => 'fluentui-content-view-28-o',
                             ],
-                            [
-                                'route' => route('site_monitor'),
-                                'label' => 'Site Monitor',
-                                'active_name' => 'Site Monitor',
-                                'icon' => 'fluentui-camera-dome-28-o',
-                            ],
-                            [
-                                'route' => route('cartrack'),
-                                'label' => 'Cartrack',
-                                'active_name' => 'Cartrack',
-                                'icon' => 'fluentui-vehicle-car-28-o',
-                            ],
+                            // [
+                            //     'route' => route('site_monitor'),
+                            //     'label' => 'Site Monitor',
+                            //     'active_name' => 'Site Monitor',
+                            //     'icon' => 'fluentui-camera-dome-28-o',
+                            // ],
+                            // [
+                            //     'route' => route('cartrack'),
+                            //     'label' => 'Cartrack',
+                            //     'active_name' => 'Cartrack',
+                            //     'icon' => 'fluentui-vehicle-car-28-o',
+                            // ],
                             [
                                 'route' => route('users'),
                                 'label' => 'Users',
