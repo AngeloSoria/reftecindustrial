@@ -176,10 +176,13 @@ class ProjectController extends Controller
             $query = Project::select($columns);
 
             // -----------------------------------
-            // Public mode: hide non-visible projects
+            // Public mode: 
+            //    hide non-visible projects
+            //    hide pending projects
             // -----------------------------------
             if ($isPublic) {
-                $query->where('is_visible', true);
+                $query->where('is_visible', true)
+                      ->where('status', '!=', 'pending');
             }
 
             // -----------------------------------
