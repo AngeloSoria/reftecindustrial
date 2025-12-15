@@ -8,7 +8,11 @@
     <x-public.content_container>
         <section x-data="{
                 projectsData: null,
-                isDataLoading: true,
+                dataLoading: true,
+                filters: {
+                    search: '',
+                    status: 'all',
+                },
                 async init() {
                     // Fetch projects data from an API endpoint
                     try {
@@ -19,7 +23,7 @@
                         const result = await response.json();
                         if (result.success) {
                             this.projectsData = result.data;
-                            this.isDataLoading = false;
+                            this.dataLoading = false;
                             console.log(this.projectsData);
                         } else {
                             console.error('Failed to load projects data:', result.message);
@@ -27,6 +31,67 @@
                     } catch (error) {
                         console.error('Error fetching projects data:', error);
                     }
+                },
+
+                async changeSourceData(route) {
+                    if(!route) {
+                        // console.warn('No route passed when calling changeSourceData');
+                        return;
+                    }
+                    const response = await fetch(route);
+                    const data = await response.json();
+                    // console.log(data);
+                    if(data && data.success) {
+                        this.projectsData = data.data;
+                        this.dataLoading = false;
+                    }
+                },
+
+                paginationRange() {
+                    if (!this.projectsData || !this.projectsData.last_page) return [];
+
+                    const total = this.projectsData.last_page;
+                    const current = this.projectsData.current_page;
+                    const delta = 2;
+                    const range = [];
+
+                    range.push(1);
+
+                    let left = Math.max(2, current - delta);
+                    let right = Math.min(total - 1, current + delta);
+
+                    if (left > 2) {
+                        range.push('...');
+                    }
+
+                    for (let i = left; i <= right; i++) {
+                        range.push(i);
+                    }
+
+                    if (right < total - 1) {
+                        range.push('...');
+                    }
+
+                    if (total > 1) {
+                        range.push(total);
+                    }
+
+                    return range;
+                },
+
+                async applyFilters(page = 1) {
+                    this.dataLoading = true;
+
+                    // Build query string
+                    const params = new URLSearchParams();
+
+                    if (this.filters.search) params.append('search', this.filters.search);
+                    if (this.filters.status && this.filters.status !== 'all') params.append('status', this.filters.status);
+
+                    params.append('page', page);
+
+                    const url = `{{ route('content.get.section.projects.filtered.public') }}?${params.toString()}`;
+                    await this.changeSourceData(url);
                 },
                 
             }">
@@ -44,12 +109,23 @@
                 {{-- filter tools --}}
                 <section class="flex flex-col md:flex-row items-end justify-end gap-2">
 
-                    <x-public.searchbar id="searchbox_projects" class="grow w-full md:max-w-[18rem]" />
+                    <x-public.searchbar
+                        placeholder="Search projects..." 
+                        x-model="filters.search"
+                        @input.debounce.300ms="applyFilters"
+                        id="searchbox_projects"
+                        class="grow w-full md:max-w-[18rem]" />
 
-                    <x-public.dropdown name="filter_status" id="dropdown_filter_status"
-                        class="grow max-w-full md:max-w-[12rem]" label="Project Status" title="Select Project Status">
-                        <option>All</option>
-                        <option value="ongoing" class="text-accent-orange-300 p-1">Ongoing</option>
+                    <x-public.dropdown
+                        name="filter_status" 
+                        id="dropdown_filter_status"
+                        class="grow max-w-full md:max-w-[12rem]" 
+                        label="Project Status" 
+                        title="Select Project Status"
+                        x-model="filters.status"
+                        @change="applyFilters">
+                        <option value="all">All</option>
+                        <option value="on_going" class="text-accent-orange-300 p-1">Ongoing</option>
                         <option value="completed" class="text-accent-lightseagreen-50 p-1">Completed</option>
                     </x-public.dropdown>
 
@@ -185,21 +261,27 @@
                     ];
                     $fake_data2 = [];
                 @endphp
-                <section class="mt-4 grid grid-cols-2 lg:grid-cols-3 gap-2 items-stretch">
-                    <template x-if="isDataLoading">
-                            {{-- Loading Skeletons --}}
-                            <template x-for="n in 6" :key="n">
-                                <div class="p-2 h-60 grow relative bg-gray-300 animate-pulse rounded shadow-xl"></div>
-                            </template>
+                <section class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+                    <template x-if="dataLoading">
+                        {{-- Loading Skeletons --}}
+                        <template x-for="n in 6" :key="n">
+                            <div class="p-2 h-60 grow relative bg-gray-300 animate-pulse rounded shadow-xl"></div>
+                        </template>
                     </template>
-                    <template x-if="!isDataLoading && projectsData">
+                    <template x-if="!dataLoading && projectsData">
                         <template x-for="(project, i) in projectsData.data" :key="i + '_' + project.id">
-                            <div class="h-60 relative cursor-pointer bg-white shadow-card p-4 rounded"
-                                x-data
-                                @click="$dispatch('preview_project_info', { modalId: 'modal_previewProject', projectInfo: project });">
+                            <div class="h-60 relative cursor-pointer bg-gray-200 shadow-card p-4 rounded hover:shadow-xl transition-shadow duration-300 ease-in-out"
+                                x-data @click="
+                                    $dispatch('openmodal', { 
+                                        modalID: 'modal_projects_public', 
+                                        modal_header_text: 'Project Details',
+                                        special_data: { 
+                                            project_data : project 
+                                        }
+                                    });">
                                 {{-- Image --}}
                                 <img x-bind:src="project.images[0]" alt="Project Thumbnail"
-                                    class="w-[95%] h-[92%] absolute inset-0 m-auto object-cover bg-gray-200">
+                                    class="w-[95%] h-[92%] absolute inset-0 m-auto rounded object-cover bg-gray-200">
 
 
                                 {{-- animated info --}}
@@ -224,8 +306,12 @@
 
                                             <section
                                                 class="px-6 w-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                                <h2 class="text-lg font-black text-wrap text-center w-full" x-text="project.title.length > 40 ? project.title.substring(0, 40) + '...' : project.title"></h2>
-                                                <h3 class="text-accent-orange-300 text-md text-center w-full" x-text="project.description.length > 50 ? project.description.substring(0, 50) + '...' : project.description"></h3>
+                                                <h2 class="text-lg font-black text-wrap text-center w-full"
+                                                    x-text="project.title.length > 40 ? project.title.substring(0, 40) + '...' : project.title">
+                                                </h2>
+                                                <h3 class="text-accent-orange-300 text-md text-center w-full"
+                                                    x-text="project.description.length > 50 ? project.description.substring(0, 50) + '...' : project.description">
+                                                </h3>
                                             </section>
                                         </div>
                                     </div>
@@ -237,43 +323,58 @@
 
                 </section>
                 {{-- Pagination --}}
-                <div class="w-full mt-4 flex items-start justify-end gap-2">
-                    <section class="flex items-center justify-center gap-2 flex-wrap">
-                        <!-- Previous Button -->
-                        <x-public.button
-                            class="cursor-pointer shadow-card bg-white hover:bg-accent-darkslategray-200 transition-colors">
-                            <span class="flex items-center justify-center gap-2">
-                                @svg('fluentui-caret-left-24', 'w-6 h-6')
-                                Previous
-                            </span>
-                        </x-public.button>
+                <template x-if="projectsData && !dataLoading">
+                    <div class="mt-4 flex items-center justify-between gap-2">
+                        <section>
+                            <p class="text-sm font-medium text-gray-700">
+                                Showing
+                                <span class="font-bold" x-text="projectsData.from"></span>
+                                to
+                                <span class="font-bold" x-text="projectsData.to"></span>
+                                of
+                                <span class="font-bold" x-text="projectsData.total"></span>
+                                projects
+                            </p>
+                        </section>
+                        <section class="flex items-center justify-center gap-1 flex-wrap">
+                            <!-- Previous Button -->
+                            <x-public.button @click="applyFilters(projectsData.current_page - 1)"
+                                x-bind:disabled="!projectsData.prev_page_url"
+                                class="cursor-pointer shadow-sm bg-white hover:bg-accent-darkslategray-200 transition-colors">
+                                <span class="flex items-center justify-center gap-2">
+                                    @svg('fluentui-caret-left-24', 'w-6 h-6')
+                                    Previous
+                                </span>
+                            </x-public.button>
 
-                        <!-- Page Numbers -->
-                        <div class="flex justify-center items-center gap-2 flex-wrap">
-                            <template x-for="(page, index) in paginationRange()" :key="page + '_' + index">
-                                <x-public.button @click="page !== '...' && applyFilters(page)"
-                                    x-bind:class="page === projectData.current_page ? 'bg-brand-primary-600 text-white' : 'bg-white border'"
-                                    class="px-3 py-1 rounded border cursor-pointer" x-text="page">
-                                </x-public.button>
-                            </template>
-                        </div>
+                            <!-- Page Numbers -->
+                            <div class="flex justify-center items-center gap-2 flex-wrap">
+                                <template x-for="(page, index) in paginationRange()" :key="page + '_' + index">
+                                    <x-public.button @click="page !== '...' && applyFilters(page)"
+                                        x-bind:class="page === projectsData.current_page ? 'bg-brand-primary-600 text-white' : 'bg-white border'"
+                                        class="px-3 py-1 rounded border cursor-pointer" x-text="page">
+                                    </x-public.button>
+                                </template>
+                            </div>
 
-                        <!-- Next Button -->
-                        <x-public.button
-                            class="cursor-pointer shadow-card bg-white hover:bg-accent-darkslategray-200 transition-colors">
-                            <span class="flex items-center justify-center gap-2">
-                                @svg('fluentui-caret-right-24', 'w-6 h-6')
-                                Next
-                            </span>
-                        </x-public.button>
+                            <!-- Next Button -->
+                            <x-public.button @click="applyFilters(projectsData.current_page + 1)"
+                                x-bind:disabled="!projectsData.next_page_url"
+                                class="cursor-pointer shadow-sm bg-white hover:bg-accent-darkslategray-200 transition-colors">
+                                <span class="flex items-center justify-center gap-2">
+                                    @svg('fluentui-caret-right-24', 'w-6 h-6')
+                                    Next
+                                </span>
+                            </x-public.button>
 
-                    </section>
-                </div>
+                        </section>
+                    </div>
+                </template>
             </section>
         </section>
     </x-public.content_container>
 
-    <x-public.modal.preview_project id="modal_previewProject" size="3xl" keyEscapeClose clickOutsideToClose />
+    <x-public.modal.public_preview_project />
 
     <x-public.footer />
 </body>
