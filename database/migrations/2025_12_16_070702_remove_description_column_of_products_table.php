@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('contents_projects', function (Blueprint $table) {
-            $table->dropColumn('year_completed');
+        Schema::table('contents_products', function (Blueprint $table) {
+            $table->dropColumn('description');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('contents_projects', function (Blueprint $table) {
-            $table->date('year_completed');
+        Schema::table('contents_products', function (Blueprint $table) {
+            $table->text('description')->nullable();
         });
     }
 };
