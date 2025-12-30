@@ -13,9 +13,45 @@ use Illuminate\Support\Facades\Auth;
 
 class UploadController extends Controller
 {
-    /**
-     * Handle both single and multiple file uploads.
-     */
+    private function isFileProtected($path)
+    {
+        $protected_contains = ['images/'];
+        foreach ($protected_contains as $protected_path) {
+            if (str_contains($path, $protected_path)) return true;
+        }
+        return false;
+    }
+
+    private function delete(string $path, bool $isPrivate = false): void
+    {
+        $disk = $isPrivate ? 'private' : 'public';
+
+        // Normalize to disk-relative path
+        $relativePath = ltrim($path, '/');
+
+        // Remove URL prefixes
+        if (str_starts_with($relativePath, 'storage/')) {
+            $relativePath = substr($relativePath, strlen('storage/'));
+        }
+
+        if (str_starts_with($relativePath, 'public/')) {
+            $relativePath = substr($relativePath, strlen('public/'));
+        }
+
+        // Protection check should use relative path
+        if ($this->isFileProtected($relativePath)) {
+            throw new Exception('File cannot be deleted as it is in a protected directory.');
+        }
+
+        if (!Storage::disk($disk)->exists($relativePath)) {
+            throw new Exception("File not found on disk [{$disk}]: {$relativePath}");
+        }
+
+        Storage::disk($disk)->delete($relativePath);
+
+        Log::info("File deleted successfully [{$disk}]: {$relativePath}");
+    }
+
     public function upload(Request $request)
     {
         try {
@@ -41,7 +77,7 @@ class UploadController extends Controller
                 $files = [$files];
             }
 
-            $isPrivate = $request->boolean('is_private');
+            $isPrivate = $request->boolean('is_private') ?? false;
 
             $uploaded = [];
 
@@ -53,14 +89,11 @@ class UploadController extends Controller
 
                 if ($isPrivate) {
                     // keep private files in storage (or private disk)
-                    $path = $file->storeAs('uploads', $filename, 'private');
+                    $path = Storage::disk('private')->putFileAs('uploads', $file, $filename);
                     $url = null;
                 } else {
-                    // store public files directly in public/uploads
-                    $destination = public_path('uploads');
-                    $file->move($destination, $filename);
-                    $path = '/uploads/' . $filename;
-                    $url = $path;
+                    $path = '/storage/' . Storage::disk('public_uploads')->putFileAs('uploads', $file, $filename);
+                    $url = Storage::url($path);
                 }
 
                 $instance = Upload::create([
@@ -79,10 +112,6 @@ class UploadController extends Controller
                 ];
             }
 
-            // toast(count($uploaded) > 1
-            //     ? 'Files uploaded successfully.'
-            //     : 'File uploaded successfully.', "success");
-
             // 4. Build response
             return response()->json([
                 'success' => true,
@@ -94,8 +123,6 @@ class UploadController extends Controller
             ], 200);
         } catch (Exception $e) {
             Log::error('Upload failed: ' . $e->getMessage());
-
-            // toast("Upload failed: " . $e->getMessage(), "error");
 
             return response()->json([
                 'success' => false,
@@ -130,7 +157,7 @@ class UploadController extends Controller
             ], 500);
         }
     }
-    public function getUploadedFileFromPath($file_path)
+    public function getUploadedFileByPath($file_path)
     {
         try {
             $record = Upload::where(['path' => $file_path])->firstOrFail();
@@ -143,7 +170,7 @@ class UploadController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'File not found.',
+                'message' => 'File not found. passed payload: ' . $file_path,
                 'type' => 'error'
             ], 404);
         } catch (Exception $e) {
@@ -157,25 +184,40 @@ class UploadController extends Controller
 
     public function getAllUploadedFiles(Request $request)
     {
-        $request->validate([
-            'type' => 'nullabe|string' // Determine file type request for proper sorting.
-        ]);
+        try {
+            $files = Upload::orderBy('created_at', 'desc')->get();
 
-        // TODO: complete this api.
+            return response()->json([
+                'type' => 'success',
+                'success' => true,
+                'data' => $files
+            ]);
+        } catch (Exception $e) {
+            Logger()->error('Failed to get uploaded files: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get uploaded files: ' . $e->getMessage(),
+                'type' => 'error'
+            ], 500);
+        }
     }
 
     public function deleteUploadedFile($upload_id)
     {
         try {
             $record = Upload::findOrFail($upload_id);
+
             // Delete the file from storage
-            $disk = $record->is_private ? 'private' : 'public';
-            Storage::disk($disk)->delete($record->path);
+            if ($record->is_protected) {
+                throw new Exception("This file is protected from deletion.");
+            }
+            $this->delete($record->path, $record->is_private);
 
             // Delete the database record
             $record->delete();
 
             // toast("File deleted successfully.", "success");
+            Logger()->info('File deleted successfully: ' . $record->path);
 
             return response()->json([
                 'success' => true,
@@ -193,39 +235,32 @@ class UploadController extends Controller
         }
     }
 
-    public function deleteUploadedFileFromPath($file_path)
+    public function deleteUploadedFileByPath($path)
     {
         try {
-            $record = Upload::where('path', $file_path)->firstOrFail();
+            if ($this->isFileProtected($path)) {
+                Logger()->info('File cannot be deleted as it was in protected directory.');
+                return false;
+            }
+
+            $record = Upload::where('path', $path)->firstOrFail();
+            if ($record->is_protected) {
+                throw new Exception("This file is protected from deletion.");
+            }
+
             // Delete the file from storage
-            $disk = $record->is_private ? 'private' : 'public';
-            Storage::disk($disk)->delete($record->path);
+            $this->delete($record->path, $record->is_private);
 
             // Delete the database record
             $record->delete();
 
-            // toast("File deleted successfully.", "success");
-
             return response()->json([
                 'success' => true,
-                'message' => 'File deleted successfully: ' . $file_path,
+                'message' => 'File deleted successfully',
                 'type' => 'success'
             ], 200);
-        } catch (ModelNotFoundException $e) {
-            Log::warning('File not found for deletion: ' . $file_path);
-
-            toast('File not found for deletion: ' . $file_path, "error");
-
-            return response()->json([
-                'success' => false,
-                'message' => 'File not found for deletion: ' . $file_path,
-                'type' => 'error'
-            ], 404);
         } catch (Exception $e) {
-            Log::error('Failed to delete uploaded file: ' . $e->getMessage());
-
-            // toast('Failed to delete uploaded file: ' . $e->getMessage(), "error");
-
+            Log::error('Failed to delete uploaded file (' . $path . '): ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete uploaded file: ' . $e->getMessage(),
