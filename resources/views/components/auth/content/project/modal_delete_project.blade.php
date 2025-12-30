@@ -49,7 +49,11 @@
                     formSubmit() {
                         this.loading = true;
                         this.formDisabled = true;
-                        $dispatch('force_disable_modal_closing', { modalID: 'modal_delete_project' });
+
+                        window.dispatchEvent(new CustomEvent("force_disable_modal_closing", {
+                            detail: { modalID: 'modal_delete_project' }
+                        }));
+
                         this.$el.submit();
                     },
 

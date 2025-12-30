@@ -5,16 +5,12 @@
 
             <section class="p-2 bg-gray-200 rounded">
                 <div class="flex gap-2">
-                    <p class="font-bold">Job Order:</p>
-                    <span x-text="productData.job_order"></span>
+                    <p class="font-bold">Product Id:</p>
+                    <span x-text="productData.id"></span>
                 </div>
                 <div class="flex gap-2">
                     <p class="font-bold">Title:</p>
                     <span x-text="productData.title"></span>
-                </div>
-                <div class="flex gap-2">
-                    <p class="font-bold">Status:</p>
-                    <span x-text="productData.status"></span>
                 </div>
             </section>
 
@@ -49,7 +45,11 @@
                     formSubmit() {
                         this.loading = true;
                         this.formDisabled = true;
-                        $dispatch('force_disable_modal_closing', { modalID: 'modal_delete_product' });
+
+                        window.dispatchEvent(new CustomEvent("force_disable_modal_closing", {
+                            detail: { modalID: 'modal_delete_product' }
+                        }));
+
                         this.$el.submit();
                     },
 

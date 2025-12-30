@@ -9,8 +9,9 @@
         x-bind:action="isUpdate() ? routes.update : routes.add" method="POST" enctype="multipart/form-data">
         @csrf
 
-        <section class="grid grid-cols-1 md:grid-cols-[1fr_0.5fr] gap-4">
-
+        <section class="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <input type="hidden" name="product_id" x-bind:value="productData.id" />
+            
             {{-- LEFT SIDE --}}
             <section>
                 <div class="grid grid-cols-2 gap-4">
@@ -31,13 +32,13 @@
                     </div>
                 </div>
 
-                <div class="mt-4">
+                {{-- <div class="mt-4">
                     <div class="flex flex-col gap-2 items-start justify-start">
                         <p class="text-sm font-medium">Description</p>
                         <textarea x-model="productData.description" @input="checkChanges()" name="description"
                             class="w-full min-h-34 max-h-40 px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none focus:bg-gray-200 transition-colors"></textarea>
                     </div>
-                </div>
+                </div> --}}
             </section>
 
             {{-- RIGHT SIDE IMAGE SECTION --}}
@@ -50,7 +51,7 @@
                 </p>
 
 
-
+                
                 <template x-if="productData.images">
                     <div x-data="{
                         init() {
@@ -60,9 +61,8 @@
                             }
                         }
                     }">
-                        <input type="hidden" name="product_id" x-bind:value="productData.id" />
                         <input type="hidden" name="product_images" x-bind:value="JSON.stringify(productData.images)" />
-
+                    
                         <div class="grid grid-cols-3 grid-rows-2 gap-2">
                             <template x-for="i in 6" :key="i">
                                 <section class="aspect-video rounded relative bg-gray-200 shadow-sm overflow-hidden">
