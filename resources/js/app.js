@@ -25,6 +25,10 @@ AOS.init({
     once: true, // Animate only once
 });
 
+window.backToTop = function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initVisitorsChart(); // Chart visualization
     initTotalVisitsCounter(); // Counter widget
