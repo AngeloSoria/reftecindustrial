@@ -220,7 +220,6 @@
                     if (e.detail.modalID !== this.modal_id) return;
                     this.projectData = this.deepClone(e.detail.data.product_data);
                     this.fakeProjectData = this.deepClone(e.detail.data.product_data);
-                    console.log(this.projectData);
                     
                     this.checkChanges();
                 },
@@ -230,17 +229,6 @@
                 ----------------------------*/
 
                 handleSubmit() {
-                    // validate highlighted projects limit
-                    // if (this.projectData.is_featured) {
-                    //     let currentHighlightedCount = highlightedCount;
-                    //     if (!this.isUpdate() || (this.isUpdate() && !this.fakeProjectData.is_featured)) {
-                    //         if (currentHighlightedCount >= 3) {
-                    //             toast("You have reached the maximum limit of highlighted projects (3).", 'warning');
-                    //             return;
-                    //         }
-                    //     }
-                    // }
-
                     this.formDisabled = true;
                     this.loading = true;
                     window.dispatchEvent(new CustomEvent("force_disable_modal_closing", {
