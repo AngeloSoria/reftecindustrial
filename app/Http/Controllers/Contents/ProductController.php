@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use Illuminate\Database\UniqueConstraintViolationException;
-use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\FileBag;
 use App\Http\Controllers\UploadController;
 use Exception;
@@ -20,30 +19,14 @@ class ProductController extends Controller
         try {
             // dd($request);
             $request->validate([
-                'job_order' => 'required|string',
-                'project_name' => 'required|string',
-                'description' => 'nullable|string',
-                'status' => [
-                    'required',
-                    'string',
-                    function ($attribute, $value, $fail) {
-                        if (!in_array($value, ["pending", "on_going", "completed"])) {
-                            $fail("Invalid project status value passed.");
-                        }
-                    },
-                ],
+                'product_name' => 'required|string',
                 'visibility' => 'nullable|string',
-                'highlighted' => 'nullable|string',
             ]);
 
             // Synthesize
             $PROJECT = [
-                'job_order' => $request->job_order,
-                'title' => $request->project_name,
-                'description' => $request->description,
-                'status' => $request->status,
+                'title' => $request->product_name,
                 'is_visible' => !empty($request->visibility) ? 1 : 0,
-                'is_featured' => !empty($request->highlighted) ? 1 : 0,
                 'images' => "",
             ];
 
@@ -59,7 +42,7 @@ class ProductController extends Controller
                         }
 
                         foreach ($uploadInfo['files'] as $fileInfo) {
-                            $uploadIds[] = $fileInfo['path'];
+                            $uploadIds[] = $fileInfo['file_id'];
                         }
                     } catch (Exception $e) {
                         foreach ($uploadIds as $upload_id) {
@@ -72,12 +55,8 @@ class ProductController extends Controller
                 // Save to DB
                 Product::create([
                     'images' => $uploadIds,
-                    'job_order' => $PROJECT['job_order'],
                     'title' => $PROJECT['title'],
-                    'description' => $PROJECT['description'],
-                    'status' => $PROJECT['status'],
                     'is_visible' => $PROJECT['is_visible'],
-                    'is_featured' => $PROJECT['is_featured'],
                 ]);
             } catch (UniqueConstraintViolationException $e) {
                 foreach ($uploadIds as $uploadId) {
@@ -92,13 +71,13 @@ class ProductController extends Controller
             }
 
             session()->flash('content', [
-                'tab' => 'projects',
+                'tab' => 'products',
             ]);
             toast("Successfully added project.", "success");
             return back();
         } catch (Exception $e) {
             session()->flash('content', [
-                'tab' => 'projects'
+                'tab' => 'products'
             ]);
             Logger()->error($e->getMessage());
             toast($e->getMessage(), 'error');
@@ -106,7 +85,7 @@ class ProductController extends Controller
         }
     }
 
-    public function getProducts()
+    public function getProducts($isPublic = false)
     {
         try {
 
@@ -114,11 +93,40 @@ class ProductController extends Controller
                 'id',
                 'images',
                 'title',
-                'description',
                 'is_visible',
             ])
                 ->latest()
                 ->paginate(15);
+
+            // Transform the paginated results
+            $products->getCollection()->transform(function ($product) {
+                $imageIDs = $product->images;
+
+                if (!empty($imageIDs) && is_array($imageIDs)) {
+
+                    // If images are already an array of IDs, map them to paths
+                    $product->images = array_map(function ($id) {
+                        $uploadController = new UploadController();
+                        $response = $uploadController->getUploadedFile($id)->getData(true);
+
+                        if (!$response['success']) {
+                            return false;
+                        }
+
+                        $file = $response['data'];
+
+                        return $file['path'];
+                    }, $imageIDs);
+                } elseif (!empty($imageIDs) && is_string($imageIDs)) {
+                    // In case it's stored as a string (legacy)
+                    $imageIds = explode(',', $imageIDs);
+                    $product->images = array_map(fn($id) => '/uploads/' . $id, $imageIds);
+                } else {
+                    $product->images = [];
+                }
+
+                return $product;
+            });
 
             return response()->json([
                 'success' => true,
@@ -143,7 +151,6 @@ class ProductController extends Controller
                 'id',
                 'images',
                 'title',
-                'description',
                 'is_visible',
             ]);
 
@@ -170,9 +177,7 @@ class ProductController extends Controller
             if ($request->filled('search')) {
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
-                    $q->where('job_order', 'LIKE', "%{$search}%")
-                        ->orWhere('title', 'LIKE', "%{$search}%")
-                        ->orWhere('description', 'LIKE', "%{$search}%");
+                    $q->where('title', 'LIKE', "%{$search}%");
                 });
             }
 
@@ -181,12 +186,42 @@ class ProductController extends Controller
             // -----------------------------
             $products = $query->latest()->paginate(15);
 
+            // Transform the paginated results
+            $products->getCollection()->transform(function ($product) {
+                $imageIDs = $product->images;
+
+                if (!empty($imageIDs) && is_array($imageIDs)) {
+
+                    // If images are already an array of IDs, map them to paths
+                    $product->images = array_map(function ($id) {
+                        $uploadController = new UploadController();
+                        $response = $uploadController->getUploadedFile($id)->getData(true);
+
+                        if (!$response['success']) {
+                            return null;
+                        }
+
+                        $file = $response['data'];
+
+                        return $file['path'];
+                    }, $imageIDs);
+                } elseif (!empty($imageIDs) && is_string($imageIDs)) {
+                    // In case it's stored as a string (legacy)
+                    $imageIds = explode(',', $imageIDs);
+                    $product->images = array_map(fn($id) => '/uploads/' . $id, $imageIds);
+                } else {
+                    $product->images = [];
+                }
+
+                return $product;
+            });
+
             // Return paginator JSON (standard Laravel format)
             return response()->json([
                 'success' => true,
                 'data' => $products
             ]);
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -197,38 +232,43 @@ class ProductController extends Controller
     public function updateProduct(Request $request)
     {
         try {
+            $uploadController = new UploadController();
+
             // Validate main request
             $request->validate([
-                'project_id' => ['required', 'integer', 'exists:contents_projects,id'],
-                'job_order' => ['required', 'string'],
-                'project_name' => ['required', 'string'],
-                'description' => ['nullable', 'string'],
-                'status' => ['required', 'string', Rule::in(['pending', 'on_going', 'completed'])],
+                'product_id' => ['required', 'integer', 'exists:contents_products,id'],
+                'product_name' => ['required', 'string'],
                 'visibility' => ['nullable', 'string'],
-                'highlighted' => ['nullable', 'string'],
             ]);
-
+            
             // Get project data from DB
-            $product = Product::findOrFail($request->project_id);
-
+            $product = Product::findOrFail($request->product_id);
+            
             // Prepare the data array for update
-            $projectData = [
-                'job_order'    => $request->job_order,
-                'title'        => $request->project_name,
-                'description'  => $request->description,
-                'status'       => $request->status,
+            $productData = [
+                'images'       => json_decode($request->product_images), // value: paths
+                'title'        => $request->product_name,
                 'is_visible'   => empty($request->visibility) || $request->visibility != "on" ? 0 : 1,
-                'is_featured'  => empty($request->highlighted) || $request->highlighted != "on" ? 0 : 1,
-                'images'       => json_decode($request->project_images), // will merge later if files uploaded
             ];
 
-            $uploadedFilesIds = [];
-
+            // convert path to id
+            $toFileId = [];
+            foreach ($productData['images'] as $image_path) {
+                $response = $uploadController->getUploadedFileByPath($image_path)->getData(true);
+                if (!$response['success']) continue;
+                $toFileId[] = $response['data']['id'];
+            }
+            
+            // replace the request's images to file id.
+            $productData['images'] = $toFileId;
+            
             // Handle uploaded files if any
+            $uploadedFileIds = [];
             $allFiles = $request->files->all('files');
             if (count($allFiles) > 0) {
+                // dd($request, $product);
                 // Calculate how many more files can be uploaded
-                $uploadLimit = 6 - count($product->images);
+                $uploadLimit = $product->images ? 6 - count($product->images) : 6;
                 $trimmedFiles = array_slice($allFiles, 0, $uploadLimit);
 
                 // Create a new Request for the UploadController only
@@ -248,45 +288,49 @@ class ProductController extends Controller
                 ]);
 
                 // Upload the trimmed files
-                $uploadController = new UploadController();
                 $uploadResponse = $uploadController->upload($uploadRequest)->getData(true);
 
                 if (!$uploadResponse['success']) {
                     throw new Exception($uploadResponse['message']);
                 }
 
-
                 // Track uploaded file IDs for rollback in case of error
                 foreach ($uploadResponse['files'] as $file) {
-                    $uploadedFilesIds[] = $file['file_id'];
+                    $uploadedFileIds[] = $file['file_id'];
                 }
 
-                // Merge new file paths with existing project images
-                $existingImages = $projectData['images'] ?? [];
-                // dd($existingImages);
-                foreach ($uploadResponse['files'] as $file) {
-                    $existingImages[] = $file['path'];
+                // append to current the uploaded
+                foreach ($uploadedFileIds as $upload_id) {
+                    $productData['images'][] = $upload_id;
                 }
-                $projectData['images'] = $existingImages;
             }
 
-            // Save the project data
-            $product->update($projectData);
+            $nonExistingFilesFromModel = array_diff($product->images, $productData['images'] ?? []);
 
-            session()->flash('content', ['tab' => 'projects']);
-            toast("A project has been updated.", 'success');
+            // delete from files the non existing
+            foreach ($nonExistingFilesFromModel as $file_id) {
+                $uploadController->deleteUploadedFile($file_id);
+            }
+
+            // dd($product->images, $productData['images'], $nonExistingFilesFromModel);
+
+            // Save the project data
+            $product->update($productData);
+
+            session()->flash('content', ['tab' => 'products']);
+            toast("A product has been updated.", 'success');
             return back();
         } catch (Exception $e) {
             // Rollback uploaded files if any
-            if (!empty($uploadedFilesIds)) {
+            if (!empty($uploadedFileIds)) {
                 $uploadController = $uploadController ?? new UploadController();
-                foreach ($uploadedFilesIds as $fileId) {
+                foreach ($uploadedFileIds as $fileId) {
                     $uploadController->deleteUploadedFile($fileId);
                 }
             }
 
             Logger()->error($e->getMessage());
-            session()->flash('content', ['tab' => 'projects']);
+            session()->flash('content', ['tab' => 'products']);
             toast($e->getMessage(), 'error');
             return back();
         }
@@ -296,20 +340,29 @@ class ProductController extends Controller
     {
         try {
             $request->validate([
-                'project_id' => 'required|string|exists:contents_projects,id'
+                'product_id' => 'required|string|exists:contents_products,id'
             ]);
 
 
-            $model = Product::findOrFail($request->project_id);
+            $product = Product::findOrFail($request->product_id);
 
-            $model->deleteOrFail();
+            // Delete old uploaded files from existing product model
+            $uploadController = new UploadController();
+            $productImages = $product->images;
+            if ($productImages && count($productImages) > 0) {
+                foreach ($productImages as $imagePath) {
+                    $uploadController->deleteUploadedFileByPath($imagePath);
+                }
+            }
 
-            session()->flash('content', ['tab' => 'projects']);
+            $product->deleteOrFail();
+
+            session()->flash('content', ['tab' => 'products']);
             toast("A project has been deleted.", 'success');
             return back();
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
-            session()->flash('content', ['tab' => 'projects']);
+            session()->flash('content', ['tab' => 'products']);
             toast($e->getMessage(), 'error');
             return back();
         }
@@ -319,26 +372,35 @@ class ProductController extends Controller
     {
         try {
             $request->validate([
-                'projects' => 'required|string'
+                'products' => 'required|string'
             ]);
 
-
-            $decoded_project = json_decode($request->projects, true);
+            $decoded_project = json_decode($request->products, true);
             if (empty($decoded_project)) {
                 throw new Exception('No existing project value passed.');
             }
 
-            Product::destroy(array_keys($decoded_project));
+            // dd($decoded_project);
 
+            $uploadController = new UploadController();
+            foreach ($decoded_project as $product_id => $value) {
+                // dd($product_id, $value);
+                $product = Product::findOrFail($product_id);
+                // dd($value['images']);
+                // Remove associated uploaded images to free storage.
+                foreach ($value['images'] as $image_path) {
+                    $uploadController->deleteUploadedFileByPath($image_path);
+                }
 
-            // dd($request->projects, json_decode($request->projects));
+                $product->delete();
+            }
 
-            session()->flash('content', ['tab' => 'projects']);
-            toast("Selected projects has been deleted.", 'success');
+            session()->flash('content', ['tab' => 'products']);
+            toast("Selected products has been deleted.", 'success');
             return back();
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
-            session()->flash('content', ['tab' => 'projects']);
+            session()->flash('content', ['tab' => 'products']);
             toast($e->getMessage(), 'error');
             return back();
         }
