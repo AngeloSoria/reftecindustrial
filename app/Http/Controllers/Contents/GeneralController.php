@@ -12,6 +12,7 @@ use App\Models\Contents\General;
 use App\Models\Contents\GeneralProductLines as ProductLines;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UploadController;
+use Symfony\Component\HttpFoundation\File\Exception\NoFileException;
 
 class GeneralController extends Controller
 {
@@ -96,6 +97,10 @@ class GeneralController extends Controller
             $about_us_data = General::where('section', $COLUMN_NAME)->first(['extra_data']);
 
             if ($about_us_data) {
+                if (!$request->hasFile('files')) {
+                    throw new NoFileException("File not found in the request.");
+                }
+                
                 $uploadController = new UploadController();
                 $uploadResponse = $uploadController->upload($request)->getData(true);
                 $uploadedFiles = [];
@@ -446,26 +451,28 @@ class GeneralController extends Controller
     public function setHeroSection(Request $request)
     {
         try {
+
+            // Check if the request contains file, else, throw an error.
+            if (!$request->hasFile('files')) {
+                throw new NoFileException('File not found in the request.');
+            }
+
             $uploadController = new UploadController();
-            $uploadResponse = $uploadController->upload($request); // Call directly
+            $uploadData = $uploadController->upload($request)->getData(true); // Call directly
 
-            // Get the data as array if it's a JsonResponse
-            $data = $uploadResponse->getData(true);
-
-            if (!$data || !$data['success']) {
-                throw new Exception($data['message']);
+            if (!$uploadData['success']) {
+                throw new Exception($uploadData['message']);
             }
 
             // Check if hero is already exists.
             // If exists, check for the image_path to delete the old file.
-            $existingHero = General::where('section', 'hero')->first();
-            if ($existingHero && $existingHero->image_path) {
-                // Delete the old file
-                $uploadController->deleteUploadedFileFromPath($existingHero->image_path);
+            $model = General::where('section', 'hero')->first();
+            if (!empty($model) && !empty($model->image_path)) {
+                $uploadController->deleteUploadedFileByPath($model->image_path);
             }
 
             General::updateOrCreate(['section' => 'hero'], [
-                'image_path' => $data['files'][0]['path'] ?? null
+                'image_path' => $uploadData['files'][0]['path'] ?? null
             ]);
 
             // Clear cache for hero section after updating
@@ -491,8 +498,7 @@ class GeneralController extends Controller
         }
     }
 
-    public function setHistory(Request $request)
-    {
+    public function setHistory(Request $request) {
         try {
             $request->validate([
                 'context' => 'string',
@@ -537,7 +543,7 @@ class GeneralController extends Controller
                     $exisitingFile = General::where('section', 'history')->first();
                     if ($exisitingFile && $exisitingFile->image_path) {
                         // Delete the old file
-                        $uploadController->deleteUploadedFileFromPath($exisitingFile->image_path);
+                        $uploadController->deleteUploadedFileByPath($exisitingFile->image_path);
                     }
 
                     General::updateOrCreate(['section' => 'history'], [
@@ -573,57 +579,73 @@ class GeneralController extends Controller
     {
         try {
             $request->validate([
-                'product_line_id' => 'required|exists:contents_general_product_lines,id',
+                'product_line_id'   => 'required|exists:contents_general_product_lines,id',
                 'product_line_name' => 'string',
-                'file' => 'file|mimes:jpg,png,jpeg,bmp,gif|max:' . env('APP_MAX_UPLOAD_SIZE', 10240), // Image only
-                'visibility' => 'boolean'
+                'file'              => 'file|mimes:jpg,png,jpeg,bmp,gif|max:' . env('APP_MAX_UPLOAD_SIZE', 10240),
+                'visibility'        => 'boolean',
             ]);
 
-            // find the model / product_line row data.
-            $productLine = ProductLines::findOrFail($request->get('product_line_id'));
+            $uploadId = null;
+
+            // Fetch existing row once (needed for old upload cleanup)
+            $existingProductLine = ProductLines::find($request->product_line_id);
 
             if ($request->hasFile('file')) {
-                // upload
                 $uploadController = new UploadController();
-                $uploadResponse = $uploadController->upload($request); // Call directly
+                $uploadResponse   = $uploadController->upload($request);
+                $data             = $uploadResponse->getData(true);
 
-                // Get the data as array if it's a JsonResponse
-                $data = $uploadResponse->getData(true);
-
-                if (!$data || !$data['success'] || empty($data['files'][0]['file_id'])) {
-                    throw new Exception($data['message'] ?? "Upload failed or invalid response.");
+                if (
+                    !$data ||
+                    !$data['success'] ||
+                    empty($data['files'][0]['file_id'])
+                ) {
+                    throw new Exception($data['message'] ?? 'Upload failed or invalid response.');
                 }
 
-                // Update upload_id if new file uploaded
-                $productLine->upload_id = $data['files'][0]['file_id'];
+                // Delete old uploaded file if exists
+                if ($existingProductLine?->upload_id) {
+                    $uploadController->deleteUploadedFile($existingProductLine->upload_id);
+                }
+
+                $uploadId = $data['files'][0]['file_id'];
             }
 
-            // Update other fields
-            $productLine->name = $request->get('product_line_name');
-            $productLine->visibility = $request->get('visibility', 0);
+            // Build update payload
+            $attributes = [
+                'name'       => $request->get('product_line_name'),
+                'visibility' => $request->get('visibility', 0),
+            ];
 
-            // Clear cache for product lines section after updating
+            if ($uploadId) {
+                $attributes['upload_id'] = $uploadId;
+            }
+
+            ProductLines::updateOrCreate(
+                ['id' => $request->product_line_id],
+                $attributes
+            );
+
+            // Clear cache
             Cache::forget('section_product_lines');
             Cache::forget('section_product_lines_visible');
 
-            $productLine->save();
-
             session()->flash('content', [
-                'tab' => 'general',
-                'section' => 'products'
+                'tab'     => 'general',
+                'section' => 'products',
             ]);
 
-            toast("Product line has been updated.", "success");
+            toast('Product line has been updated.', 'success');
             return back();
         } catch (Exception $e) {
             Logger()->info($e->getMessage());
 
             session()->flash('content', [
-                'tab' => 'general',
-                'section' => 'products'
+                'tab'     => 'general',
+                'section' => 'products',
             ]);
 
-            toast("Failed to edit product line: " . $e->getMessage(), "error");
+            toast('Failed to edit product line: ' . $e->getMessage(), 'error');
             return back();
         }
     }
@@ -746,12 +768,12 @@ class GeneralController extends Controller
             // convert to array.
             $requestData = explode(',', $request->about_us_gallery_order);
 
-            if(empty($requestData)) {
+            if (empty($requestData)) {
                 throw new Exception("Passed order data is empty.");
             }
 
             $toNumbers = [];
-            foreach($requestData as $id) {
+            foreach ($requestData as $id) {
                 $toNumbers[] = (int) $id;
             }
 
@@ -771,7 +793,7 @@ class GeneralController extends Controller
             ]);
 
             toast("Gallery order updated successfully.", "success");
-            
+
             return back();
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
