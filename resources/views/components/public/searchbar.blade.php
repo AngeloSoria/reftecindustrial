@@ -4,7 +4,7 @@
     'id' => 'searchbar-' . uniqid(),
 ])
 
-<div {{ $attributes->except(['class', 'placeholder', 'name', 'id'])->class('flex items-center gap-1 text-white bg-brand-primary-950 rounded-sm px-2 py-1') }}>
+<div {{ $attributes->except(['class', 'placeholder', 'name', 'id'])->class('w-full flex items-center gap-1 text-white bg-brand-primary-950 rounded-sm px-2 py-1') }}>
     {{-- icon --}}
     <div class="p-1">
         @svg('fluentui-search-12', 'w-4 h-4')

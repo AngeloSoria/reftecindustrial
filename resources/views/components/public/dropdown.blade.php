@@ -2,7 +2,7 @@
     'label' => null,
 ])
 
-<div {{ $attributes->except(['name', 'id', 'title', 'required', 'multiple', 'class'])->class('relative') }}>
+<div {{ $attributes->except(['name', 'id', 'title', 'required', 'multiple', 'class'])->class('w-full') }}>
     @if ($label)
         <p class="block text-sm font-medium text-gray-700 mb-1">
             {{ $label }}
