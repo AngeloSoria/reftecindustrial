@@ -5,9 +5,7 @@ namespace Database\Factories\Contents;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Contents\Project;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Models\Contents\Project>
- */
+
 class ProjectFactory extends Factory
 {
     /**
@@ -20,14 +18,7 @@ class ProjectFactory extends Factory
         $MIN = 1;
         $MAX = 6;
 
-        $IMAGES = [
-            'images/landscape/johannes-plenio-RwHv7LgeC7s-unsplash.jpg',
-            'images/landscape/leonard-cotte-c1Jp-fo53U8-unsplash.jpg',
-            'images/landscape/matthew-smith-Rfflri94rs8-unsplash.jpg',
-            'images/landscape/qingbao-meng-01_igFr7hd4-unsplash.jpg',
-            'images/landscape/quaritsch-photography-lIYBssO6ahY-unsplash.jpg',
-            'images/landscape/sergey-shmidt-koy6FlCCy5s-unsplash.jpg',
-        ];
+        $IMAGES = [1, 2, 3, 4, 5, 6];
 
         $TITLES = [
             'Industrial Plant Construction',
