@@ -218,10 +218,10 @@
                 loadProjectData(e) {
                     if (!e.detail.data) return;
                     if (e.detail.modalID !== this.modal_id) return;
-
                     this.projectData = this.deepClone(e.detail.data.product_data);
                     this.fakeProjectData = this.deepClone(e.detail.data.product_data);
-
+                    console.log(this.projectData);
+                    
                     this.checkChanges();
                 },
 

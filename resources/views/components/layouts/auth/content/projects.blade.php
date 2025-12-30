@@ -38,6 +38,7 @@
             // console.log(data);
             if(data && data.success) {
                 this.projectData = data.data;
+                this.highlightedCount = data.featured;
                 this.dataLoading = false;
             }
 

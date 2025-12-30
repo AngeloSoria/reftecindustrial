@@ -214,9 +214,11 @@ class ProjectController extends Controller
                 return $project;
             });
 
+
             return response()->json([
                 'success' => true,
                 'data'    => $projects,
+                'featured' => Project::where('is_featured', 1)->count()
             ]);
         } catch (Exception $e) {
             return response()->json([
