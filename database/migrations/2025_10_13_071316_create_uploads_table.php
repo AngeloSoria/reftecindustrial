@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('filename');
             $table->string('path');
+            $table->boolean('is_protected')->default(false);
             $table->foreignId('uploaded_by')->foreign('uploaded_by')->references('id')->on('users');
             $table->timestamps();
         });
