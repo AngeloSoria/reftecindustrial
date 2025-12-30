@@ -47,6 +47,13 @@ return [
             'report' => false,
         ],
 
+        'public_uploads' => [
+            'driver' => 'local',
+            'root' => public_path('storage/'),
+            'url' => env('APP_URL') . '/storage',
+            'visibility' => 'public'
+        ],
+
         'private' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
