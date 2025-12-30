@@ -24,17 +24,8 @@
                     el.dispatchEvent(new Event('change', { bubbles: true }));
                 });
             });
-        
-            const response = await fetch('{{ route('content.get.section.projects') }}');
-            const data = await response.json();
-            // console.log(data);
-            if(data && data.success) {
-                this.projectData = data.data.projects;
-                this.highlightedCount = data.data.highlightedCount;
-                this.dataLoading = false;
 
-
-            }
+            this.applyFilters();
         },
         
         async changeSourceData(route) {
@@ -54,6 +45,7 @@
             this.isAllRowsSelected = false;
             this.activeDataFromCheckbox = {};
             document.querySelector('#input_checkbox_selectAll').checked = false;
+            {{-- console.log(this.projectData); --}}
         },
         async applyFilters(page = 1) {
             this.dataLoading = true;
@@ -356,6 +348,7 @@
                                                 :key="image_path + '_' + index">
                                                 <img @click="$dispatch('image_preview_event', { previewInfo: { image: $el.src }});"
                                                     x-bind:src="image_path"
+                                                    x-bind:alt="image_path"
                                                     class="aspect-video rounded cursor-pointer brightness-75 hover:brightness-100 transition-all" />
                                             </template>
                                         </div>

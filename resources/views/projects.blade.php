@@ -107,46 +107,30 @@
 
             <section class="p-4">
                 {{-- filter tools --}}
-                <section class="flex flex-col md:flex-row items-end justify-end gap-2">
+                <section class="flex flex-col sm:flex-row items-end justify-end gap-2">
 
-                    <x-public.searchbar
+                    <div class="grow w-full md:max-w-[18rem]">
+                        <x-public.searchbar
                         placeholder="Search projects..." 
                         x-model="filters.search"
                         @input.debounce.300ms="applyFilters"
-                        id="searchbox_projects"
-                        class="grow w-full md:max-w-[18rem]" />
+                        id="searchbox_projects" />
+                    </div>
 
-                    <x-public.dropdown
+                    <div class="w-[50%] sm:w-[35%] md:max-w-[12rem]">
+                        <x-public.dropdown
                         name="filter_status" 
                         id="dropdown_filter_status"
-                        class="grow max-w-full md:max-w-[12rem]" 
                         label="Project Status" 
                         title="Select Project Status"
                         x-model="filters.status"
                         @change="applyFilters">
-                        <option value="all">All</option>
-                        <option value="on_going" class="text-accent-orange-300 p-1">Ongoing</option>
-                        <option value="completed" class="text-accent-lightseagreen-50 p-1">Completed</option>
-                    </x-public.dropdown>
+                            <option value="all">All</option>
+                            <option value="on_going" class="text-accent-orange-300 p-1">Ongoing</option>
+                            <option value="completed" class="text-accent-lightseagreen-50 p-1">Completed</option>
+                        </x-public.dropdown>
+                    </div>
 
-
-                    {{-- TODO: Fill the option with detected years from projects. --}}
-                    {{-- <x-public.dropdown name="filter_date" size="6" id="dropdown_filter_year"
-                        class="grow md:max-w-[12rem] w-full md:w-fit" label="Year" title="Select Year Completed">
-                        <option value="all">All</option>
-                        @for ($year = date('Y'); $year >= 2005; $year--)
-                        <option value="{{ $year }}">
-                            {{ $year }}
-                        </option>
-                        @endfor
-                    </x-public.dropdown> --}}
-
-
-                    {{-- <x-public.button button_type="primary" id="btn_apply_filters"
-                        class="px-4 py-2 rounded-sm cursor-pointer font-medium w-full max-w-[10rem] md:w-fit"
-                        title="Apply Filters">
-                        Apply Filters
-                    </x-public.button> --}}
                 </section>
 
                 {{-- Data --}}
@@ -322,9 +306,10 @@
                     </template>
 
                 </section>
+
                 {{-- Pagination --}}
                 <template x-if="projectsData && !dataLoading">
-                    <div class="mt-4 flex items-center justify-between gap-2">
+                    <div class="mt-4 flex flex-col-reverse md:flex-row items-center justify-between gap-2">
                         <section>
                             <p class="text-sm font-medium text-gray-700">
                                 Showing
@@ -338,7 +323,9 @@
                         </section>
                         <section class="flex items-center justify-center gap-1 flex-wrap">
                             <!-- Previous Button -->
-                            <x-public.button @click="applyFilters(projectsData.current_page - 1)"
+                            <x-public.button 
+                                onclick="backToTop()"
+                                @click="applyFilters(projectsData.current_page - 1)"
                                 x-bind:disabled="!projectsData.prev_page_url"
                                 class="cursor-pointer shadow-sm bg-white hover:bg-accent-darkslategray-200 transition-colors">
                                 <span class="flex items-center justify-center gap-2">
@@ -350,7 +337,7 @@
                             <!-- Page Numbers -->
                             <div class="flex justify-center items-center gap-2 flex-wrap">
                                 <template x-for="(page, index) in paginationRange()" :key="page + '_' + index">
-                                    <x-public.button @click="page !== '...' && applyFilters(page)"
+                                    <x-public.button onclick="backToTop()" @click="page !== '...' && applyFilters(page)"
                                         x-bind:class="page === projectsData.current_page ? 'bg-brand-primary-600 text-white' : 'bg-white border'"
                                         class="px-3 py-1 rounded border cursor-pointer" x-text="page">
                                     </x-public.button>
@@ -358,7 +345,9 @@
                             </div>
 
                             <!-- Next Button -->
-                            <x-public.button @click="applyFilters(projectsData.current_page + 1)"
+                            <x-public.button 
+                                onclick="backToTop()"
+                                @click="applyFilters(projectsData.current_page + 1)"
                                 x-bind:disabled="!projectsData.next_page_url"
                                 class="cursor-pointer shadow-sm bg-white hover:bg-accent-darkslategray-200 transition-colors">
                                 <span class="flex items-center justify-center gap-2">

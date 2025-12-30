@@ -51,11 +51,8 @@
                     PRODUCTS</p>
             </div>
 
-            <div
-                class="mt-4 bg-accent-darkslategray-900 grid gap-1 md:gap-0 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 relative"
-                data-aos="fade-up"
-                data-aos-anchor-placement="center-center"
-                x-data="{
+            <div class="mt-4 bg-accent-darkslategray-900 grid gap-1 md:gap-0 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 relative"
+                data-aos="fade-up" data-aos-anchor-placement="center-center" x-data="{
                     productLines: [],
                     async init() {
                         try {
@@ -67,10 +64,9 @@
                             console.error('Failed to load product lines:', e);
                         }
                     },
-                }"
-                >
+                }">
                 <template x-for="line in productLines" :key="line.name">
-                    <section  class="w-full relative h-24 overflow-hidden">
+                    <section class="w-full relative h-24 overflow-hidden">
                         {{-- Image --}}
                         <img :src="line.image_path" :alt="line.name" class="w-full m-auto" />
 
@@ -111,8 +107,7 @@
                                 this.$refs.data_history.innerHTML = data.data.description;
                             }
                         },
-                    }"
-                    class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
+                    }" class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
                         {{-- placeholder before the updated data from the database. --}}
                         Founded in 2005 as Single Proprietorship,<span class="font-black text-brand-secondary-300">
                             REFTEC
@@ -139,9 +134,7 @@
                 {{-- Image --}}
                 <div data-aos="fade-left" data-aos-anchor-placement="top-bottom" data-aos-duration="1000"
                     class="order-1 md:order-2 w-full md:h-auto aspect-video md:aspect-auto overflow-hidden">
-                    <img
-                        x-ref="image_history"
-                        x-data="{
+                    <img x-ref="image_history" x-data="{
                             async init() {
                                 try {
                                     const response = await fetch('{{ route('content.get.section.history') }}');
@@ -152,9 +145,7 @@
                                     console.error('Failed to load history image:', e);
                                 }
                             },
-                        }"
-                        src="{{ asset('images/our_history.png') }}"
-                        alt="Our History"
+                        }" src="{{ asset('images/our_history.png') }}" alt="Our History"
                         class="w-full h-full object-cover" loading="lazy" />
                 </div>
 
@@ -171,83 +162,72 @@
             </div>
 
             {{-- TODO: Must be a server-sided rendering of Highlighted Projects here. --}}
-            <section class="flex flex-col space-y-7 lg:space-y-20 mt-20 overflow-hidden">
-                @php
-                    // Example highlighted projects array
-                    $highlightedProjects = [
-                        [
-                            'title' => 'Project Title 1',
-                            'description' => 'Brief description of Project 1. This is a placeholder text.',
-                            'image' => asset('images/layout_light_16x9.png'),
-                            'status' => 'COMPLETED',
-                            'status_color' => 'bg-accent-lightseagreen-50',
-                        ],
-                        [
-                            'title' => 'Project Title 2',
-                            'description' => 'Brief description of Project 2. This is a placeholder text.',
-                            'image' => asset('images/layout_light_16x9.png'),
-                            'status' => 'COMPLETED',
-                            'status_color' => 'bg-accent-lightseagreen-50',
-                        ],
-                        [
-                            'title' => 'Project Title 3',
-                            'description' => 'Brief description of Project 3. This is a placeholder text.',
-                            'image' => asset('images/layout_light_16x9.png'),
-                            'status' => 'ON GOING',
-                            'status_color' => 'bg-accent-orange-300',
-                        ],
-                    ];
-                @endphp
+            <section x-data="{
+                highlightedProjects: [],
 
-                @for ($i = 0; $i < count($highlightedProjects); $i++)
-                    @php
-                        $project = $highlightedProjects[$i];
-                        $isEven = $i % 2 === 1;
-                    @endphp
-                    <div
-                        class="p-4 bg-gray-100 shadow-lg md:shadow-none md:bg-transparent flex flex-col md:flex-row items-end justify-center lg:space-x-[-150px] md:-space-x-28">
-                        @if (!$isEven)
-                            {{-- Image Left --}}
-                            <div data-aos="fade-right" data-aos-duration="900"
-                                class="w-full h-full lg:w-[685px] lg:h-[400px] overflow-hidden">
-                                <img src="{{ $project['image'] }}" alt="{{ $project['title'] }}"
-                                    class="w-full h-full object-fill" loading="lazy" />
-                            </div>
-                            {{-- Context Right --}}
-                            <div data-aos="fade-left" data-aos-duration="900"
-                                class="z-2 w-full mt-2 lg:w-1/2 mb-6 flex flex-col justify-center">
-                                <div>
-                                    <span
-                                        class="text-sm text-white {{ $project['status_color'] }} px-2 py-1 font-medium">{{ $project['status'] }}</span>
+                async init() {
+                    const response = await fetch('{{ route('content.get.section.projects.highlighted.public') }}')
+                    const data = await response.json()
+                    this.highlightedProjects = data.data
+                    console.log(this.highlightedProjects);
+                }
+            }" 
+            class="flex flex-col space-y-7 lg:space-y-20 mt-20 overflow-hidden">
+                <template x-for="(project, index) in highlightedProjects" :key="index">
+                    <div class="bg-gray-100 shadow-lg md:shadow-none md:bg-transparent flex flex-col md:flex-row items-end justify-center">
+                        <!-- IMAGE LEFT (even index) -->
+                        <template x-if="index % 2 === 0">
+                            <div class="flex w-full items-end md:flex-row flex-col">
+                                <div data-aos="fade-right" data-aos-duration="900"
+                                    class="w-full h-full lg:w-[685px] lg:h-[400px] overflow-hidden">
+                                    <img :src="project.images[0]" :alt="project.title" class="w-full h-full object-fill"
+                                        loading="lazy" />
                                 </div>
-                                <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
-                                    <h2 class="text-xl font-bold">{{ $project['title'] }}</h2>
-                                    <p class="text-sm">{{ $project['description'] }}</p>
-                                </div>
-                            </div>
-                        @else
-                            {{-- Context Left --}}
-                            <div data-aos="fade-right" data-aos-duration="900"
-                                class="z-2 w-full lg:w-1/2 mb-6 flex flex-col justify-center">
-                                <div>
-                                    <span
-                                        class="text-sm text-white {{ $project['status_color'] }} px-2 py-1 font-medium">{{ $project['status'] }}</span>
-                                </div>
-                                <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
-                                    <h2 class="text-xl font-bold">{{ $project['title'] }}</h2>
-                                    <p class="text-sm">{{ $project['description'] }}</p>
+
+                                <div data-aos="fade-left" data-aos-duration="900"
+                                    class="z-2 w-full mt-2 lg:w-1/2 mb-6 flex flex-col justify-center">
+                                    <div>
+                                        <span class="text-sm text-white px-2 py-1 font-medium uppercase"
+                                            :class="project.status == 'completed' ? 'bg-green-400' : project.status == 'on_going' ? 'bg-yellow-500' : 'bg-red-500'" 
+                                            x-text="project.status"></span>
+                                    </div>
+
+                                    <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
+                                        <h2 class="text-xl font-bold" x-text="project.title"></h2>
+                                        <p class="text-sm" x-text="project.description"></p>
+                                    </div>
                                 </div>
                             </div>
-                            {{-- Image Right --}}
-                            <div data-aos="fade-left" data-aos-duration="900"
-                                class="w-full lg:w-[685px] lg:h-[400px] overflow-hidden">
-                                <img src="{{ $project['image'] }}" alt="{{ $project['title'] }}"
-                                    class="w-full h-full object-fill" loading="lazy" />
+                        </template>
+
+                        <!-- IMAGE RIGHT (odd index) -->
+                        <template x-if="index % 2 === 1">
+                            <div class="flex w-full items-end md:flex-row flex-col">
+                                <div data-aos="fade-right" data-aos-duration="900"
+                                    class="z-2 w-full lg:w-1/2 mb-6 flex flex-col justify-center">
+                                    <div>
+                                        <span class="text-sm text-white px-2 py-1 font-medium uppercase"
+                                            :class="project.status == 'completed' ? 'bg-green-400' : project.status == 'on_going' ? 'bg-yellow-500' : 'bg-red-500'"
+                                            x-text="project.status"></span>
+                                    </div>
+
+                                    <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
+                                        <h2 class="text-xl font-bold" x-text="project.title"></h2>
+                                        <p class="text-sm" x-text="project.description"></p>
+                                    </div>
+                                </div>
+
+                                <div data-aos="fade-left" data-aos-duration="900"
+                                    class="w-full lg:w-[685px] lg:h-[400px] overflow-hidden">
+                                    <img :src="project.images[0]" :alt="project.title" class="w-full h-full object-fill"
+                                        loading="lazy" />
+                                </div>
                             </div>
-                        @endif
+                        </template>
                     </div>
-                @endfor
+                </template>
             </section>
+
 
             <div data-aos="fade-up" class="w-full flex justify-center items-center p-8">
                 <x-public.button button_type="primary" href="{{ route('projects') }}"

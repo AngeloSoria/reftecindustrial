@@ -16,7 +16,7 @@
 
     {{-- Collage --}}
     {{-- TODO: Make this server-sided. --}}
-    <section class="relative h-[200px]">
+    <section class="relative max-h-[200px] overflow-y-hidden">
         <div x-data="{
                 galleryData: [],
                 isFetchCompleted: false,
@@ -43,10 +43,10 @@
                     });
                 },
             }" 
-            class="grid grid-cols-3 h-full border-4 border-red-500">
+            class="grid grid-cols-3 h-full items-stretch">
             <template x-for="image_path in galleryData" :key="image_path + crypto.randomUUID()">
-                <div class="border-2 h-full relative overflow-hidden">
-                    <img :src="image_path" class="w-full h-full absolute top-0 left-0 aspect-video"/>
+                <div class="h-full overflow-hidden aspect-video">
+                    <img :src="image_path" class="h-full w-full aspect-video"/>
                 </div>
             </template>
         </div>

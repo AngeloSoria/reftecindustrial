@@ -22,13 +22,14 @@
                 });
             });
         
-            const response = await fetch('{{ route('content.get.section.products') }}');
+            const response = await fetch('{{ route('content.get.section.products.filtered') }}');
             const data = await response.json();
             // console.log(data);
             if(data && data.success) {
                 this.productData = data.data;
                 this.dataLoading = false;
             }
+            // console.log(data);
         },
         
         async changeSourceData(route) {
@@ -199,12 +200,28 @@
         </div>
 
         {{-- Table --}}
-        <div class="overflow-auto rounded max-h-[600px] overflow-y-auto">
-            <table class="w-full min-w-max table-auto text-left rounded-t-md">
+        <div class="overflow-auto rounded max-h-[600px]">
+            <table class="w-full min-w-full table-auto rounded-t-md">
+                <colgroup>
+                    <col class="w-[5%]">
+                    <col class="w-[5%]">
+                    <col class="w-[15%]">
+                    <col class="w-auto">
+                    <col class="w-[10%]">
+                    <col class="w-[10%]">
+                </colgroup>
                 <thead>
                     <tr
-                        class="bg-royalblue-400/50 shadow-sm [&>*:first-child]:rounded-tl-sm [&>*:last-child]:rounded-tr-sm [&>*]:border-x [&>*]:border-gray-200 [&>*]:p-4">
-                        
+                        class="
+                            bg-royalblue-400/50
+                            shadow-sm
+                            *:first-child:rounded-tl-md 
+                            *:last-child:rounded-tr-md
+                            *:p-4
+                            *:text-sm
+                            *:font-normal
+                        ">
+
                         <th class="rounded-tl-md">
                             <input x-data="{
                                     titleContent: 'Select All'
@@ -221,34 +238,24 @@
                         </th>
 
                         <th>
-                            <p
-                                class="antialiased font-sans text-sm text-gray-900 flex items-center justify-between gap-2 font-normal leading-none">
+                            <span>
                                 Images
-                            </p>
+                            </span>
                         </th>
                         <th>
-                            <p
-                                class="antialiased font-sans text-sm text-gray-900 flex items-center justify-between gap-2 font-normal leading-none">
+                            <span class="float-left">
                                 Title
-                            </p>
+                            </span>
                         </th>
                         <th>
-                            <p
-                                class="antialiased font-sans text-sm text-gray-900 flex items-center justify-between gap-2 font-normal leading-none">
-                                Description
-                            </p>
-                        </th>
-                        <th>
-                            <p
-                                class="antialiased font-sans text-sm text-gray-900 flex items-center justify-between gap-2 font-normal leading-none">
+                            <span>
                                 Visible
-                            </p>
+                            </span>
                         </th>
                         <th>
-                            <p
-                                class="antialiased font-sans text-sm text-center text-gray-900 gap-2 font-normal leading-none">
+                            <span>
                                 Actions
-                            </p>
+                            </span>
                         </th>
                     </tr>
                 </thead>
@@ -278,10 +285,10 @@
                                         class="input_checkbox_item-product cursor-pointer w-5 h-5 mx-auto text-accent-orange-300 accent-orange-400 rounded-sm border-2 border-accent-darkslategray-700" />
                                 </td>
                                 <td>
-                                    <span x-text="productData.from + index"></span>
+                                    <span x-text="productData.from + index" class="text-center"></span>
                                 </td>
-                                <td>
-                                    <div class="flex items-center gap-3">
+                                <td class="whitespace-nowrap w-fit">
+                                    <div class="flex items-start justify-center">
                                         <div x-data="{
                                             get imageCount() {
                                                 return product.images?.length ?? 0;
@@ -312,15 +319,9 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="w-max overflow-x-auto max-w-[200px] whitespace-normal break-words">
+                                    <div class="w-full overflow-x-auto whitespace-normal break-words">
                                         <p class="block antialiased font-sans text-sm leading-normal text-gray-900 font-normal"
                                             x-text="product.title"></p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="w-max overflow-x-auto max-w-[300px] whitespace-normal break-words">
-                                        <p class="block antialiased font-sans text-sm leading-normal text-gray-900 font-normal"
-                                            x-text="product.description"></p>
                                     </div>
                                 </td>
                                 <td>
@@ -418,7 +419,7 @@
             </div>
         </template>
 
-        
+
         <x-auth.content.product.modal_add_edit_product />
         <x-auth.content.product.modal_delete_product />
         <x-auth.content.product.modal_delete_selected_products />
@@ -427,6 +428,3 @@
 
 
 </div>
-
-
-
