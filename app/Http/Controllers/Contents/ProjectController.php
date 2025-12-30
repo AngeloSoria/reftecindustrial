@@ -66,7 +66,7 @@ class ProjectController extends Controller
                         }
 
                         foreach ($uploadInfo['files'] as $fileInfo) {
-                            $uploadIds[] = $fileInfo['path'];
+                            $uploadIds[] = $fileInfo['file_id'];
                         }
                     } catch (Exception $e) {
                         foreach ($uploadIds as $upload_id) {
@@ -113,41 +113,7 @@ class ProjectController extends Controller
         }
     }
 
-    public function getProjects($filter = null)
-    {
-        try {
-            $projects = Project::select([
-                'id',
-                'images',
-                'job_order',
-                'title',
-                'description',
-                'status',
-                'is_visible',
-                'is_featured'
-            ])
-                ->latest()
-                ->paginate(15);
-
-            $highlightedCount = Project::where('is_featured', 1)->count();
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'projects' => $projects,
-                    'highlightedCount' => $highlightedCount
-                ]
-            ]);
-        } catch (Exception $e) {
-            Logger()->error($e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'type' => 'error'
-            ]);
-        }
-    }
-    public function getProjectsV2(Request $request, $isPublic = false)
+    public function getProjectsFiltered(Request $request, $isPublic = false, $isFeatured = false)
     {
         try {
             // -----------------------------------
@@ -161,7 +127,7 @@ class ProjectController extends Controller
                 'description',
                 'status',
             ];
-            
+
             $restrictedColumns = [
                 'is_visible',
                 'is_featured',
@@ -182,7 +148,7 @@ class ProjectController extends Controller
             // -----------------------------------
             if ($isPublic) {
                 $query->where('is_visible', true)
-                      ->where('status', '!=', 'pending');
+                    ->where('status', '!=', 'pending');
             }
 
             // -----------------------------------
@@ -218,27 +184,79 @@ class ProjectController extends Controller
             // -----------------------------------
             $projects = $query->latest()->paginate(15);
 
+            // Transform the paginated results
+            $projects->getCollection()->transform(function ($project) {
+                $imageIDs = $project->images;
+
+                if (!empty($imageIDs) && is_array($imageIDs)) {
+
+                    // If images are already an array of IDs, map them to paths
+                    $project->images = array_map(function ($id) {
+                        $uploadController = new UploadController();
+                        $response = $uploadController->getUploadedFile($id)->getData(true);
+
+                        if (!$response['success']) {
+                            return null;
+                        }
+
+                        $file = $response['data'];
+
+                        return $file['path'];
+                    }, $imageIDs);
+                } elseif (!empty($imageIDs) && is_string($imageIDs)) {
+                    // In case it's stored as a string (legacy)
+                    $imageIds = explode(',', $imageIDs);
+                    $project->images = array_map(fn($id) => '/uploads/' . $id, $imageIds);
+                } else {
+                    $project->images = [];
+                }
+
+                return $project;
+            });
+
             return response()->json([
                 'success' => true,
                 'data'    => $projects,
             ]);
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
         }
     }
-
-
     public function getProjectsPublic(Request $request)
     {
-        return $this->getProjectsV2($request, true);
+        return $this->getProjectsFiltered($request, true);
     }
+    public function getProjectsHighlightedPublic(Request $request)
+    {
+        try {
+            // -----------------------------------
+            // Columns to select
+            // -----------------------------------
+            $baseColumns = [
+                'id',
+                'images',
+                'job_order',
+                'title',
+                'description',
+                'status',
+            ];
 
+            return Project::get($baseColumns)->where('is_featured', true);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
     public function updateProject(Request $request)
     {
         try {
+            $uploadController = new UploadController();
+
             // Validate main request
             $request->validate([
                 'project_id' => ['required', 'integer', 'exists:contents_projects,id'],
@@ -261,11 +279,21 @@ class ProjectController extends Controller
                 'status'       => $request->status,
                 'is_visible'   => empty($request->visibility) || $request->visibility != "on" ? 0 : 1,
                 'is_featured'  => empty($request->highlighted) || $request->highlighted != "on" ? 0 : 1,
-                'images'       => json_decode($request->project_images), // will merge later if files uploaded
+                'images'       => json_decode($request->project_images),
             ];
 
+            // convert path to id
+            $toFileId = [];
+            foreach ($projectData['images'] as $image_path) {
+                $response = $uploadController->getUploadedFileByPath($image_path)->getData(true);
+                if (!$response['success']) continue;
+                $toFileId[] = $response['data']['id'];
+            }
+            
+            // replace the request's images to file id.
+            $projectData['images'] = $toFileId;
 
-            $uploadedFilesIds = [];
+            $uploadedFileIds = [];
 
             // Check highlighted projects limit
             if ($projectData['is_featured'] == 1 && $project->is_featured == 0) {
@@ -277,9 +305,16 @@ class ProjectController extends Controller
 
             // Handle uploaded files if any
             $allFiles = $request->files->all('files');
-            if (count($allFiles) > 0) {
+            if ($request->hasFile('files')) {
                 // Calculate how many more files can be uploaded
-                $uploadLimit = 6 - count($project->images);
+                $uploadLimit = $project->images ? 6 - count($project->images) : 6;
+
+                // if there's no slots left, throw an error.
+                if ($uploadLimit <= 0) {
+                    throw new Exception("No slots left when uploading new image.");
+                }
+
+                // If the uploaded files are more than the remaining slots, remove the excess.
                 $trimmedFiles = array_slice($allFiles, 0, $uploadLimit);
 
                 // Create a new Request for the UploadController only
@@ -299,8 +334,8 @@ class ProjectController extends Controller
                 ]);
 
                 // Upload the trimmed files
-                $uploadController = new UploadController();
                 $uploadResponse = $uploadController->upload($uploadRequest)->getData(true);
+
 
                 if (!$uploadResponse['success']) {
                     throw new Exception($uploadResponse['message']);
@@ -308,29 +343,34 @@ class ProjectController extends Controller
 
                 // Track uploaded file IDs for rollback in case of error
                 foreach ($uploadResponse['files'] as $file) {
-                    $uploadedFilesIds[] = $file['file_id'];
+                    $uploadedFileIds[] = $file['file_id'];
                 }
 
-                // Merge new file paths with existing project images
-                $existingImages = $projectData['images'] ?? [];
-                // dd($existingImages);
-                foreach ($uploadResponse['files'] as $file) {
-                    $existingImages[] = $file['path'];
+                // append to current the uploaded
+                foreach ($uploadedFileIds as $upload_id) {
+                    $projectData['images'][] = $upload_id;
                 }
-                $projectData['images'] = $existingImages;
+            }
+
+            $nonExistingFilesFromModel = array_diff($project->images, $projectData['images'] ?? []);
+
+            // delete from files the non existing
+            foreach ($nonExistingFilesFromModel as $file_id) {
+                $uploadController->deleteUploadedFile($file_id);
             }
 
             // Save the project data
-            $project->update($projectData);
+            $project->updateOrFail($projectData);
 
             session()->flash('content', ['tab' => 'projects']);
             toast("A project has been updated.", 'success');
+
             return back();
         } catch (Exception $e) {
             // Rollback uploaded files if any
-            if (!empty($uploadedFilesIds)) {
+            if (!empty($uploadedFileIds)) {
                 $uploadController = $uploadController ?? new UploadController();
-                foreach ($uploadedFilesIds as $fileId) {
+                foreach ($uploadedFileIds as $fileId) {
                     $uploadController->deleteUploadedFile($fileId);
                 }
             }
@@ -341,7 +381,6 @@ class ProjectController extends Controller
             return back();
         }
     }
-
     public function deleteProject(Request $request)
     {
         try {
@@ -351,6 +390,15 @@ class ProjectController extends Controller
 
 
             $model = Project::findOrFail($request->project_id);
+
+            // Delete old uploaded files from existing product model
+            $modelImages = $model->images;
+            if (count($modelImages) > 0) {
+                $uploadController = $uploadController ?? new UploadController();
+                foreach ($modelImages as $id) {
+                    $uploadController->deleteUploadedFile($id);
+                }
+            }
 
             $model->deleteOrFail();
 
@@ -364,7 +412,6 @@ class ProjectController extends Controller
             return back();
         }
     }
-
     public function deleteSelectedProjects(Request $request)
     {
         try {
@@ -378,10 +425,20 @@ class ProjectController extends Controller
                 throw new Exception('No existing project value passed.');
             }
 
-            Project::destroy(array_keys($decoded_project));
+            // Delete old uploaded files from existing product model
+            $uploadController = new UploadController();
+            foreach ($decoded_project as $project_id => $project_data) {
+                $project = Project::findOrFail($project_id);
+                if (!$project) continue;
 
-
-            // dd($request->projects, json_decode($request->projects));
+                $modelImages = $project_data['images'];
+                if (count($modelImages) > 0) {
+                    foreach ($modelImages as $imageIDs) {
+                        $uploadController->deleteUploadedFile($imageIDs);
+                    }
+                }
+                Project::destroy($project_id);
+            }
 
             session()->flash('content', ['tab' => 'projects']);
             toast("Selected projects has been deleted.", 'success');
