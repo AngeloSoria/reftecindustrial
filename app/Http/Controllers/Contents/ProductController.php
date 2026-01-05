@@ -85,18 +85,17 @@ class ProductController extends Controller
         }
     }
 
-    public function getProducts($isPublic = false)
+    public function getProductsPublic()
     {
         try {
-
-            $products = Product::select([
+            $products = Product::where('is_visible', 1)
+            ->select([
                 'id',
                 'images',
                 'title',
-                'is_visible',
             ])
-                ->latest()
-                ->paginate(15);
+            ->latest()
+            ->paginate(15);
 
             // Transform the paginated results
             $products->getCollection()->transform(function ($product) {
@@ -141,6 +140,7 @@ class ProductController extends Controller
             ]);
         }
     }
+
     public function getProductsFiltered(Request $request)
     {
         try {
