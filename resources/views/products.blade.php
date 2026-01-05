@@ -5,7 +5,7 @@
 <body>
     <x-public.navbar />
 
-    <x-public.content_container minHeight="min-h-[10vh]">
+    <x-public.content_container minHeight="min-h-[50vh]">
         <div class="flex flex-col items-center justify-center my-12">
             <p class="text-2xl md:text-3xl font-inter font-black">
                 <span class="text-accent-black_2">OUR </span>
@@ -15,34 +15,6 @@
         </div>
 
         <section x-data="productsHandler()">
-            @php
-                // TODO: Populate this with server-sided data.
-                $fake_items = [
-                    [
-                        "title" => "Synthetic Lubricants",
-                        "image" => asset('images/lubricants.png')
-                    ],
-                    [
-                        "title" => "Galvanized Ice Cans",
-                        "image" => asset('images/galvanized-ice-can.png')
-                    ],
-                ];
-            @endphp
-            {{-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-2">
-                @foreach ($fake_items as $item)
-                <div class="cursor-pointer bg-white flex flex-col {{ $loop->last && $loop->count === 3 ? 'col-start-1 col-end-3 justify-self-center w-1/2' : '' }}"
-                    x-data @click="
-                            $dispatch('image_preview_event', {
-                                previewInfo: @js($item)
-                            })
-                        ">
-                    <img src="{{ $item['image'] }}" class="w-full grow max-h-[200px] object-cover" />
-                    <div class="bg-brand-primary-950 p-2 lg:p-4">
-                        <p class="text-sm md:text-lg font-inter font-medium text-white">{{ $item['title'] }}</p>
-                    </div>
-                </div>
-                @endforeach
-            </div> --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-2">
                 <template x-if="products !== null">
                     <template x-for="(product, index) in products" :key="index">
