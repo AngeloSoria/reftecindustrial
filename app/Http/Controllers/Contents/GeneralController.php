@@ -70,7 +70,8 @@ class GeneralController extends Controller
             ]);
 
             // Clear cache for product lines section after updating
-            Cache::forget('section_product_lines');
+            Cache::forget('section_product_lines_public');
+            Cache::forget('section_product_lines_private');
             Cache::forget('section_product_lines_visible');
 
             session()->flash('content', [
@@ -100,7 +101,7 @@ class GeneralController extends Controller
                 if (!$request->hasFile('files')) {
                     throw new NoFileException("File not found in the request.");
                 }
-                
+
                 $uploadController = new UploadController();
                 $uploadResponse = $uploadController->upload($request)->getData(true);
                 $uploadedFiles = [];
@@ -290,35 +291,52 @@ class GeneralController extends Controller
         }
     }
 
-    public function getAllProductLines()
+    public function getAllProductLines($isPublic = false)
     {
         try {
-            $response = Cache::remember('section_product_lines', env('CACHE_EXPIRATION', 3600), function () {
+            $response = Cache::remember(
+                'section_product_lines_' . ($isPublic ? 'public' : 'private'),
+                env('CACHE_EXPIRATION', 3600),
+                function () use ($isPublic) {
 
-                $record = ProductLines::latest()->get(['id', 'name', 'upload_id', 'visibility']);
+                    $visibleColumns = [
+                        'id',
+                        'name',
+                        'upload_id',
+                    ];
 
-                // Map each product line to include image_path
-                $uploadController = new UploadController();
-                $newData = $record->map(function ($product_line) use ($uploadController) {
-                    $uploadResponse = $uploadController->getUploadedFile($product_line->upload_id);
-
-                    $data = $uploadResponse->getData(true);
-
-                    if (!$uploadResponse) {
-                        throw new Exception("No uploaded data found.");
+                    if (!$isPublic) {
+                        $visibleColumns[] = 'visibility';
                     }
 
-                    $product_line->image_path = $data['data']['path'] ?? null;
+                    $record = ProductLines::when(
+                        $isPublic,
+                        fn($q) => $q->where('visibility', 1)
+                    )->latest()->get($visibleColumns);
 
-                    return $product_line;
-                });
+                    // Map each product line to include image_path
+                    $uploadController = new UploadController();
+                    $newData = $record->map(function ($product_line) use ($uploadController) {
+                        $uploadResponse = $uploadController->getUploadedFile($product_line->upload_id);
+
+                        $data = $uploadResponse->getData(true);
+
+                        if (!$uploadResponse) {
+                            throw new Exception("No uploaded data found.");
+                        }
+
+                        $product_line->image_path = $data['data']['path'] ?? null;
+
+                        return $product_line;
+                    });
 
 
-                return [
-                    'success' => true,
-                    'data' => $newData
-                ];
-            });
+                    return [
+                        'success' => true,
+                        'data' => $newData
+                    ];
+                }
+            );
             return response()->json($response);
         } catch (Exception $e) {
             Log::error('Error fetching product lines: ' . $e->getMessage());
@@ -329,6 +347,11 @@ class GeneralController extends Controller
                 'type' => 'error',
             ], 500);
         }
+    }
+
+    public function getAllProductLinesPublic()
+    {
+        return $this->getAllProductLines(true);
     }
 
     public function getAllVisibileProductLines()
@@ -498,7 +521,8 @@ class GeneralController extends Controller
         }
     }
 
-    public function setHistory(Request $request) {
+    public function setHistory(Request $request)
+    {
         try {
             $request->validate([
                 'context' => 'string',
@@ -627,7 +651,8 @@ class GeneralController extends Controller
             );
 
             // Clear cache
-            Cache::forget('section_product_lines');
+            Cache::forget('section_product_lines_public');
+            Cache::forget('section_product_lines_private');
             Cache::forget('section_product_lines_visible');
 
             session()->flash('content', [
@@ -836,7 +861,8 @@ class GeneralController extends Controller
                 $productLine->delete();
 
                 // Clear cache
-                Cache::forget('section_product_lines');
+                Cache::forget('section_product_lines_public');
+            Cache::forget('section_product_lines_private');
                 Cache::forget('section_product_lines_visible');
 
                 // Session tab state
