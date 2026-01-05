@@ -96,35 +96,6 @@
         </template>
     </section>
 
-    {{-- Paginator --}}
-    {{-- <template x-if="product_lines.length > 0">
-        <section class="w-full flex items-center justify-end mt-4">
-            <nav class="flex items-center justify-center gap-2 py-2" aria-label="Pagination">
-                <button
-                    class="px-4 py-2 rounded bg-accent-darkslategray-200 hover:bg-accent-darkslategray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled>
-                    Previous
-                </button>
-                <button
-                    class="px-4 py-2 rounded bg-accent-darkslategray-200 hover:bg-accent-darkslategray-300 transition-colors">
-                    1
-                </button>
-                <button
-                    class="px-4 py-2 rounded bg-accent-darkslategray-200 hover:bg-accent-darkslategray-300 transition-colors">
-                    2
-                </button>
-                <button
-                    class="px-4 py-2 rounded bg-accent-darkslategray-200 hover:bg-accent-darkslategray-300 transition-colors">
-                    3
-                </button>
-                <button
-                    class="px-4 py-2 rounded bg-accent-darkslategray-200 hover:bg-accent-darkslategray-300 transition-colors">
-                    Next
-                </button>
-            </nav>
-        </section>
-    </template> --}}
-
 </section>
 
 {{-- Modal: ADD / UPDATE / EDIT --}}
