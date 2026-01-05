@@ -27,6 +27,8 @@ html {
 }
 
 @theme {
+    --private_topbar_height: 30px;
+
     --breakpoint-xs: 475px;
 
     --text-xxs: 0.625rem;
@@ -141,6 +143,41 @@ html {
     --color-royalblue-950: #2b6ef6;
 }
 
+@layer utilities {
+    /* Fixed-speed horizontal conveyor */
+    @keyframes logo-conveyor {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(-50%);
+        }
+    }
+
+    .animate-logo-conveyor {
+        --conveyor-speed: 15s;
+        animation: logo-conveyor var(--conveyor-speed) linear infinite;
+    }
+
+    /* Fade edges */
+    .fade-edges-horizontal {
+        mask-image: linear-gradient(
+            to right,
+            transparent,
+            black 10%,
+            black 90%,
+            transparent
+        );
+        -webkit-mask-image: linear-gradient(
+            to right,
+            transparent,
+            black 10%,
+            black 90%,
+            transparent
+        );
+    }
+}
+
 @font-face {
     font-family: "Organetto";
     src: url("../fonts/Organetto/Fontspring-DEMO-organetto-regular.otf")
@@ -168,6 +205,11 @@ html {
     src: url("../fonts/Inter/Inter_24pt-Black.ttf") format("truetype");
     font-weight: 900;
     font-style: normal;
+}
+
+/* Top bar (private) */
+.topbar_force_style {
+    min-height: var(--private_topbar_height);
 }
 
 /* Sidebar hidden by default */
