@@ -6,6 +6,7 @@ use App\Http\Controllers\{VisitorController, UploadController};
 use App\Http\Controllers\Contents\GeneralController;
 use App\Http\Controllers\Contents\ProjectController;
 use App\Http\Controllers\Contents\ProductController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,16 +40,17 @@ Route::prefix('content')
             Route::get('section/history', 'getHistory')->name('get.section.history');
             Route::get('section/product_lines/visible', 'getAllVisibileProductLines')->name('get.section.product_lines.visible');
             Route::get('section/about_us/gallery', 'getAllAboutUsGallery')->name('get.section.about_us.gallery');
+            Route::get('section/product_lines/public', 'getAllProductLinesPublic')->name('get.section.product_lines.public');
         });
 
-        Route::controller(ProjectController::class)->group(function() {
+        Route::controller(ProjectController::class)->group(function () {
             Route::get('section/projects', 'getProjects')->name('get.section.projects');
             Route::get('section/projects/filtered/public', 'getProjectsPublic')->name('get.section.projects.filtered.public');
             Route::get('section/projects/highlighted/public', 'getProjectsHighlightedPublic')->name('get.section.projects.highlighted.public');
         });
 
-        Route::controller(ProductController::class)->group(function() {
-            Route::get('section/products/public', 'getProducts')->name('get.section.products.public');
+        Route::controller(ProductController::class)->group(function () {
+            Route::get('section/products/public', 'getProductsPublic')->name('get.section.products.public');
             Route::get('section/products/filtered/public', 'getProductsFiltered')->name('get.section.products.filtered.public');
         });
     });
@@ -82,6 +84,23 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | User Management (CRUD)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('user')
+        ->name('user.')
+        ->controller(UserController::class)
+        ->group(function() {
+            Route::get('get/all', 'getAllUsers')->name('get.all');
+            Route::post('add', 'addUser')->name('add');
+            Route::post('update', 'updateUser')->name('update');
+            Route::post('remove', 'removeUser')->name('remove');
+        })
+        ->middleware('throttle:25,1');
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Visitor Analytics
     |--------------------------------------------------------------------------
     */
@@ -107,7 +126,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('content')
         ->name('content.')
         ->group(function () {
-            
+
             Route::controller(GeneralController::class)->group(function () {
                 Route::post('section/test', 'test')->name('add.section.test');
 
@@ -125,22 +144,22 @@ Route::middleware('auth')->group(function () {
                 Route::post('section/about_us/gallery/update_order', 'updateOrderAboutUsGallery')->name('update.section.about_us.gallery.order');
             });
 
-            Route::controller(ProjectController::class)->group(function() {
+            Route::controller(ProjectController::class)->group(function () {
                 Route::post('section/project/add', 'addProject')->name('add.section.project');
                 Route::post('section/project/update', 'updateProject')->name('update.section.project');
                 Route::post('section/project/delete', 'deleteProject')->name('delete.section.project');
                 Route::post('section/project/delete/selected', 'deleteSelectedProjects')->name('delete.section.projects.selected');
-                
+
                 // Route::get('section/projects', 'getProjects')->name('get.section.projects');
                 Route::get('section/projects/filtered', 'getProjectsFiltered')->name('get.section.projects.filtered');
             });
-            
-            Route::controller(ProductController::class)->group(function() {
+
+            Route::controller(ProductController::class)->group(function () {
                 Route::post('section/product/add', 'addProduct')->name('add.section.product');
                 Route::post('section/product/update', 'updateProduct')->name('update.section.product');
                 Route::post('section/product/delete', 'deleteProduct')->name('delete.section.product');
                 Route::post('section/product/delete/selected', 'deleteSelectedProducts')->name('delete.section.products.selected');
-                
+
 
                 Route::get('section/products', 'getProducts')->name('get.section.products');
                 Route::get('section/products/filtered', 'getProductsFiltered')->name('get.section.products.filtered');
