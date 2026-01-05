@@ -5,7 +5,7 @@
 <nav class="sticky top-0 z-50">
     <section class="relative">
         {{-- Topbar --}}
-        <section class="sticky bg-brand-primary-950 py-3 px-2 lg:px-6 flex shadow-lg font-inter">
+        <section class="topbar_force_style sticky bg-brand-primary-950 py-3 px-2 lg:px-6 flex shadow-lg font-inter">
             {{-- Menu control --}}
             <div class="px-4 flex items-center text-white gap-4 grow">
                 <button aria-label="Open sidebar button" title="Open sidebar"
