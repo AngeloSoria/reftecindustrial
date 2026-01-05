@@ -44,45 +44,49 @@
 
     <x-public.content_container>
         {{-- Product Lines --}}
-        <section class="px-4 my-6 relative">
+        <section class="px-4 my-12 relative">
             <div class="flex flex-col items-center justify-center">
                 <p class="text-2xl md:text-3xl font-inter font-black text-accent-orange-300">PRODUCT LINES</p>
                 <p class="text-black text-sm font-medium text-center">HERE TO PROVIDE YOU TOP NOTCH SERVICES AND
                     PRODUCTS</p>
             </div>
 
-            <div class="mt-4 bg-accent-darkslategray-900 grid gap-1 md:gap-0 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 relative"
-                data-aos="fade-up" data-aos-anchor-placement="center-center" x-data="{
-                    productLines: [],
-                    async init() {
-                        try {
-                            const response = await fetch('{{ route('content.get.section.product_lines.visible') }}');
-                            const data = await response.json();
-                            this.productLines = data.data;
-                            console.log(this.productLines);
-                        } catch (e) {
-                            console.error('Failed to load product lines:', e);
-                        }
-                    },
-                }">
-                <template x-for="line in productLines" :key="line.name">
-                    <section class="w-full relative h-24 overflow-hidden">
-                        {{-- Image --}}
-                        <img :src="line.image_path" :alt="line.name" class="w-full m-auto" />
+            
+            <section
+            x-data="{
+                productLines: [],
+                async init() {
+                    const response = await fetch('{{ route('content.get.section.product_lines.public') }}');
+                    const data = await response.json();
+                    console.log(data);
+                    this.productLines = data.data;
+                },
+            }
+            "
+            class="mt-8"
+            >
+                <section class="fade-edges-horizontal overflow-hidden">
+                    <div 
+                    class="flex items-center"
+                    :class="Object.keys(productLines).length > 2 ? 'animate-logo-conveyor' : 'justify-center'"
+                    >
+                    <template x-for="i in Array.from({ length: Object.keys(productLines).length > 2 ? 2 : 1 }, (_, index) => index)">
+                        <template x-for="productLine in productLines">
+                            <div class="grow p-4 flex flex-col items-center justify-center">
+                                <img
+                                :src="productLine.image_path"
+                                :title="productLine.name" 
+                                class="max-w-30 sm:max-w-40 md:max-w-80 max-h-24 object-contain bg-white transition-all duration-300"
+                                />
+                            </div>
+                        </template>
+                    </template>
+                    </div>
+                </section>
+            </section>
 
-                        {{-- Product Name --}}
-                        <div class="z-2 w-[90%] absolute bottom-0 left-1/2 -translate-x-1/2 p-2 text-white text-center">
-                            <h2 class="text-sm text-shadow font-medium" x-text="line.name"></h2>
-                        </div>
-
-                        {{-- Bottom Vignette --}}
-                        <div
-                            class="z-1 absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-black/90 to-transparent pointer-events-none">
-                        </div>
-                    </section>
-                </template>
-            </div>
         </section>
+
 
         {{-- Our History --}}
         <section id="OurHistory_" class="scroll-mt-16 px-4 my-6 mt-[100px] relative overflow-hidden">
@@ -169,17 +173,16 @@
                     const response = await fetch('{{ route('content.get.section.projects.highlighted.public') }}')
                     const data = await response.json()
                     this.highlightedProjects = data.data
-                    console.log(this.highlightedProjects);
                 }
-            }" 
-            class="flex flex-col space-y-7 lg:space-y-20 mt-20 overflow-hidden">
+            }" class="flex flex-col space-y-7 lg:space-y-20 mt-20 overflow-hidden">
                 <template x-for="(project, index) in highlightedProjects" :key="index">
-                    <div class="bg-gray-100 shadow-lg md:shadow-none md:bg-transparent flex flex-col md:flex-row items-end justify-center">
+                    <div
+                        class="bg-gray-100 shadow-lg md:shadow-none md:bg-transparent flex flex-col md:flex-row items-end justify-center">
                         <!-- IMAGE LEFT (even index) -->
                         <template x-if="index % 2 === 0">
                             <div class="flex w-full items-end md:flex-row flex-col">
                                 <div data-aos="fade-right" data-aos-duration="900"
-                                    class="w-full h-full lg:w-[685px] lg:h-[400px] overflow-hidden">
+                                    class="w-full h-full lg:w-[685px] lg:h-[400px] overflow-hidden rounded-xl shadow-xl">
                                     <img :src="project.images[0]" :alt="project.title" class="w-full h-full object-fill"
                                         loading="lazy" />
                                 </div>
@@ -188,7 +191,7 @@
                                     class="z-2 w-full mt-2 lg:w-1/2 mb-6 flex flex-col justify-center">
                                     <div>
                                         <span class="text-sm text-white px-2 py-1 font-medium uppercase"
-                                            :class="project.status == 'completed' ? 'bg-green-400' : project.status == 'on_going' ? 'bg-yellow-500' : 'bg-red-500'" 
+                                            :class="project.status == 'completed' ? 'bg-green-400' : project.status == 'on_going' ? 'bg-yellow-500' : 'bg-red-500'"
                                             x-text="project.status"></span>
                                     </div>
 
@@ -218,7 +221,7 @@
                                 </div>
 
                                 <div data-aos="fade-left" data-aos-duration="900"
-                                    class="w-full lg:w-[685px] lg:h-[400px] overflow-hidden">
+                                    class="w-full lg:w-[685px] lg:h-[400px] overflow-hidden rounded-xl shadow-xl">
                                     <img :src="project.images[0]" :alt="project.title" class="w-full h-full object-fill"
                                         loading="lazy" />
                                 </div>
@@ -229,7 +232,7 @@
             </section>
 
 
-            <div data-aos="fade-up" class="w-full flex justify-center items-center p-8">
+            <div data-aos="fade-up" class="w-full flex justify-center items-center p-8 mt-8">
                 <x-public.button button_type="primary" href="{{ route('projects') }}"
                     class="rounded font-bold text-white" size="2xl">
                     View All Projects
