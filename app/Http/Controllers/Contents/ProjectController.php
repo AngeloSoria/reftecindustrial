@@ -234,19 +234,27 @@ class ProjectController extends Controller
     public function getProjectsHighlightedPublic(Request $request)
     {
         try {
-            // -----------------------------------
-            // Columns to select
-            // -----------------------------------
-            $baseColumns = [
+            $result = Project::where('is_featured', 1)->get([
                 'id',
                 'images',
                 'job_order',
                 'title',
                 'description',
                 'status',
-            ];
+            ]);
 
-            return Project::get($baseColumns)->where('is_featured', true);
+            $result->transform(function ($project) {
+                $uploadController = new UploadController();
+                $response = $uploadController->getUploadedFile($project->images[0])->getData(true);
+                if (!$response['success']) { throw new Exception($response['message']); }
+                $project->images = [$response['data']['path']];           
+                return $project;
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $result
+            ]);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
