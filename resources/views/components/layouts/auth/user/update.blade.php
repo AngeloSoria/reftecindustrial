@@ -1,12 +1,7 @@
 <x-layouts.modal modalID="modal_user_update" modalMaxWidth="2xl">
-    <form 
-        autocomplete="off"
-        x-data="updateUserFormHandler()"
-        @submit.prevent="handleSubmit" 
-        @passed_product_data.window="loadUserData($event)"
-        @modal_closed_fallback.window="handleModalClose($event)"
-        action="{{ route('user.update') }}"
-        method="POST" enctype="multipart/form-data">
+    <form autocomplete="off" x-data="updateUserFormHandler()" @submit.prevent="handleSubmit"
+        @passed_product_data.window="loadUserData($event)" @modal_closed_fallback.window="handleModalClose($event)"
+        action="{{ route('user.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <input type="hidden" name="id" :value="passContent.id" />
@@ -20,45 +15,56 @@
                             Name
                             <span class="text-red-500 font-bold">*</span>
                         </p>
-                        <input
-                            x-model="passContent.name"
-                            placeholder="Enter user's name"
+                        <input x-model="passContent.name" placeholder="Enter user's name"
                             class="w-full px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none focus:bg-gray-200 transition-colors"
                             name="name" required />
                     </div>
-                    
+
                     <div class="flex flex-col gap-2 items-start justify-start">
                         <p class="text-sm font-medium">
                             Username
                             <span class="text-red-500 font-bold">*</span>
                         </p>
-                        <input
-                            x-model="passContent.username"
-                            autocomplete="new-username"
+                        <input x-model="passContent.username" autocomplete="new-username"
                             placeholder="Enter unique username"
                             class="w-full px-4 py-2 rounded border-2 border-gray-200 focus:border-brand-primary-950 focus:outline-none focus:bg-gray-200 transition-colors"
                             name="username" required />
                     </div>
                 </div>
             </section>
-            
+
             <section class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-2 items-start justify-start">
-                        <p class="text-sm font-medium">
-                            Role
-                            <span class="text-red-500 font-bold">*</span>
-                        </p>
-                        <select
-                            x-model="passContent.role"
-                            class="w-full px-4 py-2 rounded border-2 border-gray-200" name="role" required>
-                            <option disabled value="" selected>Select role...</option>
-                            {{-- Check if current session is Super Admin role --}}
-                            @if(auth()->user()?->role === 'Super Admin')
-                                <option value="Super Admin">Super Admin</option>
-                            @endif
-                            <option value="Admin">Admin</option>
-                        </select>
+                    <p class="text-sm font-medium">
+                        Role
+                        <span class="text-red-500 font-bold">*</span>
+                    </p>
+                    <select x-model="passContent.role" class="w-full px-4 py-2 rounded border-2 border-gray-200"
+                        name="role" required>
+                        <option disabled value="" selected>Select role...</option>
+                        {{-- Check if current session is Super Admin role --}}
+                        @if(auth()->user()?->role === 'Super Admin')
+                            <option value="Super Admin">Super Admin</option>
+                        @endif
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-2 items-start justify-start">
+                    <p class="text-sm font-medium">
+                        Suspended
+                        {{-- <span class="text-gray-500/50 text-xs font-bold">(optional)</span> --}}
+                    </p>
+                    <div x-data="{ archiveEnabled: Boolean(passContent.suspended) }">
+                        <input 
+                            class="cursor-pointer w-5 h-5 border-2 accent-orange-400" 
+                            name="cbx_archived" 
+                            type="checkbox"
+                            :checked="passContent.suspended"
+                            x-model="passContent.suspended"
+                        />
+                        <input type="hidden" name="archived" x-bind:value="passContent.suspended" />
                     </div>
+                </div>
             </section>
 
             <section>
@@ -69,39 +75,28 @@
                     <div class="flex flex-col gap-2 items-start justify-start">
                         <p class="text-sm font-medium">
                             Password
-                            <span class="text-red-500 font-bold">*</span>
+                            <span x-show="updatePassEnabled" class="text-red-500 font-bold">*</span>
                         </p>
-                        <input
-                            :disabled="!updatePassEnabled"
-                            x-model="passContent.pass"
-                            autocomplete="new-password"
-                            placeholder="Enter password"
-                            type="password"
+                        <input :disabled="!updatePassEnabled" x-model="passContent.pass" autocomplete="new-password"
+                            placeholder="Enter password" type="password"
                             class="w-full px-4 py-2 rounded border-2 disabled:bg-gray-300 disabled:cursor-not-allowed border-gray-200 focus:border-brand-primary-950 focus:outline-none focus:bg-gray-200 transition-colors"
                             name="password" required />
                     </div>
                     <div class="flex flex-col gap-2 items-start justify-start">
                         <p class="text-sm font-medium">
                             Confirm Password
-                            <span class="text-red-500 font-bold">*</span>
+                            <span x-show="updatePassEnabled" class="text-red-500 font-bold">*</span>
                         </p>
-                        <input
-                            :disabled="!updatePassEnabled"
-                            x-model="passContent.confirm_pass"
-                            autocomplete="new-password"
-                            placeholder="Enter password again"
-                            type="password"
+                        <input :disabled="!updatePassEnabled" x-model="passContent.confirm_pass"
+                            autocomplete="new-password" placeholder="Enter password again" type="password"
                             class="w-full px-4 py-2 rounded border-2 disabled:bg-gray-300 disabled:cursor-not-allowed border-gray-200 focus:border-brand-primary-950 focus:outline-none focus:bg-gray-200 transition-colors"
                             name="password_confirmation" required />
                     </div>
                 </section>
                 <section class="mt-2 flex items-top justify-start">
-                    <button
-                        :disabled="formDisabled"
-                        type="button" 
-                        @click="updatePassEnabled = !updatePassEnabled"
+                    <button :disabled="formDisabled" type="button" @click="updatePassEnabled = !updatePassEnabled"
                         :class="!updatePassEnabled ? 'bg-blue-400 hover:bg-blue-500' : 'bg-red-400 hover:bg-red-500'"
-                        class="cursor-pointer py-1 px-2 rounded transition-all" >
+                        class="cursor-pointer py-1 px-2 rounded transition-all">
                         <span x-text="!updatePassEnabled ? 'Edit Password' : 'Cancel'"></span>
                     </button>
                 </section>
@@ -143,6 +138,7 @@
                     role: '',
                     pass: '',
                     confirm_pass: '',
+                    suspended: false,
                 },
 
                 /* ---------------------------
@@ -152,7 +148,7 @@
                 handleModalClose(e) {
                     if (e.detail.modalID !== this.modal_id) return;
                     this.formDisabled = false;
-                    
+
                     this.updatePassEnabled = false;
 
                     this.passContent.id = 0;
@@ -161,6 +157,7 @@
                     this.passContent.role = '';
                     this.passContent.pass = '';
                     this.passContent.confirm_pass = '';
+                    this.passContent.suspended = false;
                 },
 
                 isConfirmPassMatched() {
@@ -174,6 +171,7 @@
                     this.passContent.name = e.detail.data.user_data.name;
                     this.passContent.username = e.detail.data.user_data.username;
                     this.passContent.role = e.detail.data.user_data.role;
+                    this.passContent.suspended = e.detail.data.user_data.archived;
                     console.log(e.detail.data.user_data);
                 },
 
