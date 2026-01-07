@@ -22,7 +22,8 @@ class User extends Authenticatable
         'name',
         'username',
         'password',
-        'role'
+        'role',
+        'archived' // Instead of deleting the model, just archive it, to prevent constraints errors connected to user (e.g. uploaded files)
     ];
 
     /**
@@ -44,6 +45,7 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'archived' => 'boolean',
         ];
     }
 }
