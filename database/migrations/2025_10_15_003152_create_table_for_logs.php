@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('logs', function (Blueprint $table) {
             $table->id();
-            $table->string('action');
+            $table->enum('action', ['create', 'read', 'update', 'delete'])->nullable();
+            $table->string('activity');
             $table->string('user');
-            $table->string('description');
+            $table->string('details');
             $table->timestamps();
         });
     }

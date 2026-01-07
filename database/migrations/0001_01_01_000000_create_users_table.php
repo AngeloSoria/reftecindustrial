@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('password');
             $table->enum('role', ['Super Admin', 'Admin'])->default('Admin');
+            $table->boolean('archived')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
