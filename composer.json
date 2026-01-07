@@ -38,7 +38,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files" : [
-            "app/Helpers/Toast.php"
+            "app/Helpers/Toast.php",
+            "app/Helpers/ActivityLog.php"
         ]
     },
     "autoload-dev": {
