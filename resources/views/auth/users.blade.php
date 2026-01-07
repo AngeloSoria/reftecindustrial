@@ -1,6 +1,6 @@
 <x-layouts.auth.app viewName="Users">
     <div
-        class="bg-white shadow-md rounded-xl min-h-[calc(100vh - topbar_force_style)] my-2 mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        class="bg-white shadow-md rounded-xl min-h-[calc(100vh - var(--topbar_force_style))] my-2 mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <h2>Users List</h2>
         <div x-data="UserHandler()" class="pt-4">
             <section>
@@ -85,9 +85,9 @@
                 <section class="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
                     <template x-for="n in 11" :key="n">
                         <div class="bg-gray-300 shadow-card rounded-md px-6 py-12 animate-pulse flex flex-col gap-3">
-                            <div class="rounded-full p-1 max-w-[85%] bg-gray-400 animate-impulse"></div>
-                            <div class="rounded-full p-1 max-w-[55%] bg-gray-400 animate-impulse"></div>
-                            <div class="rounded-full p-1 max-w-[35%] bg-gray-400 animate-impulse"></div>
+                            <div class="rounded-full p-1 max-w-[85%] bg-gray-400 animate-pulse"></div>
+                            <div class="rounded-full p-1 max-w-[55%] bg-gray-400 animate-pulse"></div>
+                            <div class="rounded-full p-1 max-w-[35%] bg-gray-400 animate-pulse"></div>
                         </div>
                     </template>
                 </section>
