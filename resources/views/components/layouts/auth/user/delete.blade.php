@@ -130,10 +130,6 @@
                 ----------------------------*/
 
                 handleSubmit() {
-                    // if (!this.isConfirmPassMatched()) {
-                    //     toast('Password and Confirm Password does not match.', 'error');
-                    //     return;
-                    // };
                     this.formDisabled = true;
                     this.loading = true;
                     window.dispatchEvent(new CustomEvent("force_disable_modal_closing", {
