@@ -63,7 +63,7 @@ class GeneralController extends Controller
             $visible = $request->visibility ?? false;
 
             // Save to database.
-            ProductLines::create([
+            $product_line = ProductLines::create([
                 'name' => $request->product_line_name,
                 'upload_id' => $data['files'][0]['file_id'],
                 'visibility' => $visible
@@ -80,6 +80,7 @@ class GeneralController extends Controller
             ]);
 
             toast("New product line has been added.", "success");
+            actLog('create', 'Added new Product Line', 'A product line ' . '(' . $product_line->name . ') has been registered.');
 
             return back();
         } catch (Exception $e) {
@@ -137,6 +138,7 @@ class GeneralController extends Controller
 
                         // notify user 
                         toast('Gallery image(s) has been added.', 'success');
+                        actLog('create', 'Gallery image(s) has been added.', 'Gallery image(s) has been added.');
                     } else {
                         // if max uploaded then notify as error.
                         if (count($decoded_extra_data) >= 3) {
@@ -163,6 +165,7 @@ class GeneralController extends Controller
 
                         // notify user 
                         toast('Gallery image(s) has been added.', 'success');
+                        actLog('create', 'Gallery image(s) has been added.', 'Gallery image(s) has been added.');
                     }
                 } catch (Exception $e) {
                     // delete uploaded files when upload failed
@@ -251,7 +254,6 @@ class GeneralController extends Controller
                     ],
                 ];
             });
-
             return response()->json($response);
         } catch (Exception $e) {
             Log::error('Error fetching hero section: ' . $e->getMessage());
@@ -474,9 +476,9 @@ class GeneralController extends Controller
     public function setHeroSection(Request $request)
     {
         try {
-
+            // dd($request);
             // Check if the request contains file, else, throw an error.
-            if (!$request->hasFile('files')) {
+            if (empty($request->allFiles())) {
                 throw new NoFileException('File not found in the request.');
             }
 
@@ -506,6 +508,7 @@ class GeneralController extends Controller
                 'section' => 'hero'
             ]);
 
+            actLog('update', 'Hero has been updated.', 'Hero has been updated.');
             toast("Hero image has been updated.", "success");
             return back();
         } catch (Exception $e) {
@@ -550,6 +553,7 @@ class GeneralController extends Controller
                     ]);
 
                     toast("History text saved successfully.", "success");
+                    actLog('update', 'History description has been updated.', 'History description has been updated.');
                     return back();
                 case 'content_image':
                     $uploadController = new UploadController();
@@ -581,6 +585,7 @@ class GeneralController extends Controller
                         'section' => 'history'
                     ]);
 
+                    actLog('update', 'History image has been updated.', 'History image has been updated.');
                     toast("History image has been updated successfully.", "success");
                     return back();
                 default:
@@ -660,6 +665,7 @@ class GeneralController extends Controller
                 'section' => 'products',
             ]);
 
+            actLog('update', 'Product Line has been updated.', 'A product line has been updated.');
             toast('Product line has been updated.', 'success');
             return back();
         } catch (Exception $e) {
@@ -751,7 +757,7 @@ class GeneralController extends Controller
             ]);
 
             toast("Gallery image has been updated.", "success");
-
+            actLog('update', 'Gallery image has been updated.', 'Gallery image has been updated.');
             return back();
         } catch (Exception $e) {
             Logger()->info($e->getMessage());
@@ -817,8 +823,9 @@ class GeneralController extends Controller
                 'section' => 'about'
             ]);
 
+            actLog('update', 'Gallery order updated', 'Gallery order updated.');
             toast("Gallery order updated successfully.", "success");
-
+            
             return back();
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
@@ -862,7 +869,7 @@ class GeneralController extends Controller
 
                 // Clear cache
                 Cache::forget('section_product_lines_public');
-            Cache::forget('section_product_lines_private');
+                Cache::forget('section_product_lines_private');
                 Cache::forget('section_product_lines_visible');
 
                 // Session tab state
@@ -872,6 +879,7 @@ class GeneralController extends Controller
                 ]);
 
                 toast("Product line has been removed.", "success");
+                actLog('delete', 'Product line has been removed.', 'Product line has been removed.');
                 return back();
             } catch (Exception $e) {
                 Logger()->info('Error deleting product line: ' . $e->getMessage());
@@ -951,6 +959,7 @@ class GeneralController extends Controller
                 ]);
 
                 toast("Gallery image has been deleted.", "success");
+                actLog('delete', 'Gallery image has been deleted.', 'Gallery image has been deleted.');
                 return back();
             } catch (Exception $e) {
                 Logger()->info('Error deleting product line: ' . $e->getMessage());
