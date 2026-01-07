@@ -7,6 +7,7 @@ use App\Http\Controllers\Contents\GeneralController;
 use App\Http\Controllers\Contents\ProjectController;
 use App\Http\Controllers\Contents\ProductController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,6 +82,20 @@ Route::middleware('auth')->group(function () {
     // Core actions
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
     Route::post('/upload', [UploadController::class, 'upload'])->name('upload');
+
+
+    
+    /*
+    |--------------------------------------------------------------------------
+    | User Management (CRUD)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('logs')
+        ->name('logs.')
+        ->controller(LogController::class)
+        ->group(function () {
+            Route::get('get/all', 'getAll')->name('get.all');
+        });
 
     /*
     |--------------------------------------------------------------------------
