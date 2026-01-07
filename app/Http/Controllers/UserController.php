@@ -47,6 +47,7 @@ class UserController extends Controller
                 'password' => $request->password,
                 'role' => $request->role
             ]);
+            actLog('create', 'Registered a user', 'A user ' . $request->username . ' (' . $request->role . ') has been registered.');
             toast('A user ' . $request->username . ' (' . $request->role . ') has been registered.', 'success');
             return back();
         } catch (Exception $e) {
@@ -80,6 +81,7 @@ class UserController extends Controller
 
             $user->deleteOrFail();
 
+            actLog('delete', 'Deleted a user', 'User '. $user->name . ' has been deleted (archived)');
             toast('User has been removed.', 'success');
             return back();
         } catch (Exception $e) {
@@ -113,6 +115,9 @@ class UserController extends Controller
                     Password::min(8)->letters()->numbers()->symbols(),
                     'confirmed',
                 ],
+                'archived' => [
+                    'nullable',
+                ]
             ]);
 
             // dd($request);
@@ -136,13 +141,21 @@ class UserController extends Controller
                 'role'     => $request->role,
             ];
 
+            if ($request->filled('archived')) {
+                if ($sender->id === $user->id && $request->archived === "true") {
+                    throw new Exception('You cannot suspend yourself.');
+                }
+                $blueprint['archived'] = $request->archived === "true" ? 1 : 0;
+            }
+
             // Only touch password if provided
             if ($request->filled('password')) {
                 $blueprint['password'] = $request->password;
             }
 
+            // dd($request, $blueprint);
             $user->update($blueprint);
-
+            actLog('update', 'Updated a user', 'A user has been updated its data.');
             toast('User data has been updated successfully.', 'success');
             return back();
         } catch (Exception $e) {
@@ -156,10 +169,11 @@ class UserController extends Controller
     {
         try {
 
-            $query = User::select(['id', 'name', 'username', 'role']);
+            $query = User::select(['id', 'name', 'username', 'role', 'archived']);
 
             $filtersMap = [
                 'role' => 'role',
+                'archived' => 'archived'
             ];
 
             foreach ($filtersMap as $requestKey => $dbColumn) {
@@ -179,6 +193,8 @@ class UserController extends Controller
             }
 
             $users = $query->latest()->paginate(15);
+
+            actLog('read', 'Retrieved all users', 'All users retrieved .');
 
             return response()->json([
                 'success' => true,
