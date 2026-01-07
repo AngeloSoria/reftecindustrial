@@ -45,7 +45,7 @@
                         IN</button>
                 </form>
                 @error('login_request')
-                    <p id="text_errorResult" class="mt-2 text-red-500 text-xs text-center">Invalid Username or Password</p>
+                    <p id="text_errorResult" class="mt-2 text-red-500 text-xs text-center">{{ $errors->first('login_request') }}</p>
                     <script>
                         const input_username = document.getElementById("input_Username");
                         const input_password = document.getElementById("input_Password");
