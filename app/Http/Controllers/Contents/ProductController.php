@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Contents;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 use Illuminate\Database\UniqueConstraintViolationException;
 use Symfony\Component\HttpFoundation\FileBag;
-use App\Http\Controllers\UploadController;
 use Exception;
 
+use App\Http\Controllers\UploadController;
 use App\Models\Contents\Product;
+use App\Http\Controllers\LogController;
 
 class ProductController extends Controller
 {
@@ -24,7 +24,7 @@ class ProductController extends Controller
             ]);
 
             // Synthesize
-            $PROJECT = [
+            $PRODUCT = [
                 'title' => $request->product_name,
                 'is_visible' => !empty($request->visibility) ? 1 : 0,
                 'images' => "",
@@ -55,14 +55,14 @@ class ProductController extends Controller
                 // Save to DB
                 Product::create([
                     'images' => $uploadIds,
-                    'title' => $PROJECT['title'],
-                    'is_visible' => $PROJECT['is_visible'],
+                    'title' => $PRODUCT['title'],
+                    'is_visible' => $PRODUCT['is_visible'],
                 ]);
             } catch (UniqueConstraintViolationException $e) {
                 foreach ($uploadIds as $uploadId) {
                     $uploadController->deleteUploadedFile($uploadId);
                 }
-                throw new Exception("Job order from a project already exists.");
+                throw new Exception("Job order from a product already exists.");
             } catch (Exception $e) {
                 foreach ($uploadIds as $uploadId) {
                     $uploadController->deleteUploadedFile($uploadId);
@@ -73,7 +73,8 @@ class ProductController extends Controller
             session()->flash('content', [
                 'tab' => 'products',
             ]);
-            toast("Successfully added project.", "success");
+            actLog('create', 'Created new product titled' . $PRODUCT['title'], 'Created a new product');
+            toast("Successfully added product.", "success");
             return back();
         } catch (Exception $e) {
             session()->flash('content', [
@@ -241,7 +242,7 @@ class ProductController extends Controller
                 'visibility' => ['nullable', 'string'],
             ]);
             
-            // Get project data from DB
+            // Get product data from DB
             $product = Product::findOrFail($request->product_id);
             
             // Prepare the data array for update
@@ -312,11 +313,11 @@ class ProductController extends Controller
                 $uploadController->deleteUploadedFile($file_id);
             }
 
-            // dd($product->images, $productData['images'], $nonExistingFilesFromModel);
-
-            // Save the project data
+            // Save the product data
             $product->update($productData);
-
+            
+            actLog('update', 'Product has been updated', 'The product ' . $product->title . ' has been updated');
+            
             session()->flash('content', ['tab' => 'products']);
             toast("A product has been updated.", 'success');
             return back();
@@ -356,9 +357,10 @@ class ProductController extends Controller
             }
 
             $product->deleteOrFail();
+            actLog('delete', 'Deleted a product', 'The product ' . $product->title . ' has been deleted');
 
             session()->flash('content', ['tab' => 'products']);
-            toast("A project has been deleted.", 'success');
+            toast("A product has been deleted.", 'success');
             return back();
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
@@ -375,26 +377,28 @@ class ProductController extends Controller
                 'products' => 'required|string'
             ]);
 
-            $decoded_project = json_decode($request->products, true);
-            if (empty($decoded_project)) {
-                throw new Exception('No existing project value passed.');
+            $decoded_product = json_decode($request->products, true);
+            if (empty($decoded_product)) {
+                throw new Exception('No existing product value passed.');
             }
 
-            // dd($decoded_project);
+            $deletedItems = [];
 
             $uploadController = new UploadController();
-            foreach ($decoded_project as $product_id => $value) {
+            foreach ($decoded_product as $product_id => $value) {
                 // dd($product_id, $value);
                 $product = Product::findOrFail($product_id);
-                // dd($value['images']);
+
                 // Remove associated uploaded images to free storage.
                 foreach ($value['images'] as $image_path) {
                     $uploadController->deleteUploadedFileByPath($image_path);
                 }
 
                 $product->delete();
+                $deletedItems[] = $product->title;
             }
-
+            actLog('delete', 'Deleted these product(s)', 'These product(s) [' . implode(', ', $deletedItems) . '] has been deleted');
+            
             session()->flash('content', ['tab' => 'products']);
             toast("Selected products has been deleted.", 'success');
             return back();
