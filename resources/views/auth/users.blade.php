@@ -7,7 +7,7 @@
                 <div class="p-2 flex items-center justify-end gap-3 flex-wrap mt-4">
                     <x-public.button @click="$dispatch('openmodal', {
                         modalID: 'modal_user_register',
-                        modal_header_text: 'Register User Form'
+                        title: 'Register User Form'
                     })" button_type="primary">
                         <span class="flex items-center justify-center gap-2">
                             @svg('fluentui-add-circle-24-o', 'w-5 h-5')
@@ -82,7 +82,7 @@
 
             {{-- Skeleton loading --}}
             <template x-if="!dataLoaded">
-                <section class="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+                <section class="grid gap-3 grid-cols-2 sm:grid-cols-3">
                     <template x-for="n in 11" :key="n">
                         <div class="bg-gray-300 shadow-card rounded-md px-6 py-12 animate-pulse flex flex-col gap-3">
                             <div class="rounded-full p-1 max-w-[85%] bg-gray-400 animate-pulse"></div>
@@ -97,6 +97,7 @@
                 <div>
                     <section class="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                         <template x-for="user in users.data">
+
                             <div
                                 x-data="{
                                     isHovered: false,
@@ -104,56 +105,45 @@
                                 @mouseover="isHovered = true"
                                 @mouseleave="isHovered = false"
                                 class="relative">
-                                {{-- widget tools --}}
                                 <div
-                                    x-transition
-                                    x-show="isHovered"
-                                    class="absolute top-2 right-2 flex justify-end items-start gap-3">
-                                    <button
-                                        @click="$dispatch('openmodal', {
-                                            modalID: 'modal_user_update',
-                                            modal_header_text: 'Update User',
-                                            special_data: {
-                                                user_data: user,
-                                            }
-                                        })"
-                                        title="Update User"
-                                        class="bg-white rounded-full p-2 shadow-md hover:shadow-xl transition-all outline outline-gray-200 cursor-pointer">
-                                        @svg('fluentui-person-edit-20-o', 'w-6 h-6 text-blue-400')
-                                    </button>
-                                    <button
-                                        @click="$dispatch('openmodal', {
-                                            modalID: 'modal_user_remove',
-                                            modal_header_text: 'Remove User?',
-                                            special_data: {
-                                                user_data: user,
-                                            }
-                                        })"
-                                        title="Delete User"
-                                        class="bg-white rounded-full p-2 shadow-md hover:shadow-xl transition-all outline outline-gray-200 cursor-pointer">
-                                        @svg('fluentui-delete-20-o', 'w-6 h-6 text-red-400')
-                                    </button>
-                                </div>
-                                <div
-                                    :class="isHovered ? 'outline-2 outline-gray-300' : ''"
-                                    class="bg-gray-100 shadow-card rounded-md p-4 flex gap-2 overflow-hidden">
+                                    :class="[
+                                        isHovered ? 'outline-2 outline-gray-300' : '',
+                                        user.archived ? 'bg-red-200' : 'bg-gray-100'
+                                    ]"
+                                    class="shadow-card rounded-md p-4 flex gap-2 overflow-hidden">
                                     <div>
-                                        <div class="p-2 rounded-full border border-gray-300">
+                                        <div class="p-2 rounded-full border border-gray-300 bg-white">
                                             <span>
                                                 @svg('fluentui-person-20', 'text-black/50 w-5 h-5')
                                             </span>
                                         </div>
                                     </div>
                                     <div class="grow">
-                                        <p x-text="user.name" class="text-xl font-semibold"></p>
-                                        <p x-text="user.username" class="text-lg opacity-[75%]"></p>
                                         <div :class="user.role == 'Super Admin' ? 'text-red-500 border-red-500' : 'text-orange-400 border-orange-400'"
-                                            class="mt-2 py-1 px-3 rounded-full text-xs font-medium max-w-fit border">
+                                            class="mt-2 py-1 px-3 rounded-full text-xxs font-medium max-w-fit border">
                                             <span x-text="user.role"></span>
                                         </div>
+                                        <p x-text="user.name" class="text-xl font-semibold"></p>
+                                        <p x-text="'@' + user.username" class="text-sm opacity-[75%]"></p>
                                     </div>
                                 </div>
+                                <div class="absolute top-2 right-2 flex justify-end items-start gap-3">
+                                    <button
+                                        @click="
+                                            $store.app.modalSystem.openModal('modal_user_widget_prompt', {
+                                                title: 'User Menu (' + user.name + ')',
+                                                payload: {
+                                                    user_data: user,
+                                                },
+                                            });
+                                        "
+                                        title="Menu"
+                                        class="bg-white rounded-full p-2 hover:shadow-xl transition-all outline outline-gray-200 cursor-pointer">
+                                        @svg('fluentui-more-vertical-20', 'w-5 h-5 text-black')
+                                    </button>
+                                </div>
                             </div>
+
                         </template>
                     </section>
                     {{-- Pagination --}}
@@ -294,6 +284,7 @@
     </div>
 
     <x-layouts.auth.user.register />
-    <x-layouts.auth.user.delete />
     <x-layouts.auth.user.update />
+    <x-layouts.auth.user.deactivate_user />
+    <x-layouts.auth.user.widget_prompt />
 </x-layouts.auth.app>
