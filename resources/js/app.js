@@ -17,9 +17,59 @@ import { initQuill } from './quillManager';
 // Sortable
 import { initSortableAboutUsGallery } from './Sortable/sortableAboutUsGallery'
 
-Alpine.plugin(focus)
-window.Alpine = Alpine
-Alpine.start()
+Alpine.plugin(focus);
+window.Alpine = Alpine;
+Alpine.store('app', {
+    modalSystem: {
+        rootZIndexValue: 300,
+        modals: [],
+        activeModals: [],
+        registerModal(element) {
+            this.modals.push(element);
+        },
+        openModal(id, config = null) {
+            if (id === null || id === undefined) {
+                return console.error('id parameter not found.');
+            }
+            if (config === null || config === undefined) {
+                return console.error('config parameter not found.');
+            }
+
+            // Incremented index for stacking z-index modals.
+            const newIndex = this.rootZIndexValue + this.activeModals.length + 1;
+            const payload = config.payload;
+            const modalTitle = config.title;
+
+            if (!payload) return console.error('payload does not exists in config param.');
+            if (!modalTitle) return console.error('modalTitle does not exists in config param.');
+
+            document.dispatchEvent(new CustomEvent('openmodal', {
+                detail: {
+                    modalID: id,
+                    title: modalTitle,
+                    modalZIndex: newIndex,
+                    payload_data: payload,
+                },
+                bubbles: true
+            }));
+
+            this.activeModals.push(id);
+        },
+        closeModal(id) {
+            document.dispatchEvent(new CustomEvent('closemodal', {
+                detail: {
+                    modalID: id,
+                },
+                bubbles: true
+            }));
+            this.activeModals.pop(id);
+        },
+        getModal(parent_id) {
+            return this.activeModals[parent_id];
+        },
+    }
+});
+Alpine.start();
 
 AOS.init({
     once: true, // Animate only once
