@@ -110,6 +110,7 @@ Route::middleware('auth')->group(function () {
             Route::post('add', 'addUser')->name('add');
             Route::post('update', 'updateUser')->name('update');
             Route::post('remove', 'removeUser')->name('remove');
+            Route::post('archive', 'archiveUser')->name('archive');
         })
         ->middleware('throttle:25,1');
 
