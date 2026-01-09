@@ -109,7 +109,7 @@
         <div class="p-2 flex items-center justify-end gap-3 flex-wrap mt-4">
             <x-public.button @click="$dispatch('openmodal', {
                 modalID: 'modal_product',
-                modal_header_text: 'Add Product'
+                title: 'Add Product'
             })" button_type="primary">
                 <span class="flex items-center justify-center gap-2">
                     @svg('fluentui-add-circle-24-o', 'w-5 h-5')
@@ -122,8 +122,8 @@
                         if (Object.keys(activeDataFromCheckbox).length < 0) { return }
                         $dispatch('openmodal', {
                             modalID: 'modal_delete_products',
-                            modal_header_text: 'Delete this products?',
-                            special_data: {
+                            title: 'Delete this products?',
+                            payload_data: {
                                 product_data: activeDataFromCheckbox
                             }
                         });
@@ -343,8 +343,8 @@
                                     <div class="flex gap-2 items-center justify-center">
                                         <button @click="$dispatch('openmodal', {
                                                 modalID: 'modal_product',
-                                                modal_header_text: 'Edit Product',
-                                                special_data: {
+                                                title: 'Edit Product',
+                                                payload_data: {
                                                     product_data: product,
                                                 }
                                             })" title="Edit data"
@@ -353,8 +353,8 @@
                                         </button>
                                         <button @click="$dispatch('openmodal', {
                                                 modalID: 'modal_delete_product',
-                                                modal_header_text: 'Delete Product?',
-                                                special_data: {
+                                                title: 'Delete Product?',
+                                                payload_data: {
                                                     product_data: product,
                                                 }
                                             })" title="Delete data"
