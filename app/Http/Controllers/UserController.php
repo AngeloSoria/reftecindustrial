@@ -91,6 +91,42 @@ class UserController extends Controller
         }
     }
 
+    public function archiveUser(Request $request)
+    {
+        try {
+
+            $request->validate([
+                'id' => [
+                    'required',
+                    'exists:users,id'
+                ],
+            ]);
+
+            $sender = $request->user();
+            $user = User::findOrFail($request->id);
+
+            if ($user->id === $sender->id) {
+                throw new Exception("You can't archive your own user data.");
+            }
+
+            if ($user->role === 'Super Admin' && $sender->role !== 'Super Admin') {
+                abort(406, "You don't have a higher role access to delete this user. Error(406)");
+            }
+
+            $user->updateOrFail([
+                'archived' => 1
+            ]);
+
+            actLog('delete', 'Deactivated a user', 'User '. $user->name . ' has been deactivated');
+            toast('User has been deactivated.', 'success');
+            return back();
+        } catch (Exception $e) {
+            Logger()->error($e->getMessage());
+            toast($e->getMessage(), 'error');
+            return back();
+        }
+    }
+
     public function updateUser(Request $request)
     {
         try {
