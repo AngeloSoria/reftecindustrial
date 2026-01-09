@@ -2,7 +2,7 @@
 
 <x-public.button button_type="primary" @click="$dispatch('openmodal', {
         modalID: 'modal_product_line',
-        modal_header_text: 'Add New Product Line'
+        title: 'Add New Product Line'
     })">
     @svg('fluentui-add-circle-24-o', 'w-5 h-5')
     Add Product Line
@@ -67,8 +67,8 @@
                             'openmodal',
                             {
                                 modalID: 'modal_product_line',
-                                modal_header_text: 'Edit Product Line',
-                                special_data: {
+                                title: 'Edit Product Line',
+                                payload_data: {
                                     product_data: product,
                                 },
                             }
@@ -81,8 +81,8 @@
                             'openmodal',
                             {
                                 modalID: 'modal_delete_product_line',
-                                modal_header_text: 'Delete Product Line',
-                                special_data: {
+                                title: 'Delete Product Line',
+                                payload_data: {
                                     product_data: product,
                                 }
                             }
@@ -138,7 +138,7 @@
             },
 
         }" 
-        @passed_product_data.window="
+        @payload_event.window="
             if (!$event.detail.data) { console.error('No data passed.') }
             if (!event.detail.modalID) { console.error('No modal ID passed. \n modal_id: ' + modal_id); }
             if ($event.detail.modalID !== modal_id) { return }
@@ -250,7 +250,7 @@
                 delete: '{{ route('content.delete.section.product_line') }}',
             },
             loading: false,
-        }" @passed_product_data.window="
+        }" @payload_event.window="
             if (!$event.detail.data) { console.error('No data passed.') }
             if (!event.detail.modalID) { console.error('No modal ID passed. \n modal_id: ' + modal_id); }
             if ($event.detail.modalID !== modal_id) { return }

@@ -20,7 +20,7 @@
 
         </section>
         <section>
-            <form method="POST" @passed_product_data.window="loadProjectData($event);" @submit.prevent="formSubmit()"
+            <form method="POST" @payload_event.window="loadProjectData($event);" @submit.prevent="formSubmit()"
                 x-data action="{{ route('content.delete.section.project') }}">
                 @csrf
                 <input type="hidden" name="project_id" x-bind:value="projectData.id" />

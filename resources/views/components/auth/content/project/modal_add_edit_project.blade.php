@@ -3,7 +3,7 @@
         $fileUploadId = 'file_upload_project';
     @endphp id="form_project" x-data="projectForm()"
         @submit.prevent="handleSubmit" @modal_closed_fallback.window="handleModalClose($event)"
-        @passed_product_data.window="loadProjectData($event);"
+        @payload_event.window="loadProjectData($event);"
         @files_empty.window="handleFileUploadModalState($event, true)"
         @files_not_empty.window="handleFileUploadModalState($event, false)"
         x-bind:action="isUpdate() ? routes.update : routes.add" method="POST" enctype="multipart/form-data">

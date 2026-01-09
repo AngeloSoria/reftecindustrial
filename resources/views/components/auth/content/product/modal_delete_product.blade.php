@@ -16,7 +16,7 @@
 
         </section>
         <section>
-            <form method="POST" @passed_product_data.window="loadProductData($event);" @submit.prevent="formSubmit()"
+            <form method="POST" @payload_event.window="loadProductData($event);" @submit.prevent="formSubmit()"
                 x-data action="{{ route('content.delete.section.product') }}">
                 @csrf
                 <input type="hidden" name="product_id" x-bind:value="productData.id" />

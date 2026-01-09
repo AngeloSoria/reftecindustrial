@@ -63,7 +63,7 @@
             x-bind:title="remainingImage <= 0 ? 'Maximum image exceeded' : 'Upload image'" @click="
                 $dispatch('openmodal', {
                     modalID: 'modal_about_us_gallery',
-                    modal_header_text: 'Add Gallery Image',
+                    title: 'Add Gallery Image',
                 });
             ">
             <span class="flex items-center gap-2">
@@ -114,8 +114,8 @@
                                     'openmodal',
                                     {
                                         modalID: 'modal_about_us_gallery',
-                                        modal_header_text: 'Edit Gallery Image',
-                                        special_data: {
+                                        title: 'Edit Gallery Image',
+                                        payload_data: {
                                             image_index: index,
                                             image_path: image_data.path,
                                         },
@@ -206,7 +206,7 @@
         $dispatch('force_disable_modal_closing', { modalID: modal_id });
         $dispatch('form_in_submit_phase', { file_upload_id: file_upload_id });
         $el.submit();
-    " @passed_product_data.window="
+    " @payload_event.window="
         if (!$event.detail.data) { console.error('No data passed.') }
         if (!event.detail.modalID) { console.error('No modal ID passed. \n modal_id: ' + modal_id); }
         if ($event.detail.modalID !== modal_id) { return }

@@ -30,7 +30,7 @@
         </section>
         <section>
             <form method="POST" action="{{ route('content.delete.section.products.selected') }}"
-                @passed_product_data.window="loadProductData($event);" @submit.prevent="formSubmit()">
+                @payload_event.window="loadProductData($event);" @submit.prevent="formSubmit()">
                 @csrf
                 <input type="hidden" name="products" x-bind:value="JSON.stringify(productData)" />
                 <div class="mt-4 flex justify-end items-start gap-2">

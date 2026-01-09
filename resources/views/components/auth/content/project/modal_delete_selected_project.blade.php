@@ -48,7 +48,7 @@
         </section>
         <section>
             <form method="POST" action="{{ route('content.delete.section.projects.selected') }}"
-                @passed_product_data.window="loadProjectData($event);" @submit.prevent="formSubmit()">
+                @payload_event.window="loadProjectData($event);" @submit.prevent="formSubmit()">
                 @csrf
                 <input type="hidden" name="projects" x-bind:value="JSON.stringify(projectData)" />
                 <div class="mt-4 flex justify-end items-start gap-2">
