@@ -36,11 +36,12 @@
 @endphp
 
 <section
-    class="z-[300] bg-black/50 backdrop-blur-xs fixed inset-0 w-full h-screen p-4 flex font-inter {{ $flex_default }}"
+    class="bg-black/50 backdrop-blur-xs fixed inset-0 w-full h-screen p-4 flex font-inter {{ $flex_default }}"
+    x-bind:style="'z-index:' + modal_index + ';'"
     id="{{ $modalID }}"
     x-show="open"
     x-cloak
-    x-ref="mainModal_{{ $modalID }}"
+    x-ref="{{ $modalID }}"
     x-data='{
         modal_id: @json($modalID),
         open: false,
@@ -48,15 +49,15 @@
         specialData: {},
         titleHeaderText: @json($titleHeaderText),
         closeEnabled: true,
+        modal_index: 0,
+
+        init() {
+            // register
+            $store.app.modalSystem.registerModal($el);
+        },
 
         closeModal() {
-            if(!this.closeEnabled) {
-                console.warn("Modal closing is currently disabled.");
-                return;
-            }
-            if(!this.open) return;
-            this.open = false;
-            $dispatch("modal_closed_fallback", { modalID: this.modal_id });
+            $store.app.modalSystem.closeModal(this.modal_id);
         },
     }'
 
@@ -69,16 +70,37 @@
         }
 
         if(passed_modal_id === modal_id) {
-            titleHeaderText = $event.detail.modal_header_text || titleHeaderText;
+            titleHeaderText = $event.detail.title || titleHeaderText;
             open = true;
-            if($event.detail.special_data) {
-                $dispatch("passed_product_data", {
+            modal_index = $event.detail.modalZIndex;
+            if($event.detail.payload_data) {
+                $dispatch("payload_event", {
                     modalID: modal_id,
-                    data: $event.detail.special_data
+                    data: $event.detail.payload_data
                 });
             }
-        }'
+        }
+    '
 
+    @closemodal.window='
+        const passed_modal_id = $event.detail.modalID;
+        
+        if(!passed_modal_id) {
+            console.error("No modal id passed.");
+            return;
+        }
+            
+        if(passed_modal_id === modal_id) {
+            if(!closeEnabled) {
+                console.warn("Modal closing is currently disabled.");
+                return;
+            }
+            if(!open) return;
+            open = false;
+            $dispatch("modal_closed_fallback", { modalID: modal_id });
+        }
+    '
+    
     @force_disable_modal_closing.window ='
         const passed_modal_id = $event.detail.modalID
 
@@ -99,20 +121,18 @@
         x-transition
         x-cloak
 
-        @if($enableCloseOnOutsideClick)
+        {{-- @if($enableCloseOnOutsideClick)
             @click.outside="closeModal()"
-        @endif
+        @endif --}}
         @if($enableCloseOnEscKeyPressed)
             @keydown.escape.window="closeModal()"
         @endif
-
-        {{-- x-bind:special_data="special_data" --}}
 
         class="p-4 bg-white rounded outline-1 outline-accent-darkslategray-400 w-full h-fit max-w-{{ $modalMaxWidth }} max-h-[95%] overflow-x-hidden overflow-y-auto"
     >
         {{-- Header --}}
         <div class="flex items-center justify-between border-b border-gray-300/50 pb-2 mb-4">
-            <h1 class="text-xl font-medium" x-text="titleHeaderText"></h1>
+            <h1 class="text-lg font-medium" x-text="titleHeaderText"></h1>
             <div class="">
                 <button
                     title="Close"
