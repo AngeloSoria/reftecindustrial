@@ -258,8 +258,8 @@
                                 x-data @click="
                                     $dispatch('openmodal', { 
                                         modalID: 'modal_projects_public', 
-                                        modal_header_text: 'Project Details',
-                                        special_data: { 
+                                        title: 'Project Details',
+                                        payload_data: { 
                                             project_data : project 
                                         }
                                     });">
