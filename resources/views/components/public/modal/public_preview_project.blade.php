@@ -1,5 +1,5 @@
 <x-layouts.modal modalID="modal_projects_public" modalMaxWidth="4xl">
-    <section x-data="projectsModalController()" @passed_product_data.window="setProjectData($event.detail)">
+    <section x-data="projectsModalController()" @payload_event.window="setProjectData($event.detail)">
         <section class="w-full grid grid-cols-1 md:grid-cols-[65%_1fr] gap-2">
             
             <x-public.slideshow2 slideshow_id="ss_projects_public" />

@@ -2,7 +2,7 @@
     <form 
         autocomplete="off"
         x-data="deleteUserFormHandler()"
-        @passed_product_data.window="loadUserData($event)"
+        @payload_event.window="loadUserData($event)"
         @submit.prevent="handleSubmit" 
         @modal_closed_fallback.window="handleModalClose($event)"
         action="{{ route('user.remove') }}"

@@ -1,6 +1,6 @@
 <x-layouts.modal modalID="modal_user_update" modalMaxWidth="2xl">
     <form autocomplete="off" x-data="updateUserFormHandler()" @submit.prevent="handleSubmit"
-        @passed_product_data.window="loadUserData($event)" @modal_closed_fallback.window="handleModalClose($event)"
+        @payload_event.window="loadUserData($event)" @modal_closed_fallback.window="handleModalClose($event)"
         action="{{ route('user.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
@@ -94,7 +94,8 @@
                     </div>
                 </section>
                 <section class="mt-2 flex items-top justify-start">
-                    <button :disabled="formDisabled" type="button" @click="updatePassEnabled = !updatePassEnabled"
+                    <button :disabled="formDisabled" type="button" 
+                        @click="updatePassEnabled = !updatePassEnabled"
                         :class="!updatePassEnabled ? 'bg-blue-400 hover:bg-blue-500' : 'bg-red-400 hover:bg-red-500'"
                         class="cursor-pointer py-1 px-2 rounded transition-all">
                         <span x-text="!updatePassEnabled ? 'Edit Password' : 'Cancel'"></span>
@@ -172,7 +173,6 @@
                     this.passContent.username = e.detail.data.user_data.username;
                     this.passContent.role = e.detail.data.user_data.role;
                     this.passContent.suspended = e.detail.data.user_data.archived;
-                    console.log(e.detail.data.user_data);
                 },
 
                 /* ---------------------------
@@ -180,10 +180,6 @@
                 ----------------------------*/
 
                 handleSubmit() {
-                    // if (!this.isConfirmPassMatched()) {
-                    //     toast('Password and Confirm Password does not match.', 'error');
-                    //     return;
-                    // };
                     this.formDisabled = true;
                     this.loading = true;
                     window.dispatchEvent(new CustomEvent("force_disable_modal_closing", {
