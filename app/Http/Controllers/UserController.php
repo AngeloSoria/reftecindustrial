@@ -15,7 +15,7 @@ class UserController extends Controller
     {
         try {
             // NOTE: You can only create Super Admin if your'e also a super admin.
-            // dd($request);
+
             $request->validate([
                 'name' => [
                     'required',
@@ -81,7 +81,7 @@ class UserController extends Controller
 
             $user->deleteOrFail();
 
-            actLog('delete', 'Deleted a user', 'User '. $user->name . ' has been deleted (archived)');
+            actLog('delete', 'Deleted a user', 'User ' . $user->name . ' has been deleted (archived)');
             toast('User has been removed.', 'success');
             return back();
         } catch (Exception $e) {
@@ -117,7 +117,7 @@ class UserController extends Controller
                 'archived' => 1
             ]);
 
-            actLog('delete', 'Deactivated a user', 'User '. $user->name . ' has been deactivated');
+            actLog('delete', 'Deactivated a user', 'User ' . $user->name . ' has been deactivated');
             toast('User has been deactivated.', 'success');
             return back();
         } catch (Exception $e) {
@@ -157,7 +157,6 @@ class UserController extends Controller
                 ]
             ]);
 
-            // dd($request);
 
             $sender = $request->user();
             $user   = User::findOrFail($request->id);
@@ -190,7 +189,6 @@ class UserController extends Controller
                 $blueprint['password'] = $request->password;
             }
 
-            // dd($request, $blueprint);
             $user->update($blueprint);
             actLog('update', 'Updated a user', 'A user has been updated its data.');
             toast('User data has been updated successfully.', 'success');
@@ -230,8 +228,6 @@ class UserController extends Controller
             }
 
             $users = $query->latest()->paginate(15);
-
-            // actLog('read', 'Retrieved all users', 'All users retrieved .');
 
             return response()->json([
                 'success' => true,
