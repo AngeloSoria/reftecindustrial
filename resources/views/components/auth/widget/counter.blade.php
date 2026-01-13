@@ -40,7 +40,7 @@
 @endphp
 <div 
     id="{{ $id }}" 
-    class="bg-white px-5 py-5 grid items-center rounded-xl shadow-card font-inter max-h-[120px] {{ $attributes->get('class') }}">
+    class="bg-white px-5 py-6 grid items-center rounded-xl shadow-card font-inter max-h-[120px] {{ $attributes->get('class') }}">
 
     <div class="bg-green-300/0 flex items-center justify-start gap-4">
         {{-- icon --}}
