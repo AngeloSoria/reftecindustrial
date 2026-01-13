@@ -2,7 +2,7 @@
     'label' => null,
     'required' => false,
     'name' => '',
-    'model' => '',
+    'model' => null,
 ])
 
 <div class="flex flex-col gap-2">
@@ -19,7 +19,7 @@
                         transition-colors focus:outline-none'
         ]) }}
         name="{{ $name }}"
-        x-model="{{ $model }}"
-        @input="updateButtonState()"
+        @if (!empty($model)) x-model="{{ $model }}" @endif
+        @input="typeof updateButtonState === 'function' && updateButtonState()"
     />
 </div>
