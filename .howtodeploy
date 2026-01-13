@@ -18,9 +18,12 @@ HOW TO DEPLOY TO PROD?
                 php artisan route:clear
 
         Run in terminal:
-            composer install --optimize-autoloader --no-dev
+            composer install --optimize-autoloader
             npm run build
 
         Compress the project file into a ZIP file (copy version)
 
+        Upload the zipped project to hosting.
+
+        DELETE the "hot" file inside public directory to make the manifest.json works in production.
 -->
