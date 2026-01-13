@@ -6,95 +6,7 @@
     <x-public.navbar />
 
     <x-public.content_container>
-        <section x-data="{
-                projectsData: null,
-                dataLoading: true,
-                filters: {
-                    search: '',
-                    status: 'all',
-                },
-                async init() {
-                    // Fetch projects data from an API endpoint
-                    try {
-                        const response = await fetch('{{ route('content.get.section.projects.filtered.public') }}');
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        const result = await response.json();
-                        if (result.success) {
-                            this.projectsData = result.data;
-                            this.dataLoading = false;
-                            console.log(this.projectsData);
-                        } else {
-                            console.error('Failed to load projects data:', result.message);
-                        }
-                    } catch (error) {
-                        console.error('Error fetching projects data:', error);
-                    }
-                },
-
-                async changeSourceData(route) {
-                    if(!route) {
-                        // console.warn('No route passed when calling changeSourceData');
-                        return;
-                    }
-                    const response = await fetch(route);
-                    const data = await response.json();
-                    // console.log(data);
-                    if(data && data.success) {
-                        this.projectsData = data.data;
-                        this.dataLoading = false;
-                    }
-                },
-
-                paginationRange() {
-                    if (!this.projectsData || !this.projectsData.last_page) return [];
-
-                    const total = this.projectsData.last_page;
-                    const current = this.projectsData.current_page;
-                    const delta = 2;
-                    const range = [];
-
-                    range.push(1);
-
-                    let left = Math.max(2, current - delta);
-                    let right = Math.min(total - 1, current + delta);
-
-                    if (left > 2) {
-                        range.push('...');
-                    }
-
-                    for (let i = left; i <= right; i++) {
-                        range.push(i);
-                    }
-
-                    if (right < total - 1) {
-                        range.push('...');
-                    }
-
-                    if (total > 1) {
-                        range.push(total);
-                    }
-
-                    return range;
-                },
-
-                async applyFilters(page = 1) {
-                    this.dataLoading = true;
-
-                    // Build query string
-                    const params = new URLSearchParams();
-
-                    if (this.filters.search) params.append('search', this.filters.search);
-                    if (this.filters.status && this.filters.status !== 'all') params.append('status', this.filters.status);
-
-                    params.append('page', page);
-
-                    const url = `{{ route('content.get.section.projects.filtered.public') }}?${params.toString()}`;
-                    await this.changeSourceData(url);
-                },
-                
-            }">
+        <section x-data="projectsHandler()">
             <div class="flex flex-col items-center justify-center my-12">
                 <p class="text-2xl md:text-3xl font-inter font-black">
                     <span class="text-accent-black_2">OUR </span>
@@ -256,13 +168,13 @@
                         <template x-for="(project, i) in projectsData.data" :key="i + '_' + project.id">
                             <div class="h-60 relative cursor-pointer bg-gray-200 shadow-card p-4 rounded hover:shadow-xl transition-shadow duration-300 ease-in-out"
                                 x-data @click="
-                                    $dispatch('openmodal', { 
-                                        modalID: 'modal_projects_public', 
-                                        title: 'Project Details',
-                                        payload_data: { 
-                                            project_data : project 
+                                    $store.app.modalSystem.openModal('modal_projects_public', {
+                                        title: 'Register User Form',
+                                        payload: {
+                                            project_data : project
                                         }
-                                    });">
+                                    });
+                                    ">
                                 {{-- Image --}}
                                 <img x-bind:src="project.images[0]" alt="Project Thumbnail"
                                     class="w-[95%] h-[92%] absolute inset-0 m-auto rounded object-cover bg-gray-200">
@@ -360,6 +272,100 @@
                     </div>
                 </template>
             </section>
+
+            <script>
+                function projectsHandler() {
+                    return {
+                        projectsData: null,
+                        dataLoading: true,
+                        filters: {
+                            search: '',
+                            status: 'all',
+                        },
+                        async init() {
+                            // Fetch projects data from an API endpoint
+                            try {
+                                const response = await fetch('{{ route('content.get.section.projects.filtered.public') }}');
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                const result = await response.json();
+                                if (result.success) {
+                                    this.projectsData = result.data;
+                                    this.dataLoading = false;
+                                    console.log(this.projectsData);
+                                } else {
+                                    console.error('Failed to load projects data:', result.message);
+                                }
+                            } catch (error) {
+                                console.error('Error fetching projects data:', error);
+                            }
+                        },
+
+                        async changeSourceData(route) {
+                            if(!route) {
+                                // console.warn('No route passed when calling changeSourceData');
+                                return;
+                            }
+                            const response = await fetch(route);
+                            const data = await response.json();
+                            // console.log(data);
+                            if(data && data.success) {
+                                this.projectsData = data.data;
+                                this.dataLoading = false;
+                            }
+                        },
+
+                        paginationRange() {
+                            if (!this.projectsData || !this.projectsData.last_page) return [];
+
+                            const total = this.projectsData.last_page;
+                            const current = this.projectsData.current_page;
+                            const delta = 2;
+                            const range = [];
+
+                            range.push(1);
+
+                            let left = Math.max(2, current - delta);
+                            let right = Math.min(total - 1, current + delta);
+
+                            if (left > 2) {
+                                range.push('...');
+                            }
+
+                            for (let i = left; i <= right; i++) {
+                                range.push(i);
+                            }
+
+                            if (right < total - 1) {
+                                range.push('...');
+                            }
+
+                            if (total > 1) {
+                                range.push(total);
+                            }
+
+                            return range;
+                        },
+
+                        async applyFilters(page = 1) {
+                            this.dataLoading = true;
+
+                            // Build query string
+                            const params = new URLSearchParams();
+
+                            if (this.filters.search) params.append('search', this.filters.search);
+                            if (this.filters.status && this.filters.status !== 'all') params.append('status', this.filters.status);
+
+                            params.append('page', page);
+
+                            const url = `{{ route('content.get.section.projects.filtered.public') }}?${params.toString()}`;
+                            await this.changeSourceData(url);
+                        },
+                        
+                    };
+                }
+            </script>
         </section>
     </x-public.content_container>
 
