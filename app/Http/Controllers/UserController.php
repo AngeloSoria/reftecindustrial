@@ -130,6 +130,7 @@ class UserController extends Controller
     public function updateUser(Request $request)
     {
         try {
+            dd($request);
             $request->validate([
                 'id' => [
                     'required',
@@ -230,7 +231,7 @@ class UserController extends Controller
 
             $users = $query->latest()->paginate(15);
 
-            actLog('read', 'Retrieved all users', 'All users retrieved .');
+            // actLog('read', 'Retrieved all users', 'All users retrieved .');
 
             return response()->json([
                 'success' => true,
