@@ -5,10 +5,12 @@
         <div x-data="UserHandler()" class="pt-4">
             <section>
                 <div class="p-2 flex items-center justify-end gap-3 flex-wrap mt-4">
-                    <x-public.button @click="$dispatch('openmodal', {
-                        modalID: 'modal_user_register',
-                        title: 'Register User Form'
-                    })" button_type="primary">
+                    <x-public.button @click="
+                        $store.app.modalSystem.openModal('modal_user_register', {
+                            title: 'Register User Form',
+                        });
+                    " 
+                    button_type="primary">
                         <span class="flex items-center justify-center gap-2">
                             @svg('fluentui-add-circle-24-o', 'w-5 h-5')
                             Register New User
