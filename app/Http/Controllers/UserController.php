@@ -106,11 +106,15 @@ class UserController extends Controller
             $user = User::findOrFail($request->id);
 
             if ($user->id === $sender->id) {
-                throw new Exception("You can't archive your own user data.");
+                throw new Exception("You can't suspend yourself.");
             }
 
             if ($user->role === 'Super Admin' && $sender->role !== 'Super Admin') {
                 abort(406, "You don't have a higher role access to delete this user. Error(406)");
+            }
+
+            if ($user->role === "Super Admin" && $sender->role === "Super Admin") {
+                throw new Exception('You can\'t suspend another Super User');
             }
 
             $user->updateOrFail([
@@ -130,7 +134,6 @@ class UserController extends Controller
     public function updateUser(Request $request)
     {
         try {
-            dd($request);
             $request->validate([
                 'id' => [
                     'required',
@@ -163,12 +166,22 @@ class UserController extends Controller
 
             // Prevent lower roles from modifying Super Admin
             if ($user->role === 'Super Admin' && $sender->role !== 'Super Admin') {
-                abort(403, "You don't have sufficient access to update this user.");
+                abort(403, "You don't have sufficient access to update role.");
             }
 
             // Prevent role escalation
             if ($request->role === 'Super Admin' && $sender->role !== 'Super Admin') {
                 abort(403, "You cannot assign Super Admin role.");
+            }
+
+            // Prevent Super Admin to demote another Super Admin
+            if (($user->id !== $sender->id) && ($sender->role === 'Super Admin' && $user->role === 'Super Admin' && $request->role !== 'Super Admin')) {
+                throw new Exception("You cannot demote another Super Admin.");
+            }
+
+            // Prevent sender to demote itself to lower rank.
+            if ($sender->role === 'Super Admin' && $request->role !== 'Super Admin') {
+                throw new Exception("You cannot update your role to lower rank. User is already Super Admin.");
             }
 
             // Build update payload
@@ -177,9 +190,18 @@ class UserController extends Controller
                 'role'     => $request->role,
             ];
 
+            if ($request->filled('name')) {
+                $blueprint['name'] = $request->name;
+            }
+
+            // dd($blueprint);
+
             if ($request->filled('archived')) {
                 if ($sender->id === $user->id && $request->archived === "true") {
                     throw new Exception('You cannot suspend yourself.');
+                }
+                if ($sender->role === 'Super Admin' && $user->role === 'Super Admin' && $request->archived === 'true') {
+                    throw new Exception('You can\'t suspend another Super Admin.');
                 }
                 $blueprint['archived'] = $request->archived === "true" ? 1 : 0;
             }
