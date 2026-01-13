@@ -12,16 +12,16 @@
         action="{{ route('user.update') }}"
         >
             @csrf
-            <input type="hidden" name="id" x-bind:="copyAccountData.id"/>
+            <input type="hidden" name="id" x-bind:value="copyAccountData.id"/>
             <section class="mt-6 flex flex-col gap-4 grow">
-                <section class="grid grid-cols-2 gap-4 max-w-2xl">
+                <section class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
                     <div>
                         <p class="text-sm font-light mb-1">Name</p>
-                        <x-form.input name="account_name" model="copyAccountData.name"/>
+                        <x-form.input name="name" model="copyAccountData.name"/>
                     </div>
                     <div>
                         <p class="text-sm font-light mb-1">Username</p>
-                        <x-form.input name="account_username" model="copyAccountData.username"/>
+                        <x-form.input name="username" model="copyAccountData.username"/>
                     </div>
                 </section>
                 <section class="grid grid-cols-2 gap-4 max-w-2xl">
@@ -31,7 +31,7 @@
                             x-model="copyAccountData.role"
                             @change="updateButtonState()"
                             class="w-full px-4 py-2 rounded border-2 border-gray-200" 
-                            name="account_role" 
+                            name="role" 
                             required>
                             <option disabled value="" selected>Select role...</option>
                             {{-- Check if current session is Super Admin role --}}
@@ -84,13 +84,8 @@
                 isNewDataApplied: false,
                 isSubmitting: false,
 
-                async init() {
-                    console.log(this.accountData);
-                    
+                init() {
                     this.copyOrigin();
-
-                    console.log(this.copyAccountData)
-                    console.log('isEqual: ' + this.isEqual(this.accountData, this.copyAccountData));
                 },
 
                 copyOrigin() {
