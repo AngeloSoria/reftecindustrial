@@ -11,7 +11,7 @@ export async function initVisitorsChart() {
                         
             const response = await fetch('/visitors/widget-data');
             const data = await response.json();
-            console.log(data);
+            // console.log(data);
             
             // fetch fail
             if(!data['success']) {
