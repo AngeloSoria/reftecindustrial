@@ -1,7 +1,7 @@
 <x-layouts.auth.app viewName="Logs" class="">
     <div
         class="bg-white shadow-md rounded-xl min-h-[calc(100vh - var(--topbar_force_style))] my-2 mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <h2 class="font-semibold text-xl">Activity Log</h2>
+        <h2 class="font-semibold text-xl">Activity Logs</h2>
         <h2 class="text-gray-500 text-md">Track user activity, including actions, timestamps, user, and details.</h2>
 
         {{-- table --}}
