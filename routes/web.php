@@ -1,13 +1,22 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\{LoginController, LogoutController};
-use App\Http\Controllers\{VisitorController, UploadController};
-use App\Http\Controllers\Contents\GeneralController;
-use App\Http\Controllers\Contents\ProjectController;
-use App\Http\Controllers\Contents\ProductController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\LogController;
+use App\Http\Controllers\Auth\{
+    LoginController, 
+    LogoutController
+};
+use App\Http\Controllers\{
+    VisitorController, 
+    UploadController,
+    UserController,
+    LogController,
+};
+use App\Http\Controllers\Contents\{
+    HomeContentController,
+    GeneralController,
+    ProjectController,
+    ProductController,
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +51,11 @@ Route::prefix('content')
             Route::get('section/product_lines/visible', 'getAllVisibileProductLines')->name('get.section.product_lines.visible');
             Route::get('section/about_us/gallery', 'getAllAboutUsGallery')->name('get.section.about_us.gallery');
             Route::get('section/product_lines/public', 'getAllProductLinesPublic')->name('get.section.product_lines.public');
+            Route::get('test/sleep', function () {
+                // sleep(5);
+                return response()->json('done');
+            })->name('test.sleep');
+            Route::get('page/home', [HomeContentController::class, 'index'])->name('page.home');
         });
 
         Route::controller(ProjectController::class)->group(function () {
@@ -84,7 +98,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/upload', [UploadController::class, 'upload'])->name('upload');
 
 
-    
+
     /*
     |--------------------------------------------------------------------------
     | User Management (CRUD)
@@ -105,7 +119,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('user')
         ->name('user.')
         ->controller(UserController::class)
-        ->group(function() {
+        ->group(function () {
             Route::get('get/all', 'getAllUsers')->name('get.all');
             Route::post('add', 'addUser')->name('add');
             Route::post('update', 'updateUser')->name('update');
