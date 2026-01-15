@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use App\Models\Logs as ActivityLogs;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class LogController extends Controller
 {
@@ -24,6 +25,7 @@ class LogController extends Controller
             ];
 
             ActivityLogs::create($blueprint);
+            Cache::tags(['activity_logs'])->flush();
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
         }
@@ -32,46 +34,55 @@ class LogController extends Controller
     public function getAll(Request $request)
     {
         try {
-            // dd($request);
-            $query = ActivityLogs::select([
-                'action',
-                'activity',
-                'user',
-                'details',
-                'created_at'
-            ]);
+            $cacheKey = 'activity_logs:' . md5(json_encode([
+                'action'   => $request->action,
+                'datetime' => $request->datetime,
+                'search'   => $request->search,
+                'page'     => $request->get('page', 1),
+            ]));
 
-            // Exact filters
-            if ($request->filled('action')) {
-                $query->where('action', $request->action);
-            }
+            $result = Cache::remember(
+                $cacheKey,
+                env('CACHE_EXPIRATION', 3600),
+                function () use ($request) {
 
-            // Date filter
-            if ($request->filled('datetime')) {
-                $dt = Carbon::parse($request->datetime);
+                    $query = ActivityLogs::select([
+                        'action',
+                        'activity',
+                        'user',
+                        'details',
+                        'created_at'
+                    ]);
 
-                $query->whereBetween('created_at', [
-                    $dt->startOfMinute(),
-                    $dt->endOfMinute(),
-                ]);
-            }
+                    if ($request->filled('action')) {
+                        $query->where('action', $request->action);
+                    }
 
-            // Search
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('user', 'LIKE', "%{$search}%")
-                        ->orWhere('activity', 'LIKE', "%{$search}%")
-                        ->orWhere('details', 'LIKE', "%{$search}%");
-                });
-            }
+                    if ($request->filled('datetime')) {
+                        $dt = Carbon::parse($request->datetime);
+                        $query->whereBetween('created_at', [
+                            $dt->startOfMinute(),
+                            $dt->endOfMinute(),
+                        ]);
+                    }
 
-            $logs = $query->latest()->paginate(20);
+                    if ($request->filled('search')) {
+                        $search = $request->search;
+                        $query->where(function ($q) use ($search) {
+                            $q->where('user', 'LIKE', "%{$search}%")
+                                ->orWhere('activity', 'LIKE', "%{$search}%")
+                                ->orWhere('details', 'LIKE', "%{$search}%");
+                        });
+                    }
 
-            return response()->json([
-                'success' => true,
-                'data' => $logs
-            ]);
+                    return [
+                        'success' => true,
+                        'data' => $query->latest()->paginate(20)
+                    ];
+                }
+            );
+
+            return response()->json($result);
         } catch (Exception $e) {
             logger()->error($e->getMessage());
 
