@@ -9,12 +9,12 @@
         currentOrder: [],
         async init() {
             // fetch gallery images from API and populate the list
-            const response = await fetch('{{ route('content.get.section.about_us.gallery') }}');
+            const response = await fetch('{{ route('api.content.get.section.about_us.gallery') }}');
             const data = await response.json();
 
-            if(data.success) {
-                this.galleryImages = data.data.gallery ?? [];
-                this.remainingImage = data.data.remaining;
+            if(data.original && data.original.success) {
+                this.galleryImages = data.original.data.gallery ?? [];
+                this.remainingImage = data.original.data.remaining;
                 this.galleryImages.forEach((e, i) => {
                     this.initialOrder.push(String(e.file_id));
                 });
