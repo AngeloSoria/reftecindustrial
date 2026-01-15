@@ -19,7 +19,6 @@ class GeneralController extends Controller
     public function test(Request $request)
     {
         try {
-
             throw new Exception("Toast Exception");
         } catch (Exception $e) {
             Log::error($e->getMessage());
@@ -73,6 +72,7 @@ class GeneralController extends Controller
             Cache::forget('section_product_lines_public');
             Cache::forget('section_product_lines_private');
             Cache::forget('section_product_lines_visible');
+            Cache::forget('home_page_public');
 
             session()->flash('content', [
                 'tab' => 'general',
@@ -239,9 +239,11 @@ class GeneralController extends Controller
     }
 
     // READ | GET
-    public function getHeroSection(Request $request)
+    public function getHeroSection()
     {
         try {
+
+            // controller logic
             $response = Cache::remember('section_hero', env('CACHE_EXPIRATION', 3600), function () {
                 $record = General::where('section', 'hero')->first(['image_path']);
 
@@ -254,6 +256,7 @@ class GeneralController extends Controller
                     ],
                 ];
             });
+
             return response()->json($response);
         } catch (Exception $e) {
             Log::error('Error fetching hero section: ' . $e->getMessage());
@@ -265,7 +268,7 @@ class GeneralController extends Controller
         }
     }
 
-    public function getHistory(Request $request)
+    public function getHistory()
     {
         try {
             $response = Cache::remember('section_history', env('CACHE_EXPIRATION', 3600), function () {
@@ -293,64 +296,45 @@ class GeneralController extends Controller
         }
     }
 
-    public function getAllProductLines($isPublic = false)
+    public function getAllProductLines(bool $isPublic = false)
     {
         try {
+
+            // Build data OUTSIDE cache (no locks held)
+            $data = ProductLines::query()
+                ->when($isPublic, fn($q) => $q->where('visibility', 1))
+                ->leftJoin('uploads', 'uploads.id', '=', 'contents_general_product_lines.upload_id')
+                ->orderByDesc('contents_general_product_lines.created_at')
+                ->get([
+                    'contents_general_product_lines.id',
+                    'contents_general_product_lines.name',
+                    'contents_general_product_lines.upload_id',
+                    'uploads.path as image_path',
+                ]);
+
+            // Cache ONLY the final payload (short TTL)
             $response = Cache::remember(
                 'section_product_lines_' . ($isPublic ? 'public' : 'private'),
-                env('CACHE_EXPIRATION', 3600),
-                function () use ($isPublic) {
-
-                    $visibleColumns = [
-                        'id',
-                        'name',
-                        'upload_id',
-                    ];
-
-                    if (!$isPublic) {
-                        $visibleColumns[] = 'visibility';
-                    }
-
-                    $record = ProductLines::when(
-                        $isPublic,
-                        fn($q) => $q->where('visibility', 1)
-                    )->latest()->get($visibleColumns);
-
-                    // Map each product line to include image_path
-                    $uploadController = new UploadController();
-                    $newData = $record->map(function ($product_line) use ($uploadController) {
-                        $uploadResponse = $uploadController->getUploadedFile($product_line->upload_id);
-
-                        $data = $uploadResponse->getData(true);
-
-                        if (!$uploadResponse) {
-                            throw new Exception("No uploaded data found.");
-                        }
-
-                        $product_line->image_path = $data['data']['path'] ?? null;
-
-                        return $product_line;
-                    });
-
-
-                    return [
-                        'success' => true,
-                        'data' => $newData
-                    ];
-                }
+                300, // 5 minutes — safe for shared hosting
+                fn() => [
+                    'success' => true,
+                    'data' => $data,
+                ]
             );
+
             return response()->json($response);
         } catch (Exception $e) {
-            Log::error('Error fetching product lines: ' . $e->getMessage());
+            logger()->error('Error fetching product lines', [
+                'error' => $e->getMessage()
+            ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch product lines: ' . $e->getMessage(),
+                'message' => 'Failed to fetch product lines.',
                 'type' => 'error',
             ], 500);
         }
     }
-
     public function getAllProductLinesPublic()
     {
         return $this->getAllProductLines(true);
@@ -400,68 +384,64 @@ class GeneralController extends Controller
     public function getAllAboutUsGallery()
     {
         try {
+            $response = Cache::remember('section_about_us_gallery', env('CACHE_EXPIRATION', 3600), function () {
+                $column_name = 'about_us_gallery';
+                $record = General::where('section', $column_name)->first(['id', 'extra_data']);
 
-            // return response()->json('test');
-
-            // $response = Cache::remember('section_about_us_gallery', env('CACHE_EXPIRATION', 3600), function () {
-            $column_name = 'about_us_gallery';
-            $record = General::where('section', $column_name)->first(['id', 'extra_data']);
-
-            if (!$record) {
-                return response()->json([
-                    'success' => true,
-                    'message' => "No record found in the about us gallery.",
-                    'data' => [
-                        'remaining' => 3,
-                        'gallery' => null
-                    ],
-                ]);
-            }
-
-            $extra_data = $record['extra_data'];
-            $decode_extra_data = json_decode($extra_data);
-
-            if (empty($decode_extra_data)) {
-                return response()->json(
-                    [
+                if (!$record) {
+                    return response()->json([
                         'success' => true,
+                        'message' => "No record found in the about us gallery.",
                         'data' => [
                             'remaining' => 3,
                             'gallery' => null
-                        ]
-                    ]
-                );
-            }
-
-            $gallery_image_data = [];
-
-            // get the image path base on upload id.
-            $uploadController = new UploadController();
-            foreach ($decode_extra_data as $file_id) {
-                $uploadResponse = $uploadController->getUploadedFile($file_id);
-                $data = $uploadResponse->getData(true);
-
-                if (!$data['success']) {
-                    throw new Exception($data['message']);
+                        ],
+                    ]);
                 }
 
-                $gallery_image_data[] = [
-                    "file_id" => $data['data']['id'],
-                    "path" => $data['data']['path']
-                ] ?? null;
-            }
+                $extra_data = $record['extra_data'];
+                $decode_extra_data = json_decode($extra_data);
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'remaining' => 3 - count($gallery_image_data),
-                    'gallery' => $gallery_image_data
-                ]
-            ]);
+                if (empty($decode_extra_data)) {
+                    return response()->json(
+                        [
+                            'success' => true,
+                            'data' => [
+                                'remaining' => 3,
+                                'gallery' => null
+                            ]
+                        ]
+                    );
+                }
 
-            // });
+                $gallery_image_data = [];
 
-            // return response()->json($response);
+                // get the image path base on upload id.
+                $uploadController = new UploadController();
+                foreach ($decode_extra_data as $file_id) {
+                    $uploadResponse = $uploadController->getUploadedFile($file_id);
+                    $data = $uploadResponse->getData(true);
+
+                    if (!$data['success']) {
+                        throw new Exception($data['message']);
+                    }
+
+                    $gallery_image_data[] = [
+                        "file_id" => $data['data']['id'],
+                        "path" => $data['data']['path']
+                    ] ?? null;
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'remaining' => 3 - count($gallery_image_data),
+                        'gallery' => $gallery_image_data
+                    ]
+                ]);
+            });
+
+            return response()->json($response);
         } catch (Exception $e) {
             Log::error('Error fetching About Us gallery: ' . $e->getMessage());
 
@@ -502,6 +482,7 @@ class GeneralController extends Controller
 
             // Clear cache for hero section after updating
             Cache::forget('section_hero');
+            Cache::forget('home_page_public');
 
             session()->flash('content', [
                 'tab' => 'general',
@@ -546,6 +527,7 @@ class GeneralController extends Controller
                     ]);
 
                     Cache::forget('section_history');
+                    Cache::forget('home_page_public');
 
                     session()->flash('content', [
                         'tab' => 'general',
@@ -579,6 +561,7 @@ class GeneralController extends Controller
                     ]);
 
                     Cache::forget('section_history');
+                    Cache::forget('home_page_public');
 
                     session()->flash('content', [
                         'tab' => 'general',
@@ -659,6 +642,7 @@ class GeneralController extends Controller
             Cache::forget('section_product_lines_public');
             Cache::forget('section_product_lines_private');
             Cache::forget('section_product_lines_visible');
+            Cache::forget('home_page_public');
 
             session()->flash('content', [
                 'tab'     => 'general',
@@ -758,6 +742,7 @@ class GeneralController extends Controller
 
             toast("Gallery image has been updated.", "success");
             actLog('update', 'Gallery image has been updated.', 'Gallery image has been updated.');
+            Cache::forget('section_about_us_gallery');
             return back();
         } catch (Exception $e) {
             Logger()->info($e->getMessage());
@@ -825,7 +810,7 @@ class GeneralController extends Controller
 
             actLog('update', 'Gallery order updated', 'Gallery order updated.');
             toast("Gallery order updated successfully.", "success");
-            
+            Cache::forget('section_about_us_gallery');
             return back();
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
@@ -871,6 +856,7 @@ class GeneralController extends Controller
                 Cache::forget('section_product_lines_public');
                 Cache::forget('section_product_lines_private');
                 Cache::forget('section_product_lines_visible');
+                Cache::forget('home_page_public');
 
                 // Session tab state
                 session()->flash('content', [
