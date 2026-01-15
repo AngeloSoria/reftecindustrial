@@ -18,35 +18,35 @@
     {{-- TODO: Make this server-sided. --}}
     <section class="relative max-h-[200px] overflow-y-hidden">
         <div x-data="{
-                galleryData: [],
+                galleryData: null,
+                galleryImages: [],
                 isFetchCompleted: false,
                 async init() {
                     // pre-insert placeholder images
                     for (let i = 0; i < 3; i++) {
-                        this.galleryData.push('{{ asset('images/layout_light_16x9.png') }}');
+                        this.galleryImages.push('{{ asset('images/layout_light_16x9.png') }}');
                     }
 
                     // fetch gallery from server
-                    const response = await fetch('{{ route('content.get.section.about_us.gallery') }}');
+                    const response = await fetch('{{ route('api.content.get.section.about_us.gallery') }}');
                     const data = await response.json();
+                    
+                    if (!data.original || !data.original.data) {
+                        return console.error('Error fetching gallery content.');
+                    }
+                    this.galleryData = data.original.data;
 
-                    if(!data.success) {
-                        console.error(!data.message ? 'Fetching error on gallery images.' : data.message);
-                        return;
+                    if(!this.galleryData) {
+                        return console.error(!this.galleryData.message ? 'Fetching error on gallery images.' : this.galleryData.message);
                     };
 
-                    // reset
-                    this.galleryData = [];
-                    // re-insert new data that came from the server.
-                    data.data.gallery.forEach((e, index) => {
-                        this.galleryData.push(e.path);
-                    });
+                    this.galleryImages = this.galleryData.gallery;
                 },
             }" 
             class="grid grid-cols-3 h-full items-stretch">
-            <template x-for="image_path in galleryData" :key="image_path + crypto.randomUUID()">
+            <template x-for="image in galleryImages" :key="image.file_id + crypto.randomUUID()">
                 <div class="h-full overflow-hidden aspect-video">
-                    <img :src="image_path" class="h-full w-full aspect-video"/>
+                    <img :src="image.path" class="h-full w-full aspect-video" :title="image.path"/>
                 </div>
             </template>
         </div>
@@ -68,7 +68,6 @@
             {{-- bigger box --}}
             <div data-aos="fade-left" data-aos-anchor-placement="top-center">
                 <div class="bg-transparent border-3 border-accent-orange-300 px-8 py-14 ">
-                    {{-- TODO: Make the text here server-sided. --}}
                     <p class="font-inter text-xl font-medium">
                         Founded in 2005 as a sole proprietorship, <span
                             class="font-black text-brand-secondary-300">REFTEC
@@ -91,8 +90,8 @@
     </x-public.content_container>
 
     {{-- Mission and Vision --}}
-    <secti55 class="mt-10 grid grid-cols-1 gap-1 md:gap-0 md:grid-cols-2 overflow-hidden">
-        <div data-aos="fade-right" data-aos-anchor-placement="top-center"
+    <section class="mt-10 grid grid-cols-1 gap-1 md:gap-0 md:grid-cols-2 overflow-hidden">
+        <div data-aos="fade-right" data-aos-anchor-placement="center-bottom"
             style="background-image: url({{ asset('images/bulan.jpg') }});"
             class="relative bg-center bg-cover p-16 py-16 flex flex-col items-center justify-center text-center">
             <h2 class="font-black text-2xl text-accent-orange-300 z-2">MISSION</h2>
@@ -100,14 +99,14 @@
                 customers, shareholders, employees and community.</p>
             <div class="absolute inset-0 w-full h-full bg-accent-darkslategray-800/75"></div>
         </div>
-        <div data-aos="fade-left" data-aos-anchor-placement="top-center"
+        <div data-aos="fade-left" data-aos-anchor-placement="center-bottom"
             style="background-image: url({{ asset('images/footerbg.jpg') }});"
             class="relative bg-center bg-cover p-16 py-16 flex flex-col items-center justify-center text-center">
             <h2 class="font-black text-2xl text-accent-orange-300 z-2">VISION</h2>
             <p class="text-white z-2">To be the company that best understands customers' needs.</p>
             <div class="absolute inset-0 w-full h-full bg-accent-darkslategray-800/75"></div>
         </div>
-    </secti55>
+    </section>
 
     <x-public.footer />
 </body>
