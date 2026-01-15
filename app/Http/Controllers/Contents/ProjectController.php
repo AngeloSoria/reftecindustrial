@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Contents;
 
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\UploadController;
 use Exception;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\UploadController;
 
-use App\Models\Contents\Project;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Validation\Rule;
+use App\Models\Contents\Project;
 use Symfony\Component\HttpFoundation\FileBag;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 class ProjectController extends Controller
 {
@@ -112,7 +113,6 @@ class ProjectController extends Controller
             return back();
         }
     }
-
     public function getProjectsFiltered(Request $request, $isPublic = false, $isFeatured = false)
     {
         try {
@@ -231,7 +231,7 @@ class ProjectController extends Controller
     {
         return $this->getProjectsFiltered($request, true);
     }
-    public function getProjectsHighlightedPublic(Request $request)
+    public function getProjectsHighlightedPublic()
     {
         try {
             $result = Project::where('is_featured', 1)->get([
@@ -372,6 +372,8 @@ class ProjectController extends Controller
             // Save the project data
             $project->updateOrFail($projectData);
 
+            Cache::forget('home_page_public');
+
             session()->flash('content', ['tab' => 'projects']);
             toast("A project has been updated.", 'success');
 
@@ -411,6 +413,7 @@ class ProjectController extends Controller
             }
 
             $model->deleteOrFail();
+            Cache::forget('home_page_public');
 
             session()->flash('content', ['tab' => 'projects']);
             toast("A project has been deleted.", 'success');
@@ -449,6 +452,7 @@ class ProjectController extends Controller
                 }
                 Project::destroy($project_id);
             }
+            Cache::forget('home_page_public');
 
             session()->flash('content', ['tab' => 'projects']);
             toast("Selected projects has been deleted.", 'success');
