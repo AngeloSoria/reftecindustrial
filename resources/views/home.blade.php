@@ -2,28 +2,11 @@
 <html lang="en">
 <x-partials.head />
 
-<body class="bg-white">
+<body x-data="homeContentHandler" class="bg-white">
     <x-public.navbar />
 
     {{-- Hero section --}}
-    <section class="w-full h-100 bg-cover bg-center flex items-center justify-start relative"
-        style="background-image: url('{{ asset('images/bulan.jpg') }}');" x-ref="heroBackdrop" x-data="{async init() {
-                try {
-                    const response = await fetch('{{ route('content.get.section.hero') }}');
-                    const data = await response.json();
-
-                    const img = new Image();
-                    img.src = data.data.image;
-
-                    // Wait until the actual image is fully loaded
-                    img.onload = () => {
-                        this.$refs.heroBackdrop.style.backgroundImage = 'url(' + img.src + ')';
-                    };
-                } catch (e) {
-                    console.error('Failed to load hero image:', e);
-                }
-            }
-        }">
+    <section class="w-full h-100 bg-cover bg-center flex items-center justify-start relative" x-ref="ref_heroBackdrop">
         <div class="block absolute top-0 left-0 w-full h-full bg-black/85 z-0"></div>
         <section class="max-w-6xl z-1 mx-auto flex items-center justify-center sm:justify-start w-full px-2 md:px-6">
             <div
@@ -51,37 +34,23 @@
                     PRODUCTS</p>
             </div>
 
-            
-            <section
-            x-data="{
-                productLines: [],
-                async init() {
-                    const response = await fetch('{{ route('content.get.section.product_lines.public') }}');
-                    const data = await response.json();
-                    console.log(data);
-                    this.productLines = data.data;
-                },
-            }
-            "
-            class="mt-8"
-            >
+
+            <section x-data class="mt-8">
                 <section class="fade-edges-horizontal overflow-hidden">
-                    <div 
-                    class="flex items-center"
-                    :class="Object.keys(productLines).length > 2 ? 'animate-logo-conveyor' : 'justify-center'"
-                    >
-                    <template x-for="i in Array.from({ length: Object.keys(productLines).length > 2 ? 2 : 1 }, (_, index) => index)">
-                        <template x-for="productLine in productLines">
-                            <div class="grow p-4 flex flex-col items-center justify-center">
-                                <img
-                                :src="productLine.image_path"
-                                :title="productLine.name" 
-                                class="max-w-30 sm:max-w-40 md:max-w-80 max-h-24 object-contain bg-white transition-all duration-300"
-                                />
-                            </div>
-                        </template>
+                    <template x-if="productLinesData">
+                        <div class="flex items-center"
+                            :class="Object.keys(productLinesData.data).length > 2 ? 'animate-logo-conveyor' : 'justify-center'">
+                            <template
+                                x-for="i in Array.from({ length: Object.keys(productLinesData.data).length > 2 ? 2 : 1 }, (_, index) => index)">
+                                <template x-for="productLine in productLinesData.data">
+                                    <div class="grow p-4 flex flex-col items-center justify-center">
+                                        <img :src="productLine.image_path" :title="productLine.name"
+                                            class="max-w-30 sm:max-w-40 md:max-w-80 max-h-24 object-contain bg-white transition-all duration-300" />
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
                     </template>
-                    </div>
                 </section>
             </section>
 
@@ -99,20 +68,11 @@
             </div>
 
             <div class="mt-4 p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-2">
-
                 {{-- Text --}}
                 <div data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-duration="1200"
                     class="text-black order-2 md:order-1 bg-[#ecf0f1] shadow-md flex flex-col justify-center item-end -border-4 -border-accent-orange-300 p-6 rounded">
-                    <p x-ref="data_history" x-data="{
-                        async init() {
-                            const response = await fetch('{{ route('content.get.section.history') }}');
-                            const data = await response.json();
-                            if(data) {
-                                this.$refs.data_history.innerHTML = data.data.description;
-                            }
-                        },
-                    }" class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
-                        {{-- placeholder before the updated data from the database. --}}
+                    <p x-ref="ref_HistoryText"
+                        class="text-sm md:text-base text-justify font-inter font-medium leading-relaxed">
                         Founded in 2005 as Single Proprietorship,<span class="font-black text-brand-secondary-300">
                             REFTEC
                             Industrial Supply and Services Inc.</span> is 100%
@@ -138,19 +98,8 @@
                 {{-- Image --}}
                 <div data-aos="fade-left" data-aos-anchor-placement="top-bottom" data-aos-duration="1000"
                     class="order-1 md:order-2 w-full md:h-auto aspect-video md:aspect-auto overflow-hidden">
-                    <img x-ref="image_history" x-data="{
-                            async init() {
-                                try {
-                                    const response = await fetch('{{ route('content.get.section.history') }}');
-                                    const data = await response.json();
-
-                                    this.$refs.image_history.src = data.data.image
-                                } catch (e) {
-                                    console.error('Failed to load history image:', e);
-                                }
-                            },
-                        }" src="{{ asset('images/our_history.png') }}" alt="Our History"
-                        class="w-full h-full object-cover" loading="lazy" />
+                    <img x-ref="ref_HistoryImage" src="{{ asset('images/our_history.png') }}" alt="Our History"
+                        class="w-full h-full object-cover" />
                 </div>
 
             </div>
@@ -166,68 +115,64 @@
             </div>
 
             {{-- TODO: Must be a server-sided rendering of Highlighted Projects here. --}}
-            <section x-data="{
-                highlightedProjects: [],
-
-                async init() {
-                    const response = await fetch('{{ route('content.get.section.projects.highlighted.public') }}')
-                    const data = await response.json()
-                    this.highlightedProjects = data.data
-                }
-            }" class="flex flex-col space-y-7 lg:space-y-20 mt-20 overflow-hidden">
-                <template x-for="(project, index) in highlightedProjects" :key="index">
-                    <div
-                        class="bg-gray-100 shadow-lg md:shadow-none md:bg-transparent flex flex-col md:flex-row items-end justify-center">
-                        <!-- IMAGE LEFT (even index) -->
-                        <template x-if="index % 2 === 0">
-                            <div class="flex w-full items-end md:flex-row flex-col">
-                                <div data-aos="fade-right" data-aos-duration="900"
-                                    class="w-full h-full lg:w-[685px] lg:h-[400px] overflow-hidden rounded-xl shadow-xl">
-                                    <img :src="project.images[0]" :alt="project.title" class="w-full h-full object-fill"
-                                        loading="lazy" />
-                                </div>
-
-                                <div data-aos="fade-left" data-aos-duration="900"
-                                    class="z-2 w-full mt-2 lg:w-1/2 mb-6 flex flex-col justify-center">
-                                    <div>
-                                        <span class="text-sm text-white px-2 py-1 font-medium uppercase"
-                                            :class="project.status == 'completed' ? 'bg-green-400' : project.status == 'on_going' ? 'bg-yellow-500' : 'bg-red-500'"
-                                            x-text="project.status"></span>
+            <section class="flex flex-col space-y-7 lg:space-y-20 mt-20 overflow-hidden">
+                <template x-if="highlightedProjectsData">
+                    <template x-for="(project, index) in highlightedProjectsData.data" :key="index">
+                        <div
+                            class="bg-gray-100 shadow-lg md:shadow-none md:bg-transparent flex flex-col md:flex-row items-end justify-center">
+                            <!-- IMAGE LEFT (even index) -->
+                            <template x-if="index % 2 === 0">
+                                <div class="flex w-full items-end md:flex-row flex-col">
+                                    <div data-aos="fade-right" data-aos-duration="900"
+                                        class="w-full h-full lg:w-[685px] lg:h-[400px] overflow-hidden rounded-xl shadow-xl">
+                                        <img :src="project.images[0]" :alt="project.title"
+                                            class="w-full h-full object-fill" />
                                     </div>
 
-                                    <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
-                                        <h2 class="text-xl font-bold" x-text="project.title"></h2>
-                                        <p class="text-sm" x-text="project.description"></p>
+                                    <div data-aos="fade-left" data-aos-duration="900"
+                                        class="z-2 w-full mt-2 lg:w-1/2 mb-6 flex flex-col justify-center">
+                                        <div>
+                                            <span class="text-sm text-white px-2 py-1 font-medium uppercase"
+                                                :class="project.status == 'completed' ? 'bg-green-400' : project.status ==
+                                                    'on_going' ? 'bg-yellow-500' : 'bg-red-500'"
+                                                x-text="project.status"></span>
+                                        </div>
+
+                                        <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
+                                            <h2 class="text-xl font-bold" x-text="project.title"></h2>
+                                            <p class="text-sm" x-text="project.description"></p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </template>
+                            </template>
 
-                        <!-- IMAGE RIGHT (odd index) -->
-                        <template x-if="index % 2 === 1">
-                            <div class="flex w-full items-end md:flex-row flex-col">
-                                <div data-aos="fade-right" data-aos-duration="900"
-                                    class="z-2 w-full lg:w-1/2 mb-6 flex flex-col justify-center">
-                                    <div>
-                                        <span class="text-sm text-white px-2 py-1 font-medium uppercase"
-                                            :class="project.status == 'completed' ? 'bg-green-400' : project.status == 'on_going' ? 'bg-yellow-500' : 'bg-red-500'"
-                                            x-text="project.status"></span>
+                            <!-- IMAGE RIGHT (odd index) -->
+                            <template x-if="index % 2 === 1">
+                                <div class="flex w-full items-end md:flex-row flex-col">
+                                    <div data-aos="fade-right" data-aos-duration="900"
+                                        class="z-2 w-full lg:w-1/2 mb-6 flex flex-col justify-center">
+                                        <div>
+                                            <span class="text-sm text-white px-2 py-1 font-medium uppercase"
+                                                :class="project.status == 'completed' ? 'bg-green-400' : project.status ==
+                                                    'on_going' ? 'bg-yellow-500' : 'bg-red-500'"
+                                                x-text="project.status"></span>
+                                        </div>
+
+                                        <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
+                                            <h2 class="text-xl font-bold" x-text="project.title"></h2>
+                                            <p class="text-sm" x-text="project.description"></p>
+                                        </div>
                                     </div>
 
-                                    <div class="p-4 md:bg-brand-primary-950 text-black md:text-white">
-                                        <h2 class="text-xl font-bold" x-text="project.title"></h2>
-                                        <p class="text-sm" x-text="project.description"></p>
+                                    <div data-aos="fade-left" data-aos-duration="900"
+                                        class="w-full lg:w-[685px] lg:h-[400px] overflow-hidden rounded-xl shadow-xl">
+                                        <img :src="project.images[0]" :alt="project.title"
+                                            class="w-full h-full object-fill" />
                                     </div>
                                 </div>
-
-                                <div data-aos="fade-left" data-aos-duration="900"
-                                    class="w-full lg:w-[685px] lg:h-[400px] overflow-hidden rounded-xl shadow-xl">
-                                    <img :src="project.images[0]" :alt="project.title" class="w-full h-full object-fill"
-                                        loading="lazy" />
-                                </div>
-                            </div>
-                        </template>
-                    </div>
+                            </template>
+                        </div>
+                    </template>
                 </template>
             </section>
 
@@ -242,6 +187,77 @@
     </x-public.content_container>
 
     <x-public.footer />
+    <script>
+        function homeContentHandler() {
+            return {
+                homeDataLoaded: false,
+                heroData: null,
+                productLinesData: null,
+                historyData: null,
+                highlightedProjectsData: null,
+
+                async init() {
+                    const response = await fetch('{{ route('api.content.page.home') }}', {
+                        credentials: 'omit'
+                    });
+                    const data = await response.json();
+
+                    // home
+                    if (data.hero && data.hero.original) {
+                        this.heroData = data.hero.original;
+                        if (this.heroData.success) {
+                            this.setHeroBG(this.heroData.data.image);
+                        } else {
+                            return console.error('Failed to load hero image.');
+                        }
+                    }
+
+                    // product lines
+                    if (data.product_lines && data.product_lines.original) {
+                        this.productLinesData = data.product_lines.original;
+                        if (!this.productLinesData.success) {
+                            return console.error('Failed to load product lines.');
+                        }
+                    }
+
+                    // history (description & image)
+                    if (data.history && data.history.original) {
+                        this.historyData = data.history.original;
+                        if (!this.historyData.success) {
+                            return console.error('Failed to load history.');
+                        } else {
+                            // set Image
+                            this.$refs.ref_HistoryImage.src = this.historyData.data.image;
+
+                            // set Description
+                            this.$refs.ref_HistoryText.innerHTML = this.historyData.data.description;
+                        }
+                    }
+
+                    // highlighted projects
+                    if (data.projects && data.projects.original) {
+                        this.highlightedProjectsData = data.projects.original;
+                        if (!this.highlightedProjectsData.success) {
+                            return console.error('Failed to load highlighted projects.');
+                        }
+                    }
+
+
+                    this.homeDataLoaded = true;
+                },
+
+                setHeroBG(image_path = @js(asset('images/JSP-building-landscape.png'))) {
+                    const img = new Image();
+                    img.src = image_path;
+
+                    // Wait until the actual image is fully loaded
+                    img.onload = () => {
+                        this.$refs.ref_heroBackdrop.style.backgroundImage = `url(${image_path})`;
+                    };
+                },
+            };
+        }
+    </script>
 </body>
 
 </html>
