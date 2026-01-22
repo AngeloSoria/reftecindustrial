@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{
     LoginController, 
@@ -150,7 +151,7 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Content Management (POST only)
+    | Content Management
     |--------------------------------------------------------------------------
     */
     Route::prefix('content')
@@ -159,6 +160,8 @@ Route::middleware('auth')->group(function () {
 
             Route::controller(GeneralController::class)->group(function () {
                 Route::post('section/test', 'test')->name('add.section.test');
+
+                Route::get('section/general/all', 'authGeneralContents')->name('get.section.all');
 
                 Route::post('section/hero', 'setHeroSection')->name('update.section.hero');
                 Route::post('section/history', 'setHistory')->name('update.section.history');
@@ -191,7 +194,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('section/product/delete/selected', 'deleteSelectedProducts')->name('delete.section.products.selected');
 
 
-                Route::get('section/products', 'getProducts')->name('get.section.products');
+                Route::get('section/products', 'getProductsPublic')->name('get.section.products');
                 Route::get('section/products/filtered', 'getProductsFiltered')->name('get.section.products.filtered');
             });
         });
