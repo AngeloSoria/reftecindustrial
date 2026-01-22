@@ -1,4 +1,5 @@
-<div x-data="{
+<div x-data="
+    {
         sortableGalleryObject: null,
         controlButtonsVisible: false,
         remainingImage: 0,
@@ -7,110 +8,102 @@
         galleryImages: [],
         initialOrder: [],
         currentOrder: [],
-        async init() {
-            // fetch gallery images from API and populate the list
-            const response = await fetch('{{ route('api.content.get.section.about_us.gallery') }}');
-            const data = await response.json();
-
-            if(data.original && data.original.success) {
-                this.galleryImages = data.original.data.gallery ?? [];
-                this.remainingImage = data.original.data.remaining;
-                this.galleryImages.forEach((e, i) => {
-                    this.initialOrder.push(String(e.file_id));
-                });
-                $dispatch('send_remaining_image_of_gallery', {remaining: this.remainingImage});
-                $dispatch('sortable_set_initialOrder', { 
-                    sortableObject: this.sortableGalleryObject,
-                    initialOrder: this.initialOrder
-                });
-            }
-            this.loading = false;
+        init() {
+            $watch('generalContentsLoaded', (value) => {
+                if (aboutUsData && aboutUsData.success) {
+                    this.galleryImages = aboutUsData.data.gallery ?? [];
+                    this.remainingImage = aboutUsData.data.remaining;
+                    this.galleryImages.forEach((e, i) => {
+                        this.initialOrder.push(String(e.file_id));
+                    });
+                    $dispatch('send_remaining_image_of_gallery', { remaining: this.remainingImage });
+                    $dispatch('sortable_set_initialOrder', {
+                        sortableObject: this.sortableGalleryObject,
+                        initialOrder: this.initialOrder
+                    });
+                }
+                this.loading = false;
+            });
         },
         sortableResetOrder() {
-            if(!this.sortableGalleryObject) {
+            if (!this.sortableGalleryObject) {
                 console.warn('sortable gallery object is null when calling this function.');
                 return;
             }
             $dispatch('sortable_resetOrder', {
-                sortableObject: this.sortableGalleryObject ,
+                sortableObject: this.sortableGalleryObject,
                 initialOrder: this.initialOrder
             });
-        }
-    }" @about_us_gallery_sorted.window="    
+        },
+    }" @about_us_gallery_sorted.window="
         const order = $event.detail.order;
-        if(!order) return;
-        
-        if(JSON.stringify(order) !== JSON.stringify(initialOrder)) {
+        if (!order) return;
+
+        if (JSON.stringify(order) !== JSON.stringify(initialOrder)) {
             currentOrder = order;
             controlButtonsVisible = true;
-        } else {        
+        } else {
             currentOrder = initialOrder;
             controlButtonsVisible = false;
         }
-
-        {{-- console.log(`order: ${order}`);
-        console.log(`initial: ${initialOrder}`);
-        console.log(`matching?: ${JSON.stringify(order) === JSON.stringify(initialOrder)}`);
-        console.log(`current order: ${currentOrder}`); --}}
     " @sortable_object_gallery.window="sortableGalleryObject = $event.detail.sortableObject;">
-    <h2 class="gap-2">
-        Gallery
-        <span x-text="!loading ? '(' + galleryImages.length + '/3' + ')' : ''"></span>
-    </h2>
+    <section>
+        <h2 class="gap-2">
+            Gallery
+            <span x-text="!loading ? '(' + galleryImages.length + '/3' + ')' : ''"></span>
+        </h2>
 
-    <section class="py-2 flex">
-        <x-public.button button_type="primary" x-bind:disabled="remainingImage <= 0"
-            x-bind:title="remainingImage <= 0 ? 'Maximum image exceeded' : 'Upload image'" @click="
+        <section class="py-2 flex">
+            <x-public.button button_type="primary" x-bind:disabled="remainingImage <= 0"
+                x-bind:title="remainingImage <= 0 ? 'Maximum image exceeded' : 'Upload image'" @click="
                 $dispatch('openmodal', {
                     modalID: 'modal_about_us_gallery',
                     title: 'Add Gallery Image',
                 });
             ">
-            <span class="flex items-center gap-2">
-                @svg('fluentui-add-circle-20-o', 'w-5 h-5')
-                <span x-text="!loading ? 'Add Image' : 'Loading...'"></span>
-            </span>
-        </x-public.button>
-    </section>
+                <span class="flex items-center gap-2">
+                    @svg('fluentui-add-circle-20-o', 'w-5 h-5')
+                    <span x-text="!loading ? 'Add Image' : 'Loading...'"></span>
+                </span>
+            </x-public.button>
+        </section>
 
-    <p class="text-sm text-gray-600 italic py-2">
-        Note: Hold the drag icon <span class="inline-block">@svg('fluentui-drag-24-o', 'w-5 h-5')</span> to reorder
-        images in the gallery.
-    </p>
+        <p class="text-sm text-gray-600 italic py-2">
+            Note: Hold the drag icon <span class="inline-block">@svg('fluentui-drag-24-o', 'w-5 h-5')</span> to reorder
+            images in the gallery.
+        </p>
 
-    {{-- TODO: Complete this api-sided gallery rendering. --}}
-    <ul id="sortable-container_about_gallery" x-data="{
+        <ul id="sortable-container_about_gallery" x-data="{
             isMobile: window.innerWidth < 768,
-        }"
-        :class="galleryImages && galleryImages.length <= 0 ? 'p-6 flex justify-start items-center' : 'p-2  grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2'"
-        class="bg-gray-200 border rounded">
+        }" :class="galleryImages && galleryImages.length <= 0 ? 'p-6 flex justify-start items-center' : 'p-2  grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2'"
+            class="bg-gray-200 border rounded">
 
 
 
-        <template x-if="loading">
-            <div class="opacity-[50%] italic flex justify-center items-center gap-4">
-                @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
-                Loading gallery...
-            </div>
-        </template>
+            <template x-if="loading">
+                <div class="opacity-[50%] italic flex justify-center items-center gap-4">
+                    @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                    Loading gallery...
+                </div>
+            </template>
 
-        <template x-if="galleryImages.length <= 0 && !loading">
-            <div class="opacity-[50%] italic">No images uploaded...</d>
-        </template>
+            <template x-if="galleryImages.length <= 0 && !loading">
+                <div class="opacity-[50%] italic">No images uploaded...</d>
+            </template>
 
 
-        <template x-for="(image_data, index) in galleryImages" :key="image_data + '_' + index">
-            <li class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
-                x-data="{ isHovered: false }" x-bind:data-id="image_data.file_id" title="Drag to change order."
-                @mouseover="isHovered = true" @mouseleave="isHovered = false">
+            <template x-for="(image_data, index) in galleryImages" :key="image_data + '_' + index">
+                <li class="relative p-1 bg-accent-darkslategray-100 border-12 border-white rounded-lg shadow-sm min-w-[33%] min-h-[200px]"
+                    x-data="{ isHovered: false }" x-bind:data-id="image_data.file_id" title="Drag to change order."
+                    @mouseover="isHovered = true" @mouseleave="isHovered = false">
 
-                <img :src="image_data.path" class="w-full h-full aspect-video object-contain" />
+                    <img :src="image_data.path" class="w-full h-full aspect-video object-contain" />
 
-                <!-- Controls: Visible on hover (desktop) + always visible on mobile -->
-                <div x-show="isHovered || isMobile" x-transition
-                    class="flex items-center justify-end gap-2 absolute bottom-0 left-0 w-full p-2">
+                    <!-- Controls: Visible on hover (desktop) + always visible on mobile -->
+                    <div x-show="isHovered || isMobile" x-transition
+                        class="flex items-center justify-end gap-2 absolute bottom-0 left-0 w-full p-2">
 
-                    <button @click="$dispatch(
+                        <button @click="$dispatch(
                                     'openmodal',
                                     {
                                         modalID: 'modal_about_us_gallery',
@@ -121,23 +114,23 @@
                                         },
                                     }
                                 )" title="Edit Image"
-                        class="p-2 rounded-full cursor-pointer shadow-sm hover:bg-gray-200 bg-white text-black/90 hover:text-black">
-                        @svg('fluentui-edit-24-o', 'w-4 h-4')
-                    </button>
+                            class="p-2 rounded-full cursor-pointer shadow-sm hover:bg-gray-200 bg-white text-black/90 hover:text-black">
+                            @svg('fluentui-edit-24-o', 'w-4 h-4')
+                        </button>
 
-                    <button title="Hold and Drag to Reorder"
-                        class="drag-handle flex items-center justify-start gap-1 p-2 rounded-full cursor-pointer shadow-sm hover:bg-gray-200 bg-white text-black/90 hover:text-black">
-                        @svg('fluentui-drag-24-o', 'w-4 h-4')
-                    </button>
-                </div>
-            </li>
-        </template>
+                        <button title="Hold and Drag to Reorder"
+                            class="drag-handle flex items-center justify-start gap-1 p-2 rounded-full cursor-pointer shadow-sm hover:bg-gray-200 bg-white text-black/90 hover:text-black">
+                            @svg('fluentui-drag-24-o', 'w-4 h-4')
+                        </button>
+                    </div>
+                </li>
+            </template>
 
-    </ul>
+        </ul>
 
-    <section x-transition x-show="controlButtonsVisible" x-data class="mt-2 py-2 flex justify-end items-center">
-        <form method="POST" action="{{ route('content.update.section.about_us.gallery.order') }}" x-data
-            @submit.prevent="
+        <section x-transition x-show="controlButtonsVisible" x-data class="mt-2 py-2 flex justify-end items-center">
+            <form method="POST" action="{{ route('content.update.section.about_us.gallery.order') }}" x-data
+                @submit.prevent="
                 if(!initialOrder || !currentOrder) return;
 
                 // Do not submit if current is identical to initial.
@@ -148,34 +141,34 @@
                 submitLoading = true;
                 $el.submit();
             ">
-            @csrf
-            <input id="about_us_gallery_input_order" type="hidden" name="about_us_gallery_order" x-model="currentOrder" />
+                @csrf
+                <input id="about_us_gallery_input_order" type="hidden" name="about_us_gallery_order"
+                    x-model="currentOrder" />
 
-            <section class="flex items-center gap-2">
-                <x-public.button type="button" @click="sortableResetOrder()" x-bind:disabled="submitLoading">
-                    <span class="flex items-center justify-center gap-2">
-                        Cancel
-                    </span>
-                </x-public.button>
-                <x-public.button button_type="primary" type="submit" x-bind:disabled="submitLoading">
-                    <span class="flex items-center justify-center gap-2">
+                <section class="flex items-center gap-2">
+                    <x-public.button type="button" @click="sortableResetOrder()" x-bind:disabled="submitLoading">
+                        <span class="flex items-center justify-center gap-2">
+                            Cancel
+                        </span>
+                    </x-public.button>
+                    <x-public.button button_type="primary" type="submit" x-bind:disabled="submitLoading">
+                        <span class="flex items-center justify-center gap-2">
 
-                        <template x-if="submitLoading">
-                            @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
-                        </template>
-                        <template x-if="!submitLoading">
-                            @svg('fluentui-save-20', 'w-5 h-5')
-                        </template>
+                            <template x-if="submitLoading">
+                                @svg('antdesign-loading-3-quarters-o', 'w-5 h-5 animate-spin')
+                            </template>
+                            <template x-if="!submitLoading">
+                                @svg('fluentui-save-20', 'w-5 h-5')
+                            </template>
 
-                        <span x-text="submitLoading ? 'Saving Changes...' : 'Save Changes'"></span>
-                    </span>
-                </x-public.button>
-            </section>
+                            <span x-text="submitLoading ? 'Saving Changes...' : 'Save Changes'"></span>
+                        </span>
+                    </x-public.button>
+                </section>
 
-        </form>
+            </form>
+        </section>
     </section>
-
-
 </div>
 
 <x-layouts.modal modalID="modal_about_us_gallery" modalMaxWidth="md">
