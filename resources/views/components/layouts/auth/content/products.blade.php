@@ -24,12 +24,10 @@
         
             const response = await fetch('{{ route('content.get.section.products.filtered') }}');
             const data = await response.json();
-            // console.log(data);
             if(data && data.success) {
                 this.productData = data.data;
                 this.dataLoading = false;
             }
-            // console.log(data);
         },
         
         async changeSourceData(route) {
