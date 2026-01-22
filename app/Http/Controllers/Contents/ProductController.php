@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers\Contents;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Database\UniqueConstraintViolationException;
-use Symfony\Component\HttpFoundation\FileBag;
 use Exception;
-
-use App\Http\Controllers\UploadController;
+use Illuminate\Http\Request;
 use App\Models\Contents\Product;
-use App\Http\Controllers\LogController;
+use Illuminate\Support\Facades\Cache;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\UploadController;
+use Symfony\Component\HttpFoundation\FileBag;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 class ProductController extends Controller
 {
+    private function resetAllCache()
+    {
+        Cache::increment('products:version');
+    }
+
     public function addProduct(Request $request)
     {
         try {
@@ -70,6 +74,8 @@ class ProductController extends Controller
                 throw new Exception($e);
             }
 
+            $this->resetAllCache();
+
             session()->flash('content', [
                 'tab' => 'products',
             ]);
@@ -86,150 +92,6 @@ class ProductController extends Controller
         }
     }
 
-    public function getProductsPublic()
-    {
-        try {
-            $products = Product::where('is_visible', 1)
-            ->select([
-                'id',
-                'images',
-                'title',
-            ])
-            ->latest()
-            ->paginate(15);
-
-            // Transform the paginated results
-            $products->getCollection()->transform(function ($product) {
-                $imageIDs = $product->images;
-
-                if (!empty($imageIDs) && is_array($imageIDs)) {
-
-                    // If images are already an array of IDs, map them to paths
-                    $product->images = array_map(function ($id) {
-                        $uploadController = new UploadController();
-                        $response = $uploadController->getUploadedFile($id)->getData(true);
-
-                        if (!$response['success']) {
-                            return false;
-                        }
-
-                        $file = $response['data'];
-
-                        return $file['path'];
-                    }, $imageIDs);
-                } elseif (!empty($imageIDs) && is_string($imageIDs)) {
-                    // In case it's stored as a string (legacy)
-                    $imageIds = explode(',', $imageIDs);
-                    $product->images = array_map(fn($id) => '/uploads/' . $id, $imageIds);
-                } else {
-                    $product->images = [];
-                }
-
-                return $product;
-            });
-
-            return response()->json([
-                'success' => true,
-                'data' => $products
-            ]);
-        } catch (Exception $e) {
-            Logger()->error($e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'type' => 'error'
-            ]);
-        }
-    }
-
-    public function getProductsFiltered(Request $request)
-    {
-        try {
-            // -----------------------------
-            // Base query
-            // -----------------------------
-            $query = Product::select([
-                'id',
-                'images',
-                'title',
-                'is_visible',
-            ]);
-
-            // -----------------------------
-            // Dynamic filters map
-            // -----------------------------
-            $filtersMap = [
-                'status'     => 'status',
-                'visibility' => 'is_visible',
-                'featured'   => 'is_featured',
-                // Add new filters here in the future:
-                // 'category' => 'category_id',
-            ];
-
-            foreach ($filtersMap as $requestKey => $dbColumn) {
-                if ($request->filled($requestKey)) {
-                    $query->where($dbColumn, $request->input($requestKey));
-                }
-            }
-
-            // -----------------------------
-            // Optional search
-            // -----------------------------
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'LIKE', "%{$search}%");
-                });
-            }
-
-            // -----------------------------
-            // Pagination (15 per page)
-            // -----------------------------
-            $products = $query->latest()->paginate(15);
-
-            // Transform the paginated results
-            $products->getCollection()->transform(function ($product) {
-                $imageIDs = $product->images;
-
-                if (!empty($imageIDs) && is_array($imageIDs)) {
-
-                    // If images are already an array of IDs, map them to paths
-                    $product->images = array_map(function ($id) {
-                        $uploadController = new UploadController();
-                        $response = $uploadController->getUploadedFile($id)->getData(true);
-
-                        if (!$response['success']) {
-                            return null;
-                        }
-
-                        $file = $response['data'];
-
-                        return $file['path'];
-                    }, $imageIDs);
-                } elseif (!empty($imageIDs) && is_string($imageIDs)) {
-                    // In case it's stored as a string (legacy)
-                    $imageIds = explode(',', $imageIDs);
-                    $product->images = array_map(fn($id) => '/uploads/' . $id, $imageIds);
-                } else {
-                    $product->images = [];
-                }
-
-                return $product;
-            });
-
-            // Return paginator JSON (standard Laravel format)
-            return response()->json([
-                'success' => true,
-                'data' => $products
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
     public function updateProduct(Request $request)
     {
         try {
@@ -241,10 +103,10 @@ class ProductController extends Controller
                 'product_name' => ['required', 'string'],
                 'visibility' => ['nullable', 'string'],
             ]);
-            
+
             // Get product data from DB
             $product = Product::findOrFail($request->product_id);
-            
+
             // Prepare the data array for update
             $productData = [
                 'images'       => json_decode($request->product_images), // value: paths
@@ -259,10 +121,10 @@ class ProductController extends Controller
                 if (!$response['success']) continue;
                 $toFileId[] = $response['data']['id'];
             }
-            
+
             // replace the request's images to file id.
             $productData['images'] = $toFileId;
-            
+
             // Handle uploaded files if any
             $uploadedFileIds = [];
             $allFiles = $request->files->all('files');
@@ -315,9 +177,11 @@ class ProductController extends Controller
 
             // Save the product data
             $product->update($productData);
-            
+
+            $this->resetAllCache();
+
             actLog('update', 'Product has been updated', 'The product ' . $product->title . ' has been updated');
-            
+
             session()->flash('content', ['tab' => 'products']);
             toast("A product has been updated.", 'success');
             return back();
@@ -357,8 +221,9 @@ class ProductController extends Controller
             }
 
             $product->deleteOrFail();
-            actLog('delete', 'Deleted a product', 'The product ' . $product->title . ' has been deleted');
+            $this->resetAllCache();
 
+            actLog('delete', 'Deleted a product', 'The product ' . $product->title . ' has been deleted');
             session()->flash('content', ['tab' => 'products']);
             toast("A product has been deleted.", 'success');
             return back();
@@ -397,8 +262,9 @@ class ProductController extends Controller
                 $product->delete();
                 $deletedItems[] = $product->title;
             }
+            $this->resetAllCache();
+
             actLog('delete', 'Deleted these product(s)', 'These product(s) [' . implode(', ', $deletedItems) . '] has been deleted');
-            
             session()->flash('content', ['tab' => 'products']);
             toast("Selected products has been deleted.", 'success');
             return back();
@@ -407,6 +273,184 @@ class ProductController extends Controller
             session()->flash('content', ['tab' => 'products']);
             toast($e->getMessage(), 'error');
             return back();
+        }
+    }
+
+    public function getProductsPublic()
+    {
+        try {
+            // Get current version, initialize if missing
+            $version = Cache::get('products:version', function () {
+                return Cache::forever('products:version', 1);
+            });
+
+            // -----------------------------------
+            // Cache key (pagination-aware)
+            // -----------------------------------
+            $cacheKey = 'products:public:v' . $version . ':' . md5(json_encode([
+                'page' => request()->get('page', 1),
+            ]));
+
+            return Cache::remember($cacheKey, ENV('CACHE_EXPIRATION', 600), function () {
+                    $products = Product::where('is_visible', 1)
+                        ->select([
+                            'id',
+                            'images',
+                            'title',
+                        ])
+                        ->latest()
+                        ->paginate(15);
+
+                    // -----------------------------------
+                    // Transform results
+                    // -----------------------------------
+                    $products->getCollection()->transform(function ($product) {
+
+                        $imageIDs = $product->images;
+
+                        if (is_array($imageIDs)) {
+                            $product->images = array_filter(array_map(function ($id) {
+
+                                $response = app(UploadController::class)
+                                    ->getUploadedFile($id)
+                                    ->getData(true);
+
+                                return $response['success']
+                                    ? $response['data']['path']
+                                    : null;
+                            }, $imageIDs));
+                        } elseif (is_string($imageIDs)) {
+
+                            $product->images = array_map(
+                                fn($id) => '/uploads/' . $id,
+                                explode(',', $imageIDs)
+                            );
+                        } else {
+                            $product->images = [];
+                        }
+
+                        return $product;
+                    });
+
+                    return response()->json([
+                        'success' => true,
+                        'data'    => $products,
+                    ]);
+                }
+            );
+        } catch (Exception $e) {
+
+            logger()->error($e);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error',
+                'type'    => 'error',
+            ], 500);
+        }
+    }
+
+
+    // Unused. For future uses.
+    public function getProductsFiltered(Request $request)
+    {
+        try {
+            // Get current version, initialize if missing
+            $version = Cache::get('products:version', function () {
+                return Cache::forever('products:version', 1);
+            });
+
+            // -----------------------------------
+            // Cache key (filter + search + page)
+            // -----------------------------------
+            $cacheKey = 'products:filtered:v' . $version . ':' . md5(json_encode([
+                'filters' => $request->only(['status', 'visibility', 'featured', 'search']),
+                'page'    => $request->get('page', 1),
+            ]));
+
+            return Cache::remember($cacheKey, ENV('CACHE_EXPIRATION', 600), function () use ($request) {
+
+                // -----------------------------
+                // Base query
+                // -----------------------------
+                $query = Product::select([
+                    'id',
+                    'images',
+                    'title',
+                    'is_visible',
+                ]);
+
+                // -----------------------------
+                // Dynamic filters map
+                // -----------------------------
+                $filtersMap = [
+                    'status'     => 'status',
+                    'visibility' => 'is_visible',
+                    'featured'   => 'is_featured',
+                ];
+
+                foreach ($filtersMap as $requestKey => $dbColumn) {
+                    if ($request->filled($requestKey)) {
+                        $query->where($dbColumn, $request->input($requestKey));
+                    }
+                }
+
+                // -----------------------------
+                // Optional search
+                // -----------------------------
+                if ($request->filled('search')) {
+                    $search = $request->search;
+                    $query->where(function ($q) use ($search) {
+                        $q->where('title', 'LIKE', "%{$search}%");
+                    });
+                }
+
+                // -----------------------------
+                // Pagination
+                // -----------------------------
+                $products = $query->latest()->paginate(15);
+
+                // -----------------------------
+                // Transform results
+                // -----------------------------
+                $products->getCollection()->transform(function ($product) {
+                    $imageIDs = $product->images;
+
+                    if (is_array($imageIDs)) {
+                        $product->images = array_filter(array_map(function ($id) {
+                            $response = app(UploadController::class)
+                                ->getUploadedFile($id)
+                                ->getData(true);
+
+                            return $response['success']
+                                ? $response['data']['path']
+                                : null;
+                        }, $imageIDs));
+                    } elseif (is_string($imageIDs)) {
+                        $product->images = array_map(
+                            fn($id) => '/uploads/' . $id,
+                            explode(',', $imageIDs)
+                        );
+                    } else {
+                        $product->images = [];
+                    }
+
+                    return $product;
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'data'    => $products,
+                ]);
+            });
+        } catch (\Throwable $e) {
+
+            report($e);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error',
+            ], 500);
         }
     }
 }
