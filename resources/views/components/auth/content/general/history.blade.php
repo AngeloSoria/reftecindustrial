@@ -1,91 +1,36 @@
-<section class="flex flex-col gap-4">
-
-    <div class="mb-8">
-        <h2 class="font-medium text-lg my-2">Brief History Image</h2>
-
-
-        <section class="bg-gray-950 w-full flex items-center justify-center">
-            <div class="bg-gray-300 max-w-150 w-full aspect-video overflow-hidden">
-                {{-- loading icon --}}
-                <div id="loading_status_history"
-                    class="text-white w-full h-full bg-accent-darkslategray-900 flex flex-col gap-4 justify-center items-center">
-                    @svg('antdesign-loading-3-quarters-o', 'w-16 h-16 animate-spin')
-                    <h2 class="text-xl font-medium">Loading...</h2>
-                </div>
-                <img id="image_history" src="{{ asset('images/reftec_logo_transparent.png') }}"
-                    class="w-full cursor-pointer aspect-video" title="preview image" x-data="{
-                                isLoaded: false,
-                                async init() {
-                                    try {
-                                        const response = await fetch('{{ route('content.get.section.history') }}');
-                                        const data = await response.json();
-
-                                        const img = new Image();
-                                        img.src = data.data.image;
-
-                                        // Wait until the actual image is fully loaded
-                                        img.onload = () => {
-                                            this.$refs.historyImg.src = img.src;
-                                            this.isLoaded = true;
-                                            document.querySelector('#loading_status_history').classList.add('hidden')
-                                        };
-                                    } catch (e) {
-                                        console.error('Failed to load hero image:', e);
-                                    }
-                                },
-                                preview() {
-                                    if (!this.isLoaded) {
-                                        console.warn('Image not ready yet');
-                                        return;
-                                    }
-                                    this.$dispatch('image_preview_event', {
-                                        previewInfo: {
-                                            image: this.$refs.historyImg.src
-                                        }
-                                    });
-                                }
-                            }" x-ref="historyImg" @click="preview" />
-            </div>
-        </section>
-
-        <section class="py-4 flex flex-wrap items-start justify-start">
-            <x-public.button button_type="primary"
-                @click="$dispatch('openmodal', {'modalID':'update_history_section_image'})">
-                @svg('fluentui-image-20-o', 'w-5 h-5')
-                Update Image
-            </x-public.button>
-        </section>
-
-    </div>
-
-    <hr class="border-gray-300" />
-
-    <div class="flex flex-col gap-2 mt-8">
-        <h2 class="font-medium text-xl my-2">Brief History Text</h2>
-        <form action="{{ route('content.update.section.history') }}" method="POST" class="flex flex-col gap-2" x-data="{
+<section class="flex flex-col gap-4" x-data="
+    {
+        isLoaded: false,
+        history: {},
         editing: false,
         quill: null,
         toolbar: null,
         originalContent: '',
+        init() {
+            $watch('generalContentsLoaded', (value) => {
+                if (historyData && historyData.success) {
+                    this.history.image = historyData.data.image;
+                    this.history.description = historyData.data.description;
 
-        async init() {
-            const response = await fetch('{{ route('content.get.section.history') }}');
-            const data = await response.json();
+                    if (this.quill) {
+                        this.quill.root.innerHTML = this.history.description || '';
+                        this.originalContent = this.history.description || '';
+                        this.quill.enable(false);
+                        this.quill.root.setAttribute('contenteditable', false);
+                    }
 
-            this.quill = window.quills ? window.quills['editor-history'] : null;
+                    this.isLoaded = true;
+                }
+            });
 
-            if (this.quill) {
-                this.quill.root.innerHTML = data.data.description || '';
-                this.originalContent = data.data.description || '';
-
-                this.toolbar = this.quill.getModule('toolbar')?.container;
-                if (this.toolbar) this.toolbar.style.display = 'none';
-
-                this.quill.enable(false);
-                this.quill.root.setAttribute('contenteditable', false);
-            }
+            document.addEventListener('quill-initialized', () => {
+                this.quill = window.quills?.['editor-history'] ?? null;
+                if (this.quill) {
+                    this.toolbar = this.quill.getModule('toolbar')?.container;
+                    if (this.toolbar) this.toolbar.style.display = 'none';
+                }
+            });
         },
-
         toggleEditing(state) {
             this.editing = state;
 
@@ -104,8 +49,44 @@
                     this.quill.root.innerHTML = this.originalContent;
                 }
             }
-        }
-    }">
+        },
+    }
+    ">
+    <div class="mb-8">
+        <h2 class="font-medium text-lg my-2">Brief History Image</h2>
+        <section class="bg-gray-950 w-full flex items-center justify-center">
+            <div class="bg-gray-300 max-w-150 w-full aspect-video overflow-hidden">
+                {{-- loading icon --}}
+                <div class="text-white w-full h-full bg-accent-darkslategray-900 flex flex-col gap-4 justify-center items-center"
+                    id="loading_status_history" x-show="!isLoaded">
+                    @svg('antdesign-loading-3-quarters-o', 'w-16 h-16 animate-spin')
+                    <h2 class="text-xl font-medium">Loading...</h2>
+                </div>
+                <img class="w-full cursor-pointer aspect-video" id="image_history"
+                    src="{{ asset('images/reftec_logo_transparent.png') }}" title="preview image" x-data
+                    x-show="isLoaded" x-bind:src="history.image" @click="$dispatch('image_preview_event', {
+                        previewInfo: {
+                            image: this.$refs.historyImg.src
+                        }
+                    })" />
+            </div>
+        </section>
+
+        <section class="py-4 flex flex-wrap items-start justify-start">
+            <x-public.button button_type="primary"
+                @click="$dispatch('openmodal', {'modalID':'update_history_section_image'})">
+                @svg('fluentui-image-20-o', 'w-5 h-5')
+                Update Image
+            </x-public.button>
+        </section>
+
+    </div>
+
+    <hr class="border-gray-300" />
+
+    <div class="flex flex-col gap-2 mt-8">
+        <h2 class="font-medium text-xl my-2">Brief History Text</h2>
+        <form x-data action="{{ route('content.update.section.history') }}" method="POST" class="flex flex-col gap-2">
             @csrf
 
             <!-- Quill Editor -->
@@ -161,14 +142,12 @@
         @php
             $fileUploadId = 'file_upload_history';
         @endphp
-        <form
-            x-data="{
+        <form x-data="{
                 modal_id: 'update_history_section_image',
                 loading: false,
                 formDisabled: true,
                 file_upload_id: @js($fileUploadId),
-            }"
-            @submit.prevent="
+            }" @submit.prevent="
                 loading = true;
                 if(formDisabled) {
                     toast('all required fields in the form must have value first.', 'warning');
@@ -177,27 +156,21 @@
                 $dispatch('force_disable_modal_closing', { modalID: modal_id });
                 $dispatch('form_in_submit_phase', { file_upload_id: file_upload_id });
                 $el.submit();
-            "
-            @modal_closed_fallback.window="
+            " @modal_closed_fallback.window="
                 if($event.detail.modalID != modal_id) return;
                 $dispatch('reset_file_upload', { file_upload_id: file_upload_id });
-            "
-            @files_empty.window="
+            " @files_empty.window="
                 if($event.detail.file_upload_id != file_upload_id) return;
                 formDisabled = true;
-            "
-            @files_not_empty.window="
+            " @files_not_empty.window="
                 if($event.detail.file_upload_id != file_upload_id) return;
                 formDisabled = false;
-            "
-            action="{{ route('content.update.section.history') }}" method="POST" enctype="multipart/form-data">
+            " action="{{ route('content.update.section.history') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <section class="flex flex-col gap-2">
                 <h4>Upload an image to update hero section backdrop image:</h4>
-                <x-layouts.file_upload_drag
-                    file_upload_id="{{ $fileUploadId }}" 
-                    :hidden-data="['context' => 'content_image']" 
-                    acceptFile="image/*" />
+                <x-layouts.file_upload_drag file_upload_id="{{ $fileUploadId }}"
+                    :hidden-data="['context' => 'content_image']" acceptFile="image/*" />
             </section>
             <section class="mt-6 flex items-center justify-end gap-2">
                 <button type="button" @click="closeModal()" :disabled="loading"
