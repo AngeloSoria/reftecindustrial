@@ -25,7 +25,6 @@ class LogController extends Controller
             ];
 
             ActivityLogs::create($blueprint);
-            Cache::tags(['activity_logs'])->flush();
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
         }
