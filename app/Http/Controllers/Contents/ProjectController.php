@@ -15,10 +15,13 @@ use Illuminate\Database\UniqueConstraintViolationException;
 
 class ProjectController extends Controller
 {
+    private function resetAllCache()
+    {
+        Cache::increment('projects:version');
+    }
     public function addProject(Request $request)
     {
         try {
-            // dd($request);
             $request->validate([
                 'job_order' => 'required|string',
                 'project_name' => 'required|string',
@@ -99,6 +102,8 @@ class ProjectController extends Controller
                 throw new Exception($e);
             }
 
+            $this->resetAllCache();
+
             session()->flash('content', [
                 'tab' => 'projects',
             ]);
@@ -111,155 +116,6 @@ class ProjectController extends Controller
             Logger()->error($e->getMessage());
             toast($e->getMessage(), 'error');
             return back();
-        }
-    }
-    public function getProjectsFiltered(Request $request, $isPublic = false, $isFeatured = false)
-    {
-        try {
-            // -----------------------------------
-            // Columns to select
-            // -----------------------------------
-            $baseColumns = [
-                'id',
-                'images',
-                'job_order',
-                'title',
-                'description',
-                'status',
-            ];
-
-            $restrictedColumns = [
-                'is_visible',
-                'is_featured',
-            ];
-
-            // If not public, include restricted columns
-            $columns = $baseColumns;
-            if ($request->user()) {
-                $columns = array_merge($columns, $restrictedColumns);
-            }
-
-            $query = Project::select($columns);
-
-            // -----------------------------------
-            // Public mode: 
-            //    hide non-visible projects
-            //    hide pending projects
-            // -----------------------------------
-            if ($isPublic) {
-                $query->where('is_visible', true)
-                    ->where('status', '!=', 'pending');
-            }
-
-            // -----------------------------------
-            // Dynamic filters
-            // -----------------------------------
-            $filtersMap = [
-                'status'     => 'status',
-                'visibility' => 'is_visible',
-                'featured'   => 'is_featured',
-            ];
-
-            foreach ($filtersMap as $requestKey => $dbColumn) {
-                if ($request->filled($requestKey)) {
-                    $query->where($dbColumn, $request->input($requestKey));
-                }
-            }
-
-            // -----------------------------------
-            // Search
-            // -----------------------------------
-            if ($request->filled('search')) {
-                $search = $request->search;
-
-                $query->where(function ($q) use ($search) {
-                    $q->where('job_order', 'LIKE', "%{$search}%")
-                        ->orWhere('title', 'LIKE', "%{$search}%")
-                        ->orWhere('description', 'LIKE', "%{$search}%");
-                });
-            }
-
-            // -----------------------------------
-            // Pagination
-            // -----------------------------------
-            $projects = $query->latest()->paginate(15);
-
-            // Transform the paginated results
-            $projects->getCollection()->transform(function ($project) {
-                $imageIDs = $project->images;
-
-                if (!empty($imageIDs) && is_array($imageIDs)) {
-
-                    // If images are already an array of IDs, map them to paths
-                    $project->images = array_map(function ($id) {
-                        $uploadController = new UploadController();
-                        $response = $uploadController->getUploadedFile($id)->getData(true);
-
-                        if (!$response['success']) {
-                            return null;
-                        }
-
-                        $file = $response['data'];
-
-                        return $file['path'];
-                    }, $imageIDs);
-                } elseif (!empty($imageIDs) && is_string($imageIDs)) {
-                    // In case it's stored as a string (legacy)
-                    $imageIds = explode(',', $imageIDs);
-                    $project->images = array_map(fn($id) => '/uploads/' . $id, $imageIds);
-                } else {
-                    $project->images = [];
-                }
-
-                return $project;
-            });
-
-
-            return response()->json([
-                'success' => true,
-                'data'    => $projects,
-                'featured' => Project::where('is_featured', 1)->count()
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
-    public function getProjectsPublic(Request $request)
-    {
-        return $this->getProjectsFiltered($request, true);
-    }
-    public function getProjectsHighlightedPublic()
-    {
-        try {
-            $result = Project::where('is_featured', 1)->get([
-                'id',
-                'images',
-                'job_order',
-                'title',
-                'description',
-                'status',
-            ]);
-
-            $result->transform(function ($project) {
-                $uploadController = new UploadController();
-                $response = $uploadController->getUploadedFile($project->images[0])->getData(true);
-                if (!$response['success']) { throw new Exception($response['message']); }
-                $project->images = [$response['data']['path']];           
-                return $project;
-            });
-
-            return response()->json([
-                'success' => true,
-                'data' => $result
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
         }
     }
     public function updateProject(Request $request)
@@ -299,7 +155,7 @@ class ProjectController extends Controller
                 if (!$response['success']) continue;
                 $toFileId[] = $response['data']['id'];
             }
-            
+
             // replace the request's images to file id.
             $projectData['images'] = $toFileId;
 
@@ -372,7 +228,7 @@ class ProjectController extends Controller
             // Save the project data
             $project->updateOrFail($projectData);
 
-            Cache::forget('home_page_public');
+            $this->resetAllCache();
 
             session()->flash('content', ['tab' => 'projects']);
             toast("A project has been updated.", 'success');
@@ -413,7 +269,7 @@ class ProjectController extends Controller
             }
 
             $model->deleteOrFail();
-            Cache::forget('home_page_public');
+            $this->resetAllCache();
 
             session()->flash('content', ['tab' => 'projects']);
             toast("A project has been deleted.", 'success');
@@ -452,7 +308,7 @@ class ProjectController extends Controller
                 }
                 Project::destroy($project_id);
             }
-            Cache::forget('home_page_public');
+            $this->resetAllCache();
 
             session()->flash('content', ['tab' => 'projects']);
             toast("Selected projects has been deleted.", 'success');
@@ -462,6 +318,165 @@ class ProjectController extends Controller
             session()->flash('content', ['tab' => 'projects']);
             toast($e->getMessage(), 'error');
             return back();
+        }
+    }
+    public function getProjectsFiltered(Request $request, $isPublic = false)
+    {
+        try {
+
+            // Get current version, initialize if missing
+            $version = Cache::get('projects:version', function () {
+                return Cache::forever('projects:version', 1);
+            });
+
+            $cacheKey = 'projects:filtered:v' . $version . ':' . md5(json_encode([
+                'public'   => $isPublic,
+                'auth'     => $request->user() ? 1 : 0,
+                'filters'  => $request->only(['status', 'visibility', 'featured', 'search']),
+                'page'     => $request->get('page', 1),
+            ]));
+
+            return Cache::remember($cacheKey, ENV('CACHE_EXPIRATION', 300), function () use ($request, $isPublic) {
+
+                // -----------------------------------
+                // Columns
+                // -----------------------------------
+                $baseColumns = [
+                    'id',
+                    'images',
+                    'job_order',
+                    'title',
+                    'description',
+                    'status',
+                ];
+
+                $restrictedColumns = ['is_visible', 'is_featured'];
+
+                $columns = $request->user()
+                    ? array_merge($baseColumns, $restrictedColumns)
+                    : $baseColumns;
+
+                $query = Project::select($columns);
+
+                // -----------------------------------
+                // Public rules
+                // -----------------------------------
+                if ($isPublic) {
+                    $query->where('is_visible', true)
+                        ->where('status', '!=', 'pending');
+                }
+
+                // -----------------------------------
+                // Filters
+                // -----------------------------------
+                $filtersMap = [
+                    'status'     => 'status',
+                    'visibility' => 'is_visible',
+                    'featured'   => 'is_featured',
+                ];
+
+                foreach ($filtersMap as $requestKey => $dbColumn) {
+                    if ($request->filled($requestKey)) {
+                        $query->where($dbColumn, $request->input($requestKey));
+                    }
+                }
+
+                // -----------------------------------
+                // Search
+                // -----------------------------------
+                if ($request->filled('search')) {
+                    $search = $request->search;
+                    $query->where(function ($q) use ($search) {
+                        $q->where('job_order', 'LIKE', "%{$search}%")
+                            ->orWhere('title', 'LIKE', "%{$search}%")
+                            ->orWhere('description', 'LIKE', "%{$search}%");
+                    });
+                }
+
+                $projects = $query->latest()->paginate(15);
+
+                // -----------------------------------
+                // Transform
+                // -----------------------------------
+                $projects->getCollection()->transform(function ($project) {
+                    $imageIDs = $project->images;
+
+                    if (is_array($imageIDs)) {
+                        $project->images = array_filter(array_map(function ($id) {
+                            $response = app(UploadController::class)
+                                ->getUploadedFile($id)
+                                ->getData(true);
+
+                            return $response['success']
+                                ? $response['data']['path']
+                                : null;
+                        }, $imageIDs));
+                    } else {
+                        $project->images = [];
+                    }
+
+                    return $project;
+                });
+
+                return [
+                    'success'  => true,
+                    'data'     => $projects,
+                    'featured' => Project::where('is_featured', 1)->count(),
+                ];
+            });
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function getProjectsPublic(Request $request)
+    {
+        return $this->getProjectsFiltered($request, true);
+    }
+    public function getProjectsHighlightedPublic()
+    {
+        try {
+            // Get current version, initialize if missing
+            $version = Cache::get('projects:version', function () {
+                return Cache::forever('projects:version', 1);
+            });
+
+            $cacheKey = 'projects:highlighted_public:v' . $version;
+
+            $response = Cache::remember($cacheKey, ENV('CACHE_EXPIRATION', 500), function () {
+                $result = Project::where('is_featured', 1)->get([
+                    'id',
+                    'images',
+                    'job_order',
+                    'title',
+                    'description',
+                    'status',
+                ]);
+
+                $result->transform(function ($project) {
+                    $uploadController = new UploadController();
+                    $response = $uploadController->getUploadedFile($project->images[0])->getData(true);
+                    if (!$response['success']) {
+                        throw new Exception($response['message']);
+                    }
+                    $project->images = [$response['data']['path']];
+                    return $project;
+                });
+
+                return [
+                    'success' => true,
+                    'data' => $result
+                ];
+            });
+
+            return response()->json($response);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }
