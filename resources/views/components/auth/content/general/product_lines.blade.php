@@ -3,7 +3,9 @@
 <x-public.button button_type="primary" @click="$dispatch('openmodal', {
         modalID: 'modal_product_line',
         title: 'Add New Product Line'
-    })">
+    });
+        const response = await fetch('{{ route('content.get.section.all') }}');
+    ">
     @svg('fluentui-add-circle-24-o', 'w-5 h-5')
     Add Product Line
 </x-public.button>
@@ -12,12 +14,12 @@
         product_lines: [],
         loading: true,
         async init() {
-            const response = await fetch('{{ route('content.get.section.product_lines') }}');
-            const data = await response.json();
-            if (data && data.success) {
-                this.product_lines = data.data;
-            }
-            this.loading = false
+            $watch('generalContentsLoaded', (value) => {
+                if (productLinesData && productLinesData.success) {
+                    this.product_lines = productLinesData.data;
+                    this.loading = false
+                }
+            });
         },
     }">
 
@@ -142,7 +144,7 @@
             if (!$event.detail.data) { console.error('No data passed.') }
             if (!event.detail.modalID) { console.error('No modal ID passed. \n modal_id: ' + modal_id); }
             if ($event.detail.modalID !== modal_id) { return }
-            productData = $event.detail.data.product_data;
+            productData = JSON.parse(JSON.stringify($event.detail.data.product_data));
             if(productData.visibility) {
                 productData.visibility = productData.visibility == 1 ? true : false;
             }
