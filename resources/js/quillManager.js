@@ -38,5 +38,7 @@ export function initQuill() {
 
         // Optionally expose globally
         window.quills[editorId] = quill;
+
+        document.dispatchEvent(new Event('quill-initialized'));
     });
 }
