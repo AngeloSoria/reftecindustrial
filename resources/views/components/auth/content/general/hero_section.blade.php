@@ -2,46 +2,51 @@
 
 {{-- Hero section image preview --}}
 <section class="bg-gray-950 w-full flex items-center justify-center">
-    <div class="bg-gray-300 max-w-150 w-full aspect-video overflow-hidden">
+    <div class="bg-gray-300 max-w-150 w-full aspect-video overflow-hidden" 
+    x-data="{
+        isLoaded: false,
+        heroImageSrc: @js(asset('images/reftec_logo_transparent.png')),
+        init() {
+            try {
+                $watch('generalContentsLoaded', (value) => {
+                    if (heroData && heroData.success) {
+                        this.heroImageSrc = heroData.data.image;
+                        this.loadHeroImage();
+                    }
+                });
+            } catch (e) {
+                console.error('Failed to load hero image:', e);
+            }
+        },
+        loadHeroImage() {
+            let imageInstance = new Image();
+            imageInstance.src = this.heroImageSrc;
+            imageInstance.onload = () => {
+                this.isLoaded = true;
+            }
+        },
+        preview() {
+            if (!this.isLoaded) {
+                console.warn('Image not ready yet');
+                return;
+            }
+            this.$dispatch('image_preview_event', {
+                previewInfo: {
+                    image: this.$refs.heroImg.src
+                }
+            });
+        },
+    }">
         {{-- loading icon --}}
-        <div id="loading_status_hero"
-            class="text-white w-full h-full bg-accent-darkslategray-900 flex flex-col gap-4 justify-center items-center">
+        <div class="text-white w-full h-full bg-accent-darkslategray-900 flex flex-col gap-4 justify-center items-center"
+            id="loading_status_hero" x-show="!isLoaded">
             @svg('antdesign-loading-3-quarters-o', 'w-16 h-16 animate-spin')
             <h2 class="text-xl font-medium">Loading...</h2>
         </div>
-        <img id="image_hero" src="{{ asset('images/reftec_logo_transparent.png') }}"
-            class="w-full cursor-pointer aspect-video" title="preview image" x-data="{
-            isLoaded: false,
-            async init() {
-                try {
-                    const response = await fetch('{{ route('content.get.section.hero') }}');
-                    const data = await response.json();
-
-                    const img = new Image();
-                    img.src = data.data.image;
-
-                    // Wait until the actual image is fully loaded
-                    img.onload = () => {
-                        this.$refs.heroImg.src = img.src;
-                        this.isLoaded = true;
-                        document.querySelector('#loading_status_hero').classList.add('hidden')
-                    };
-                } catch (e) {
-                    console.error('Failed to load hero image:', e);
-                }
-            },
-            preview() {
-                if (!this.isLoaded) {
-                    console.warn('Image not ready yet');
-                    return;
-                }
-                this.$dispatch('image_preview_event', {
-                    previewInfo: {
-                        image: this.$refs.heroImg.src
-                    }
-                });
-            }
-        }" x-ref="heroImg" @click="preview" />
+        <div x-show="isLoaded">
+            <img id="image_hero" @click="preview" title="preview image" x-ref="heroImg" x-bind:src="heroImageSrc"
+                class="w-full cursor-pointer aspect-video" />
+        </div>
     </div>
 </section>
 
@@ -54,17 +59,14 @@
 
 <x-layouts.modal titleHeaderText="Update Hero Image" modalID="update_hero_section_image" promptAlertBeforeClosing>
     <section>
-        <form 
-        @php
+        <form @php
             $fileUploadId = 'file_upload_hero';
-        @endphp
-        x-data="{
+        @endphp x-data="{
             modal_id: 'update_hero_section_image',
             loading: false,
             formDisabled: true,
             file_upload_id: @js($fileUploadId),
-        }" 
-        @submit.prevent="
+        }" @submit.prevent="
             loading = true;
             if(formDisabled) {
                 toast('all required fields in the form must have value first.', 'warning');
@@ -73,28 +75,20 @@
             $dispatch('force_disable_modal_closing', { modalID: modal_id });
             $dispatch('form_in_submit_phase', { file_upload_id: file_upload_id });
             $el.submit();
-        " 
-        @modal_closed_fallback.window="
+        " @modal_closed_fallback.window="
             if($event.detail.modalID !== modal_id ) { return }
             $dispatch('reset_file_upload', { file_upload_id: file_upload_id });
-        "
-        @files_empty.window="
+        " @files_empty.window="
             if($event.detail.file_upload_id != file_upload_id) return;
             formDisabled = true;
-        "
-        @files_not_empty.window="
+        " @files_not_empty.window="
             if($event.detail.file_upload_id != file_upload_id) return;
             formDisabled = false;
-        "
-        action="{{ route('content.update.section.hero') }}"
-        method="POST" 
-        enctype="multipart/form-data">
+        " action="{{ route('content.update.section.hero') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <section class="flex flex-col gap-2">
                 <h4>Upload an image to update hero section backdrop image:</h4>
-                <x-layouts.file_upload_drag 
-                    acceptFile="image/*" 
-                    file_upload_id="{{ $fileUploadId }}" 
+                <x-layouts.file_upload_drag acceptFile="image/*" file_upload_id="{{ $fileUploadId }}"
                     modalMaxWidth="md" />
             </section>
             <section class="mt-6 flex items-center justify-end gap-2">
