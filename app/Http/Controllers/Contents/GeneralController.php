@@ -29,13 +29,36 @@ class GeneralController extends Controller
         }
     }
 
+    private function resetAllCache()
+    {
+        Cache::increment('general:version');
+    }
+
+    public function authGeneralContents()
+    {
+        // Get current version, initialize if missing
+        $version = Cache::get('general:version', function () {
+            return Cache::forever('general:version', 1);
+        });
+
+        $cacheKey = 'general:auth_all:v' . $version;
+
+        $cacheData = Cache::remember($cacheKey, env('CACHE_EXPIRATION', 600), function () {
+            return [
+                "hero" => $this->getHeroSection(),
+                "product_lines" => $this->getAllProductLines(),
+                "history" => $this->getHistory(),
+                "about_us" => $this->getAllAboutUsGallery()
+            ];
+        });
+
+        return response()->json($cacheData);
+    }
+
     // CREATE | POST
     public function addProductLine(Request $request)
     {
         try {
-
-            // dd($request);
-
             // Normalize checkbox input before validation
             $request->merge([
                 'visibility' => $request->has('visibility') ? 1 : 0,
@@ -68,11 +91,8 @@ class GeneralController extends Controller
                 'visibility' => $visible
             ]);
 
-            // Clear cache for product lines section after updating
-            Cache::forget('section_product_lines_public');
-            Cache::forget('section_product_lines_private');
-            Cache::forget('section_product_lines_visible');
-            Cache::forget('home_page_public');
+            // Clear cache
+            $this->resetAllCache();
 
             session()->flash('content', [
                 'tab' => 'general',
@@ -89,7 +109,6 @@ class GeneralController extends Controller
             return back();
         }
     }
-
     public function addAboutUsGalleryImage(Request $request)
     {
         try {
@@ -135,6 +154,7 @@ class GeneralController extends Controller
 
                         // Clear cache for about us section after updating
                         Cache::forget('section_about_us_gallery');
+                        Cache::forget('cache_auth_general_all');
 
                         // notify user 
                         toast('Gallery image(s) has been added.', 'success');
@@ -162,6 +182,9 @@ class GeneralController extends Controller
 
                         // Save to database
                         General::where(['section' => $COLUMN_NAME])->update(['extra_data' => $encoded_extra_data]);
+
+                        // Clear cache for about us section after updating
+                        $this->resetAllCache();
 
                         // notify user 
                         toast('Gallery image(s) has been added.', 'success');
@@ -205,7 +228,7 @@ class GeneralController extends Controller
                         );
 
                         // Clear cache for about us section after updating
-                        Cache::forget('section_about_us_gallery');
+                        $this->resetAllCache();
 
                         session()->flash('content', [
                             'tab' => 'general',
@@ -242,9 +265,16 @@ class GeneralController extends Controller
     public function getHeroSection()
     {
         try {
+            // Get current version, initialize if missing
+            $version = Cache::get('general:version', function () {
+                return Cache::forever('general:version', 1);
+            });
+
+            $cacheKey = 'general:hero:v' . $version;
+
 
             // controller logic
-            $response = Cache::remember('section_hero', env('CACHE_EXPIRATION', 3600), function () {
+            $response = Cache::remember($cacheKey, env('CACHE_EXPIRATION', 600), function () {
                 $record = General::where('section', 'hero')->first(['image_path']);
 
                 return [
@@ -267,11 +297,19 @@ class GeneralController extends Controller
             ], 500);
         }
     }
-
     public function getHistory()
     {
         try {
-            $response = Cache::remember('section_history', env('CACHE_EXPIRATION', 3600), function () {
+            // Get current version, initialize if missing
+            $version = Cache::get('general:version', function () {
+                return Cache::forever('general:version', 1);
+            });
+
+            $cacheKey = 'general:history:v' . $version;
+
+
+            // controller logic
+            $response = Cache::remember($cacheKey, env('CACHE_EXPIRATION', 600), function () {
                 $record = General::where('section', 'history')->first(['content', 'image_path']);
 
                 return [
@@ -295,8 +333,7 @@ class GeneralController extends Controller
             ], 500);
         }
     }
-
-    public function getAllProductLines(bool $isPublic = false)
+    public function getAllProductLines($isPublic = false)
     {
         try {
 
@@ -308,19 +345,25 @@ class GeneralController extends Controller
                 ->get([
                     'contents_general_product_lines.id',
                     'contents_general_product_lines.name',
+                    'contents_general_product_lines.visibility',
                     'contents_general_product_lines.upload_id',
                     'uploads.path as image_path',
                 ]);
 
-            // Cache ONLY the final payload (short TTL)
-            $response = Cache::remember(
-                'section_product_lines_' . ($isPublic ? 'public' : 'private'),
-                300, // 5 minutes — safe for shared hosting
-                fn() => [
+            // Get current version, initialize if missing
+            $version = Cache::get('general:version', function () {
+                return Cache::forever('general:version', 1);
+            });
+
+            $cacheKey = 'general:productlines_all:' . ($isPublic ? 'public' : 'private') . ':v' . $version;
+
+            // controller logic
+            $response = Cache::remember($cacheKey, env('CACHE_EXPIRATION', 600), function () use ($data) {
+                return [
                     'success' => true,
                     'data' => $data,
-                ]
-            );
+                ];
+            });
 
             return response()->json($response);
         } catch (Exception $e) {
@@ -339,11 +382,17 @@ class GeneralController extends Controller
     {
         return $this->getAllProductLines(true);
     }
-
     public function getAllVisibileProductLines()
     {
         try {
-            $response = Cache::remember('section_product_lines_visible', env('CACHE_EXPIRATION', 3600), function () {
+            // Get current version, initialize if missing
+            $version = Cache::get('general:version', function () {
+                return Cache::forever('general:version', 1);
+            });
+
+            $cacheKey = 'general:productlines_all_visible:v' . $version;
+
+            $response = Cache::remember($cacheKey, env('CACHE_EXPIRATION', 600), function () {
 
                 $record = ProductLines::where('visibility', 1)->latest()->get(['id', 'name', 'upload_id']);
 
@@ -380,11 +429,17 @@ class GeneralController extends Controller
             ], 500);
         }
     }
-
     public function getAllAboutUsGallery()
     {
         try {
-            $response = Cache::remember('section_about_us_gallery', env('CACHE_EXPIRATION', 3600), function () {
+            // Get current version, initialize if missing
+            $version = Cache::get('general:version', function () {
+                return Cache::forever('general:version', 1);
+            });
+
+            $cacheKey = 'general:gallery:all'. ':v' . $version;
+
+            $response = Cache::remember($cacheKey, env('CACHE_EXPIRATION', 600), function () {
                 $column_name = 'about_us_gallery';
                 $record = General::where('section', $column_name)->first(['id', 'extra_data']);
 
@@ -481,8 +536,7 @@ class GeneralController extends Controller
             ]);
 
             // Clear cache for hero section after updating
-            Cache::forget('section_hero');
-            Cache::forget('home_page_public');
+            $this->resetAllCache();
 
             session()->flash('content', [
                 'tab' => 'general',
@@ -526,8 +580,7 @@ class GeneralController extends Controller
                         'content' => $request->get('data_history')
                     ]);
 
-                    Cache::forget('section_history');
-                    Cache::forget('home_page_public');
+                    $this->resetAllCache();
 
                     session()->flash('content', [
                         'tab' => 'general',
@@ -560,8 +613,7 @@ class GeneralController extends Controller
                         'image_path' => $data['files'][0]['path'] ?? null
                     ]);
 
-                    Cache::forget('section_history');
-                    Cache::forget('home_page_public');
+                    $this->resetAllCache();
 
                     session()->flash('content', [
                         'tab' => 'general',
@@ -639,10 +691,7 @@ class GeneralController extends Controller
             );
 
             // Clear cache
-            Cache::forget('section_product_lines_public');
-            Cache::forget('section_product_lines_private');
-            Cache::forget('section_product_lines_visible');
-            Cache::forget('home_page_public');
+            $this->resetAllCache();
 
             session()->flash('content', [
                 'tab'     => 'general',
@@ -740,6 +789,8 @@ class GeneralController extends Controller
                 'section' => 'about'
             ]);
 
+            $this->resetAllCache();
+
             toast("Gallery image has been updated.", "success");
             actLog('update', 'Gallery image has been updated.', 'Gallery image has been updated.');
             Cache::forget('section_about_us_gallery');
@@ -808,6 +859,8 @@ class GeneralController extends Controller
                 'section' => 'about'
             ]);
 
+            $this->resetAllCache();
+
             actLog('update', 'Gallery order updated', 'Gallery order updated.');
             toast("Gallery order updated successfully.", "success");
             Cache::forget('section_about_us_gallery');
@@ -853,10 +906,7 @@ class GeneralController extends Controller
                 $productLine->delete();
 
                 // Clear cache
-                Cache::forget('section_product_lines_public');
-                Cache::forget('section_product_lines_private');
-                Cache::forget('section_product_lines_visible');
-                Cache::forget('home_page_public');
+                $this->resetAllCache();
 
                 // Session tab state
                 session()->flash('content', [
@@ -884,80 +934,66 @@ class GeneralController extends Controller
 
     public function deleteAboutUsGallery(Request $request)
     {
-        // Define a global lock key (you can make it user-specific if needed)
-        $lockKey = 'delete_about_us_gallery_item';
+        try {
+            $request->validate([
+                'gallery_image_index' => 'required|integer',
+            ]);
 
-        // Try to acquire the lock for up to 10 seconds
-        $lock = Cache::lock($lockKey, 3);
+            $data = General::where(['section' => 'about_us_gallery'])->first(['extra_data']);
 
-        if ($lock->get()) { // Lock acquired
-            try {
-                $request->validate([
-                    'gallery_image_index' => 'required|integer',
-                ]);
-
-                $data = General::where(['section' => 'about_us_gallery'])->first(['extra_data']);
-
-                if (empty($data)) {
-                    throw new Exception("No data found when deleting image from gallery.");
-                }
-                if (empty($data['extra_data'])) {
-                    throw new Exception("No data value found inside gallery model.");
-                }
-
-                // convert to table as the extra_data value is a json_encode (string).
-                $decoded_data = json_decode($data['extra_data']);
-
-                $file_id = $decoded_data[$request->gallery_image_index];
-
-                if (empty($file_id)) {
-                    throw new Exception("File id not found when referencing using index.");
-                }
-
-                $uploadController = new UploadController();
-
-                // delete from upload model
-                $uploadResponse = $uploadController->deleteUploadedFile($file_id)->getData(true);
-
-                if (!$uploadResponse['success']) {
-                    throw new Exception($uploadResponse['message']);
-                }
-
-                // remove from gallery list
-                unset($decoded_data[$request->gallery_image_index]);
-                $decoded_data = array_values($decoded_data); // reindex
-
-                // encode
-                $encoded_data = json_encode($decoded_data);
-
-                // save to database
-                General::updateOrCreate(['section' => 'about_us_gallery'], [
-                    'extra_data' => $encoded_data ?? null
-                ]);
-
-                // Clear cache
-                Cache::forget($lockKey);
-
-                // Session tab state
-                session()->flash('content', [
-                    'tab' => 'general',
-                    'section' => 'about'
-                ]);
-
-                toast("Gallery image has been deleted.", "success");
-                actLog('delete', 'Gallery image has been deleted.', 'Gallery image has been deleted.');
-                return back();
-            } catch (Exception $e) {
-                Logger()->info('Error deleting product line: ' . $e->getMessage());
-                toast("Error deleting product line: " . $e->getMessage(), "error");
-                return back();
-            } finally {
-                // Release the lock no matter what
-                $lock->release();
+            if (empty($data)) {
+                throw new Exception("No data found when deleting image from gallery.");
             }
-        } else {
-            // Lock not acquired (another deletion in progress)
-            toast("Another deletion is in progress. Please try again shortly.", "error");
+            if (empty($data['extra_data'])) {
+                throw new Exception("No data value found inside gallery model.");
+            }
+
+            // convert to table as the extra_data value is a json_encode (string).
+            $decoded_data = json_decode($data['extra_data']);
+
+            $file_id = $decoded_data[$request->gallery_image_index];
+
+            if (empty($file_id)) {
+                throw new Exception("File id not found when referencing using index.");
+            }
+
+            $uploadController = new UploadController();
+
+            // delete from upload model
+            $uploadResponse = $uploadController->deleteUploadedFile($file_id)->getData(true);
+
+            if (!$uploadResponse['success']) {
+                throw new Exception($uploadResponse['message']);
+            }
+
+            // remove from gallery list
+            unset($decoded_data[$request->gallery_image_index]);
+            $decoded_data = array_values($decoded_data); // reindex
+
+            // encode
+            $encoded_data = json_encode($decoded_data);
+
+            // save to database
+            General::updateOrCreate(['section' => 'about_us_gallery'], [
+                'extra_data' => $encoded_data ?? null
+            ]);
+
+            // Clear cache
+            $this->resetAllCache();
+
+            // Session tab state
+            session()->flash('content', [
+                'tab' => 'general',
+                'section' => 'about'
+            ]);
+
+
+            toast("Gallery image has been deleted.", "success");
+            actLog('delete', 'Gallery image has been deleted.', 'Gallery image has been deleted.');
+            return back();
+        } catch (Exception $e) {
+            Logger()->info('Error deleting product line: ' . $e->getMessage());
+            toast("Error deleting product line: " . $e->getMessage(), "error");
             return back();
         }
     }
