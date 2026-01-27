@@ -148,6 +148,7 @@
                         ];
                     @endphp
                     @foreach ($sidebar_links as $link)
+                        @if ($link['active_name'] === 'Test' && ENV('APP_ENV') === 'production') @continue @endif
                         <a href="{{ $link['route'] }}" title="{{ $link['label'] }}"
                             @if($viewName === $link['active_name'])
                                 class="{{ $active_link_class_indicator }}"
