@@ -18,6 +18,7 @@ class ProjectController extends Controller
     private function resetAllCache()
     {
         Cache::increment('projects:version');
+        Cache::increment('general:version');
     }
     public function addProject(Request $request)
     {
