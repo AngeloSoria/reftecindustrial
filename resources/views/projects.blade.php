@@ -45,118 +45,7 @@
 
                 </section>
 
-                {{-- Data --}}
-                @php
-                    // TODO: Make these server sided data retrieval.
-                    $fake_data = [
-                        [
-                            'status' => 'ongoing',
-                            'thumbnail' => asset('images/reftec_logo_transparent_16x9.png'),
-                            'title' => 'Bacolor, Pampanga',
-                            'description' => 'Hello World Thessssssss.',
-                            'date' => '2023-10-01',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 2',
-                            'description' => 'Description 2',
-                            'date' => '2022-08-15',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 3',
-                            'description' => 'Description 3',
-                            'date' => '2021-05-20',
-                        ],
-                        [
-                            'status' => 'ongoing',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 4',
-                            'description' => 'Description 4',
-                            'date' => '2023-11-11',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 5',
-                            'description' => 'Description 5',
-                            'date' => '2020-12-30',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 6',
-                            'description' => 'Description 6',
-                            'date' => '2019-07-04',
-                        ],
-                        [
-                            'status' => 'ongoing',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 4',
-                            'description' => 'Description 4',
-                            'date' => '2023-11-11',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 5',
-                            'description' => 'Description 5',
-                            'date' => '2020-12-30',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 6',
-                            'description' => 'Description 6',
-                            'date' => '2019-07-04',
-                        ],
-                        [
-                            'status' => 'ongoing',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 4',
-                            'description' => 'Description 4',
-                            'date' => '2023-11-11',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 5',
-                            'description' => 'Description 5',
-                            'date' => '2020-12-30',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 6',
-                            'description' => 'Description 6',
-                            'date' => '2019-07-04',
-                        ],
-                        [
-                            'status' => 'ongoing',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 4',
-                            'description' => 'Description 4',
-                            'date' => '2023-11-11',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 5',
-                            'description' => 'Description 5',
-                            'date' => '2020-12-30',
-                        ],
-                        [
-                            'status' => 'completed',
-                            'thumbnail' => asset('images/layout_light_16x9.png'),
-                            'title' => 'Project 6',
-                            'description' => 'Description 6',
-                            'date' => '2019-07-04',
-                        ],
-                    ];
-                    $fake_data2 = [];
-                @endphp
+                
                 <section class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
                     <template x-if="dataLoading">
                         {{-- Loading Skeletons --}}
@@ -169,7 +58,7 @@
                             <div class="h-60 relative cursor-pointer bg-gray-200 shadow-card p-4 rounded hover:shadow-xl transition-shadow duration-300 ease-in-out"
                                 x-data @click="
                                     $store.app.modalSystem.openModal('modal_projects_public', {
-                                        title: 'Register User Form',
+                                        title: 'Project Details',
                                         payload: {
                                             project_data : project
                                         }
