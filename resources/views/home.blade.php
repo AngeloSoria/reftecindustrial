@@ -26,6 +26,7 @@
     </section>
 
     <x-public.content_container>
+
         {{-- Product Lines --}}
         <section class="px-4 my-12 relative">
             <div class="flex flex-col items-center justify-center">
@@ -35,24 +36,32 @@
             </div>
 
 
-            <section x-data class="mt-8">
+            <section class="mt-8">
                 <section class="fade-edges-horizontal overflow-hidden">
-                    <template x-if="productLinesData">
-                        <div class="flex items-center"
-                            :class="Object.keys(productLinesData.data).length > 2 ? 'animate-logo-conveyor' : 'justify-center'">
-                            <template
-                                x-for="i in Array.from({ length: Object.keys(productLinesData.data).length > 2 ? 2 : 1 }, (_, index) => index)">
-                                <template x-for="productLine in productLinesData.data">
-                                    <div class="grow p-4 flex flex-col items-center justify-center">
-                                        <img :src="productLine.image_path" :title="productLine.name"
-                                            class="max-w-30 sm:max-w-40 md:max-w-80 max-h-24 object-contain bg-white transition-all duration-300" />
+                    <div class="conveyor">
+                        <div 
+                            class="conveyor-track"
+                            :class="Object.keys(productLinesData.data).length > 2 ? 'animate-logo-conveyor w-max' : 'justify-center w-full'">
+                            <!-- Primary set -->
+                            <template x-for="productLine in productLinesData.data" :key="productLine.id">
+                                <div class="conveyor-item">
+                                    <img :src="productLine.image_path" :title="productLine.name" />
+                                </div>
+                            </template>
+
+                            <!-- Duplicate only when needed -->
+                            <template x-if="Object.keys(productLinesData.data).length > 2">
+                                <template x-for="productLine in productLinesData.data" :key="'dup-' + productLine.id">
+                                    <div class="conveyor-item">
+                                        <img :src="productLine.image_path" :title="productLine.name" />
                                     </div>
                                 </template>
                             </template>
                         </div>
-                    </template>
+                    </div>
                 </section>
             </section>
+
 
         </section>
 
@@ -132,8 +141,7 @@
                                     <div data-aos="fade-left" data-aos-duration="900"
                                         class="z-2 w-full mt-2 lg:w-1/2 mb-6 flex flex-col justify-center">
                                         <div>
-                                            <span class="text-sm text-white px-2 py-1 font-medium uppercase"
-                                                :class="project.status == 'completed' ? 'bg-green-400' : project.status ==
+                                            <span class="text-sm text-white px-2 py-1 font-medium uppercase" :class="project.status == 'completed' ? 'bg-green-400' : project.status ==
                                                     'on_going' ? 'bg-yellow-500' : 'bg-red-500'"
                                                 x-text="project.status"></span>
                                         </div>
@@ -152,8 +160,7 @@
                                     <div data-aos="fade-right" data-aos-duration="900"
                                         class="z-2 w-full lg:w-1/2 mb-6 flex flex-col justify-center">
                                         <div>
-                                            <span class="text-sm text-white px-2 py-1 font-medium uppercase"
-                                                :class="project.status == 'completed' ? 'bg-green-400' : project.status ==
+                                            <span class="text-sm text-white px-2 py-1 font-medium uppercase" :class="project.status == 'completed' ? 'bg-green-400' : project.status ==
                                                     'on_going' ? 'bg-yellow-500' : 'bg-red-500'"
                                                 x-text="project.status"></span>
                                         </div>
