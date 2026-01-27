@@ -237,7 +237,6 @@ class UploadController extends Controller
             $record->delete();
 
             // toast("File deleted successfully.", "success");
-            Logger()->info('File deleted successfully: ' . $record->filename);
 
             return response()->json([
                 'success' => true,
