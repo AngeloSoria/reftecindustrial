@@ -28,17 +28,19 @@ html {
 
 @theme {
     --private_topbar_height: 30px;
-    
+
     --breakpoint-xs: 475px;
 
     --text-xxs: 0.625rem;
 
     --backdrop-blur-xss: 2px;
 
-    --shadow-card: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+    --shadow-card:
+        rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
         rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
 
-    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
 
@@ -148,7 +150,30 @@ html {
 }
 
 @layer utilities {
-    /* Fixed-speed horizontal conveyor */
+    .conveyor {
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .conveyor-track {
+        display: flex;
+        will-change: transform;
+    }
+
+    .conveyor-item {
+        flex: 0 0 auto;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .conveyor-item img {
+        max-height: 6rem;
+        object-fit: contain;
+        background: white;
+    }
+
     @keyframes logo-conveyor {
         from {
             transform: translateX(0);
@@ -159,26 +184,9 @@ html {
     }
 
     .animate-logo-conveyor {
-        --conveyor-speed: 15s;
-        animation: logo-conveyor var(--conveyor-speed) linear infinite;
-    }
-
-    /* Fade edges */
-    .fade-edges-horizontal {
-        mask-image: linear-gradient(
-            to right,
-            transparent,
-            black 10%,
-            black 90%,
-            transparent
-        );
-        -webkit-mask-image: linear-gradient(
-            to right,
-            transparent,
-            black 10%,
-            black 90%,
-            transparent
-        );
+        animation: logo-conveyor 15s linear infinite;
+        backface-visibility: hidden;
+        transform: translate3d(0, 0, 0);
     }
 }
 
