@@ -37,10 +37,10 @@ Alpine.store('app', {
 
             // Incremented index for stacking z-index modals.
             const newIndex = this.rootZIndexValue + this.activeModals.length + 1;
-            const payload = config.payload;
+            const payload = config.payload ?? [];
             const modalTitle = config.title;
 
-            if (!payload) return console.error('payload does not exists in config param.');
+            // if (!payload) return console.error('payload does not exists in config param.');
             if (!modalTitle) return console.error('modalTitle does not exists in config param.');
 
             document.dispatchEvent(new CustomEvent('openmodal', {
