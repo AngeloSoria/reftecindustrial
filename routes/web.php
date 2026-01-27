@@ -97,6 +97,8 @@ Route::middleware('auth')->group(function () {
     // Core actions
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
     Route::post('/upload', [UploadController::class, 'upload'])->name('upload');
+    Route::get('/upload/get', [UploadController::class, 'getAllUploadedFiles'])->name('files.get.all');
+    Route::post('/upload/delete-selected', [UploadController::class, 'deleteMultiUploadedFiles'])->name('files.delete.selected');
 
 
 
