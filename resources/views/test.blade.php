@@ -1,12 +1,8 @@
 <x-layouts.auth.app viewName="Test" class="font-inter p-4" x-data>
 
-    <button
-    
-    x-data="test"
-    @click="clickMe"
-    >
-        Click me!
-    </button>
+    {{-- <button class="px-4 py-2 rounded shadow-card bg-orange-400 cursor-pointer" x-data="test" @click="clickMe">
+        Delete
+    </button> --}}
     <script>
         function test() {
             return {
@@ -24,34 +20,53 @@
 
     <x-public.content_container>
         <section x-data="{
-            productLines: [
-                {
-                    'image': '{{ asset('images/product_lines/kingspan.jpg') }}',
-                    'title': 'Kingspan'
-                },   
-                {
-                    'image': '{{ asset('images/product_lines/Vilter_logo_transparent.png') }}',
-                    'title': 'Vilter'
-                },  
-                {
-                    'image': '{{ asset('images/product_lines/starr.jpg') }}',
-                    'title': 'Starr Panel'
-                },
-            ],
+            files: null,
+            selectedFiles: [],
+            async init() {
+                const response = await fetch('{{ route('files.get.all') }}');
+                const data = await response.json();
+                if (data && data.success) {
+                    this.files = data.data;
+                }
+            },
+
+            toggleSelect(obj) {
+                const id = obj.id;
+
+                if (this.selectedFiles.includes(id)) {
+                    // Remove regardless of position
+                    this.selectedFiles = this.selectedFiles.filter(item => item !== id);
+                } else {
+                    // Add if not selected
+                    this.selectedFiles.push(id);
+                }
+            },
         }">
-            <section class="fade-edges-horizontal overflow-hidden">
-                <div class="flex items-center"
-                    :class="Object.keys(productLines).length > 2 ? 'animate-logo-conveyor' : 'justify-center'">
-                    <template
-                        x-for="i in Array.from({ length: Object.keys(productLines).length > 2 ? 2 : 1 }, (_, index) => index)">
-                        <template x-for="productLine in productLines">
-                            <div class="grow p-4 flex flex-col items-center justify-center">
-                                <img :src="productLine.image" :title="productLine.title"
-                                    class="max-w-30 sm:max-w-40 md:max-w-80 max-h-24 object-contain bg-white transition-all duration-300" />
-                            </div>
-                        </template>
-                    </template>
-                </div>
+            <form method="POST" action="{{ route('files.delete.selected') }}">
+                @csrf
+                <input type="hidden" name="selectedFiles" :value="selectedFiles" />
+                <button class="px-4 py-2 rounded shadow-card bg-orange-400 cursor-pointer">
+                    Delete (<span x-text="Object.keys(selectedFiles).length"></span>)
+                </button>
+            </form>
+            <section class="grid grid-cols-5 gap-4">
+                <template x-for="(file, index) in files" :key="index">
+                    <div x-data="{
+                            checked: false,
+                            init() {
+                                $watch('checked', function(value) {
+                                    toggleSelect(file);
+                                    console.log(selectedFiles);
+                                });
+                            },
+                        }"
+                        :class="checked ? 'bg-accent-orange-200 hover:bg-accent-orange-300' : 'bg-white hover:bg-accent-darkslategray-100'"
+                        @click="checked = !checked"
+                        class="flex flex-col items-start justify-start gap-4 shadow-card p-4 rounded-xl transition-colors">
+                        <input type="checkbox" class="scale-[150%]" @click="checked = !checked" :checked="checked" />
+                        <p x-text="file.filename"></p>
+                    </div>
+                </template>
             </section>
         </section>
     </x-public.content_container>
