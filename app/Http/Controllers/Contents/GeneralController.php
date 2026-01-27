@@ -152,9 +152,7 @@ class GeneralController extends Controller
                         // save to database
                         General::where(['section' => $COLUMN_NAME])->update(['extra_data' => $encoded_extra_data]);
 
-                        // Clear cache for about us section after updating
-                        Cache::forget('section_about_us_gallery');
-                        Cache::forget('cache_auth_general_all');
+                        $this->resetAllCache();
 
                         // notify user 
                         toast('Gallery image(s) has been added.', 'success');
@@ -527,12 +525,13 @@ class GeneralController extends Controller
             // Check if hero is already exists.
             // If exists, check for the image_path to delete the old file.
             $model = General::where('section', 'hero')->first();
-            if (!empty($model) && !empty($model->image_path)) {
-                $uploadController->deleteUploadedFileByPath($model->image_path);
+            if (!empty($model) && !empty($model->extra_data)) {
+                $uploadController->deleteUploadedFileByFileName(json_decode($model->extra_data));
             }
 
             General::updateOrCreate(['section' => 'hero'], [
-                'image_path' => $uploadData['files'][0]['path'] ?? null
+                'image_path' => $uploadData['files'][0]['path'] ?? null,
+                'extra_data' => json_encode($uploadData['files'][0]['filename']) ?? null,
             ]);
 
             // Clear cache for hero section after updating
@@ -606,11 +605,12 @@ class GeneralController extends Controller
                     $exisitingFile = General::where('section', 'history')->first();
                     if ($exisitingFile && $exisitingFile->image_path) {
                         // Delete the old file
-                        $uploadController->deleteUploadedFileByPath($exisitingFile->image_path);
+                        $uploadController->deleteUploadedFileByFileName(json_decode($exisitingFile->extra_data));
                     }
 
                     General::updateOrCreate(['section' => 'history'], [
-                        'image_path' => $data['files'][0]['path'] ?? null
+                        'image_path' => $data['files'][0]['path'] ?? null,
+                        'extra_data' => json_encode($data['files'][0]['filename']) ?? null,
                     ]);
 
                     $this->resetAllCache();
@@ -793,7 +793,7 @@ class GeneralController extends Controller
 
             toast("Gallery image has been updated.", "success");
             actLog('update', 'Gallery image has been updated.', 'Gallery image has been updated.');
-            Cache::forget('section_about_us_gallery');
+
             return back();
         } catch (Exception $e) {
             Logger()->info($e->getMessage());
@@ -863,7 +863,6 @@ class GeneralController extends Controller
 
             actLog('update', 'Gallery order updated', 'Gallery order updated.');
             toast("Gallery order updated successfully.", "success");
-            Cache::forget('section_about_us_gallery');
             return back();
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
