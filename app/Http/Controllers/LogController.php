@@ -24,6 +24,8 @@ class LogController extends Controller
                 'details' => $details
             ];
 
+            Cache::forget('activity_logs');
+            
             ActivityLogs::create($blueprint);
         } catch (Exception $e) {
             Logger()->error($e->getMessage());
