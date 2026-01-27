@@ -215,8 +215,8 @@ class ProductController extends Controller
             $uploadController = new UploadController();
             $productImages = $product->images;
             if ($productImages && count($productImages) > 0) {
-                foreach ($productImages as $imagePath) {
-                    $uploadController->deleteUploadedFileByPath($imagePath);
+                foreach ($productImages as $fileIds) {
+                    $uploadController->deleteUploadedFile($fileIds);
                 }
             }
 
