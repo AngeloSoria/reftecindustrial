@@ -14,7 +14,10 @@ class UserController extends Controller
     public function addUser(Request $request)
     {
         try {
-            // NOTE: You can only create Super Admin if your'e also a super admin.
+            // Prevent non-SA from creating users.
+            if ($request->user()->role !== 'Super Admin' ) {
+                throw new Exception("Your role is not allowed to create user.");
+            }
 
             $request->validate([
                 'name' => [
