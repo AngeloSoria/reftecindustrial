@@ -8,6 +8,7 @@
                     <x-public.button @click="
                         $store.app.modalSystem.openModal('modal_user_register', {
                             title: 'Register User Form',
+                            payload: '',
                         });
                     " 
                     button_type="primary">
