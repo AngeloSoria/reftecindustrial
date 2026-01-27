@@ -46,7 +46,7 @@
             class="grid grid-cols-3 h-full items-stretch">
             <template x-for="image in galleryImages" :key="image.file_id + crypto.randomUUID()">
                 <div class="h-full overflow-hidden aspect-video">
-                    <img :src="image.path" class="h-full w-full aspect-video" :title="image.path"/>
+                    <img :src="image.path" class="h-full w-full aspect-video"/>
                 </div>
             </template>
         </div>
